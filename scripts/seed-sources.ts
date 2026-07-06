@@ -82,40 +82,104 @@ const seedSources: SeedSource[] = [
     fetchIntervalMinutes: 60,
   },
   {
-    name: "YouTube AI Agents",
+    name: "YouTube OpenAI",
     type: "YOUTUBE",
-    url: null,
+    url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCXZCJLdBC09xxGZ6gcdrc6A",
     config: {
-      keyword: "AI agents",
+      keyword: "OpenAI AI",
+      channelId: "UCXZCJLdBC09xxGZ6gcdrc6A",
+      keywords: ["AI", "model", "Codex", "ChatGPT", "agent", "developer", "research"],
       regionCode: "US",
       relevanceLanguage: "en",
-      maxResults: 10,
+      maxResults: 15,
     },
     fetchIntervalMinutes: 120,
+    replaces: [
+      {
+        name: "YouTube AI Agents",
+        type: "YOUTUBE",
+        url: null,
+      },
+    ],
   },
   {
-    name: "YouTube LLM Research",
+    name: "YouTube Google DeepMind",
     type: "YOUTUBE",
-    url: null,
+    url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCP7jMXSY2xbc3KCAE0MHQ-A",
     config: {
-      keyword: "large language models",
+      keyword: "Google DeepMind AI",
+      channelId: "UCP7jMXSY2xbc3KCAE0MHQ-A",
+      keywords: ["AI", "agent", "model", "Gemini", "research", "robot", "learning"],
       regionCode: "US",
       relevanceLanguage: "en",
-      maxResults: 10,
+      maxResults: 15,
     },
     fetchIntervalMinutes: 120,
+    replaces: [
+      {
+        name: "YouTube LLM Research",
+        type: "YOUTUBE",
+        url: null,
+      },
+    ],
   },
   {
-    name: "YouTube AI Coding",
+    name: "YouTube Two Minute Papers",
     type: "YOUTUBE",
-    url: null,
+    url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCbfYPyITQ-7l4upoX8nvctg",
     config: {
-      keyword: "AI coding tools",
+      keyword: "AI research explained",
+      channelId: "UCbfYPyITQ-7l4upoX8nvctg",
+      keywords: ["AI", "neural", "model", "learning", "research", "paper", "robot"],
       regionCode: "US",
       relevanceLanguage: "en",
-      maxResults: 10,
+      maxResults: 15,
     },
     fetchIntervalMinutes: 120,
+    replaces: [
+      {
+        name: "YouTube AI Coding",
+        type: "YOUTUBE",
+        url: null,
+      },
+    ],
+  },
+  {
+    name: "YouTube Yannic Kilcher",
+    type: "YOUTUBE",
+    url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCZHmQk67mSJgfCCTn7xBfew",
+    config: {
+      keyword: "machine learning papers",
+      channelId: "UCZHmQk67mSJgfCCTn7xBfew",
+      keywords: ["AI", "LLM", "machine learning", "paper", "model", "agent", "neural"],
+      maxResults: 15,
+    },
+    fetchIntervalMinutes: 180,
+  },
+  {
+    name: "YouTube Google for Developers AI",
+    type: "YOUTUBE",
+    url: "https://www.youtube.com/feeds/videos.xml?channel_id=UC_x5XG1OV2P6uZZ5FSM9Ttw",
+    config: {
+      keyword: "AI developer tools",
+      channelId: "UC_x5XG1OV2P6uZZ5FSM9Ttw",
+      keywords: ["AI", "Gemini", "agent", "model", "developer", "machine learning"],
+      excludeKeywords: ["shorts"],
+      maxResults: 15,
+    },
+    fetchIntervalMinutes: 180,
+  },
+  {
+    name: "YouTube Lex Fridman AI",
+    type: "YOUTUBE",
+    url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCSHZKyawb77ixDdsGog4iWA",
+    config: {
+      keyword: "AI interview",
+      channelId: "UCSHZKyawb77ixDdsGog4iWA",
+      keywords: ["AI", "artificial intelligence", "DeepMind", "OpenAI", "robot", "machine learning"],
+      maxResults: 15,
+    },
+    fetchIntervalMinutes: 240,
   },
 ];
 
@@ -133,14 +197,24 @@ async function findExistingSource(source: SeedSource) {
   }
 
   for (const replacedSource of source.replaces ?? []) {
-    const legacyRows = await prisma.$queryRaw<ExistingSourceRow[]>`
-      SELECT "id"
-      FROM "Source"
-      WHERE "name" = ${replacedSource.name}
-        AND "type" = ${replacedSource.type}
-        AND "url" = ${replacedSource.url}
-      LIMIT 1
-    `;
+    const legacyRows =
+      replacedSource.url === null
+        ? await prisma.$queryRaw<ExistingSourceRow[]>`
+            SELECT "id"
+            FROM "Source"
+            WHERE "name" = ${replacedSource.name}
+              AND "type" = ${replacedSource.type}
+              AND "url" IS NULL
+            LIMIT 1
+          `
+        : await prisma.$queryRaw<ExistingSourceRow[]>`
+            SELECT "id"
+            FROM "Source"
+            WHERE "name" = ${replacedSource.name}
+              AND "type" = ${replacedSource.type}
+              AND "url" = ${replacedSource.url}
+            LIMIT 1
+          `;
 
     if (legacyRows[0]) {
       return legacyRows[0];
@@ -207,16 +281,29 @@ async function retireReplacedSources(sources: SeedSource[]) {
 
   for (const source of sources) {
     for (const replacedSource of source.replaces ?? []) {
-      await prisma.$executeRaw`
-        UPDATE "Source"
-        SET
-          "enabled" = ${false},
-          "lastError" = ${`Replaced by seed source: ${source.name}`},
-          "updatedAt" = ${now}
-        WHERE "name" = ${replacedSource.name}
-          AND "type" = ${replacedSource.type}
-          AND "url" = ${replacedSource.url}
-      `;
+      if (replacedSource.url === null) {
+        await prisma.$executeRaw`
+          UPDATE "Source"
+          SET
+            "enabled" = ${false},
+            "lastError" = ${`Replaced by seed source: ${source.name}`},
+            "updatedAt" = ${now}
+          WHERE "name" = ${replacedSource.name}
+            AND "type" = ${replacedSource.type}
+            AND "url" IS NULL
+        `;
+      } else {
+        await prisma.$executeRaw`
+          UPDATE "Source"
+          SET
+            "enabled" = ${false},
+            "lastError" = ${`Replaced by seed source: ${source.name}`},
+            "updatedAt" = ${now}
+          WHERE "name" = ${replacedSource.name}
+            AND "type" = ${replacedSource.type}
+            AND "url" = ${replacedSource.url}
+        `;
+      }
     }
   }
 }

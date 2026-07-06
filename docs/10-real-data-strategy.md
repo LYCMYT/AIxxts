@@ -21,13 +21,14 @@
 | 科技媒体 AI 栏目 | RSS/Atom | 已接入 | TechCrunch AI 已接入，后续可补机器之心、量子位、MIT Technology Review 等可用 RSS |
 | Hacker News | HN RSS 或官方 Firebase API | 已接入 RSS | 适合开发者社区热度信号 |
 | Reddit | RSS 或 Data API | 已接入 subreddit RSS | 先使用公开 RSS，若要更稳定的搜索和互动指标再申请 Data API |
-| YouTube | YouTube Data API `search.list` | 已接入采集器，待配置 key | 需要 `YOUTUBE_API_KEY`，关键词配置已在 Source.config |
+| YouTube | 频道 RSS fallback + YouTube Data API `search.list` | 已接入 | 无 key 时采集默认 AI 频道池的真实 RSS；配置 `YOUTUBE_API_KEY` 后可升级为全站关键词搜索 |
 | arXiv | 官方 RSS/API | 已加入默认来源 | `cs.AI`、`cs.CL`、`cs.LG` 作为无 key 的研究动态补充 |
 | GitHub | REST Search API | 待做 | 可监测 AI repo、agent 框架、LLM 工具的 star/update/release 信号 |
 
 参考资料：
 
 - YouTube Data API search.list: https://developers.google.com/youtube/v3/docs/search/list
+- YouTube channel ID lookup: https://developers.google.com/youtube/v3/docs/channels/list
 - Hacker News official API: https://github.com/HackerNews/API
 - Reddit Data API Wiki: https://support.reddithelp.com/hc/en-us/articles/16160319875092-Reddit-Data-API-Wiki
 - arXiv RSS feeds: https://info.arxiv.org/help/rss.html
@@ -62,6 +63,6 @@
 
 1. 运行 `pnpm seed:sources`，把 arXiv 等新增真实来源写入本地库。
 2. 运行 `pnpm job:collect`，确认真实来源采集结果和空结果都能被记录。
-3. 配置 `YOUTUBE_API_KEY` 后验证 YouTube 候选采集。
+3. 继续维护 YouTube 默认频道池；如需全站搜索，再配置 `YOUTUBE_API_KEY`。
 4. 配置 `LLM_API_KEY` 后验证模型排序和 1-2 句解读。
 5. 接 Windows Task Scheduler 或 WSL cron，固定采集和每日生成。

@@ -78,7 +78,7 @@ const completedItems: ProgressItem[] = [
 const nextItems: ProgressItem[] = [
   {
     title: "配置真实密钥",
-    description: "补齐 YOUTUBE_API_KEY 和 LLM_API_KEY 后，YouTube 候选和模型评分进入完整真实流程。",
+    description: "LLM key 已接入 DeepSeek；YouTube 当前用频道 RSS 获取真实视频，后续补齐 YOUTUBE_API_KEY 后可升级全站搜索。",
     status: "active",
   },
   {

@@ -10,7 +10,7 @@ MVP 采用单体全栈架构：
 - ORM / Migration：Prisma
 - 定时任务：独立 Node.js 脚本，由系统级计划任务触发
 - LLM：OpenAI-compatible 客户端配置，当前默认使用 DeepSeek API，可替换为 Qwen / OpenRouter / OpenAI 等兼容接口
-- 采集：RSS parser + YouTube Data API；后续通过 source adapter 扩展
+- 采集：RSS parser + YouTube 频道 RSS fallback + YouTube Data API；后续通过 source adapter 扩展
 - 部署：自托管 Node.js 进程 + Caddy 反向代理
 - 访问控制：当前取消登录，开放预览；保留轻量账号密码 + HttpOnly session cookie 代码，后续可恢复管理员/只读角色
 

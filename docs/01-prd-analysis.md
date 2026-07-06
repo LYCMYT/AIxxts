@@ -11,7 +11,7 @@
 1. 候选池持续采集。
    - RSS / 官方博客 / Changelog。
    - Hacker News、Reddit 等可公开检索或 RSS 化来源。
-   - YouTube Data API 搜索 AI 相关内容。
+   - YouTube 先用 AI 频道 RSS feed 接入真实视频，后续有 key 时再启用 Data API 全站关键词搜索。
 
 2. 每日精选生成。
    - 每天固定时间取过去 24 小时内容。
@@ -40,7 +40,7 @@
 
 ### YouTube
 
-可进入 MVP。官方 Data API 支持关键词搜索，当前官方文档显示 `search.list` 属于独立 Search Queries 配额桶，默认每天 100 次搜索调用。MVP 需要控制关键词数、分页数和刷新频率，避免无意义消耗配额。
+可进入 MVP。无 key 阶段先用 YouTube 频道 RSS feed 采集可信 AI 频道池；这能接入真实视频，但不等同于全站热点搜索。官方 Data API 支持关键词搜索，当前官方文档显示 `search.list` 属于独立 Search Queries 配额桶，默认每天 100 次搜索调用。后续配置 key 后，MVP 需要控制关键词数、分页数和刷新频率，避免无意义消耗配额。
 
 ### Twitter/X
 
