@@ -9,7 +9,7 @@ MVP 采用单体全栈架构：
 - 数据库：SQLite
 - ORM / Migration：Prisma
 - 定时任务：独立 Node.js 脚本，由系统级计划任务触发
-- LLM：OpenAI-compatible 客户端配置，默认支持 Qwen / OpenRouter / OpenAI 等兼容接口
+- LLM：OpenAI-compatible 客户端配置，当前默认使用 DeepSeek API，可替换为 Qwen / OpenRouter / OpenAI 等兼容接口
 - 采集：RSS parser + YouTube Data API；后续通过 source adapter 扩展
 - 部署：自托管 Node.js 进程 + Caddy 反向代理
 - 访问控制：当前取消登录，开放预览；保留轻量账号密码 + HttpOnly session cookie 代码，后续可恢复管理员/只读角色
@@ -30,7 +30,7 @@ MVP 数据量主要是候选内容、精选结果、数据源配置和用户表�
 
 ### OpenAI-compatible LLM 接口
 
-PRD 提到 Qwen 或其他模型。使用兼容 OpenAI Chat Completions 风格的配置项可以降低供应商绑定：
+PRD 提到 Qwen 或其他模型；当前项目已按 DeepSeek OpenAI-compatible API 配置默认示例。使用兼容 OpenAI Chat Completions 风格的配置项可以降低供应商绑定：
 
 - `LLM_BASE_URL`
 - `LLM_API_KEY`

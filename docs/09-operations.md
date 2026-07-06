@@ -103,7 +103,7 @@ pnpm dev
 | `SESSION_SECRET` | 是 | HttpOnly session 密钥，至少 32 字符，生产必须独立生成。 |
 | `LLM_BASE_URL` | 否 | OpenAI-compatible API base URL。 |
 | `LLM_API_KEY` | 是 | LLM API key，不允许提交。 |
-| `LLM_MODEL` | 否 | 每日精选使用的模型名，例如 `qwen-plus`。 |
+| `LLM_MODEL` | 否 | 每日精选使用的模型名，当前示例为 `deepseek-v4-flash`。 |
 | `YOUTUBE_API_KEY` | 是 | YouTube Data API key，不允许提交。 |
 | `X_API_BEARER_TOKEN` | 是 | 后续 X 接入预留，不允许提交。 |
 | `ADMIN_EMAIL` | 否 | 当前不启用登录，仅作为后续管理员 seed 预留变量。 |

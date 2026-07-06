@@ -43,7 +43,7 @@ http://127.0.0.1:3000/api/health
 - `SESSION_SECRET`: 登录 session 密钥，生产环境必须替换
 - `LLM_BASE_URL`: OpenAI-compatible API base URL
 - `LLM_API_KEY`: LLM API key
-- `LLM_MODEL`: 每日精选模型
+- `LLM_MODEL`: 每日精选模型，当前示例为 `deepseek-v4-flash`
 - `YOUTUBE_API_KEY`: YouTube Data API key
 
 `pnpm db:migrate` 会先执行 `db:prepare`，自动创建本地 SQLite 目录和空文件，避免 Prisma 7 在空文件不存在时初始化失败。

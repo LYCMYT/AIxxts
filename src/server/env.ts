@@ -12,7 +12,7 @@ const envSchema = z.object({
   SESSION_SECRET: z.string().min(32),
   LLM_BASE_URL: z.string().url().optional(),
   LLM_API_KEY: z.string().optional(),
-  LLM_MODEL: z.string().default("qwen-plus"),
+  LLM_MODEL: z.string().default("deepseek-v4-flash"),
   YOUTUBE_API_KEY: z.string().optional(),
   X_API_BEARER_TOKEN: z.string().optional(),
 });
