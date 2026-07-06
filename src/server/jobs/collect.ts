@@ -19,6 +19,7 @@ import {
 } from "@/server/collectors/types";
 import { collectYouTubeSource } from "@/server/collectors/youtube";
 import { upsertCandidateItems } from "@/server/collectors/candidate-store";
+import { enrichCandidateItemsWithArticleText } from "@/server/article-extraction/extractor";
 
 function errorMessage(error: unknown) {
   if (error instanceof Error) {
@@ -121,7 +122,8 @@ export async function collectSource(source: SourceRow): Promise<SourceCollectRes
       return result;
     }
 
-    const writeResult = await upsertCandidateItems(fetchResult.items, source.url);
+    const articleEnrichment = await enrichCandidateItemsWithArticleText(fetchResult.items);
+    const writeResult = await upsertCandidateItems(articleEnrichment.items, source.url);
     const result = {
       sourceId: source.id,
       sourceName: source.name,
@@ -136,7 +138,14 @@ export async function collectSource(source: SourceRow): Promise<SourceCollectRes
       scannedCount: result.scannedCount,
       createdCount: result.createdCount,
       skippedCount: result.skippedCount,
-      metadata: fetchResult.metadata,
+      metadata: {
+        ...fetchResult.metadata,
+        articleExtraction: {
+          attemptedCount: articleEnrichment.attemptedCount,
+          enrichedCount: articleEnrichment.enrichedCount,
+          failedCount: articleEnrichment.failedCount,
+        },
+      },
     });
     await markSourceFetchSuccess(source.id);
 

@@ -31,6 +31,10 @@ pnpm install
 pnpm check:env
 pnpm db:generate
 pnpm db:migrate
+pnpm job:collect
+pnpm job:daily
+pnpm job:enrich-articles
+pnpm job:translate
 pnpm dev
 pnpm lint
 pnpm typecheck
@@ -61,3 +65,4 @@ http://127.0.0.1:3000/progress
 - [部署与运行](docs/09-operations.md)
 - [采集任务闭环](docs/09-collection-job.md)
 - [每日精选 LLM 方案](docs/09-daily-ranking-llm.md)
+- [原文正文抓取与清洗](docs/12-article-extraction.md)

@@ -2,8 +2,13 @@ import { CandidateStatus, DigestStatus, Prisma } from "@/generated/prisma/client
 import { rankCandidatesWithLlm } from "@/server/llm/client";
 import { prisma } from "@/server/db/prisma";
 import { env } from "@/server/env";
+import { runArticleEnrichmentJob } from "@/server/jobs/enrich-articles";
 import { runCandidateTranslationJob } from "@/server/jobs/translate-candidates";
 import { rankCandidatesWithFallback } from "@/server/ranking/fallback";
+import type {
+  ArticleEnrichmentJobResult,
+  RunArticleEnrichmentJobOptions,
+} from "@/server/jobs/enrich-articles";
 import type {
   CandidateTranslationJobResult,
   RunCandidateTranslationJobOptions,
@@ -33,8 +38,13 @@ export type DailyDigestJobResult = {
   digestId?: string;
   llmRunId: string;
   message: string;
+  articleEnrichment?: ArticleEnrichmentJobResult;
   translation?: CandidateTranslationJobResult;
 };
+
+type ArticleEnrichmentRunner = (
+  options?: RunArticleEnrichmentJobOptions,
+) => Promise<ArticleEnrichmentJobResult>;
 
 type CandidateTranslationRunner = (
   options?: RunCandidateTranslationJobOptions,
@@ -100,9 +110,28 @@ export async function runDailyDigestJob(
 export async function attachCandidateTranslationsToDailyResult(
   result: DailyDigestJobResult,
   translateCandidates: CandidateTranslationRunner = runCandidateTranslationJob,
+  enrichArticles: ArticleEnrichmentRunner = runArticleEnrichmentJob,
 ): Promise<DailyDigestJobResult> {
   if (result.status === "failed") {
     return result;
+  }
+
+  let articleEnrichment: ArticleEnrichmentJobResult | undefined;
+
+  try {
+    articleEnrichment = await enrichArticles({
+      digestDate: result.digestDate,
+      selectedOnly: true,
+    });
+  } catch (error) {
+    articleEnrichment = {
+      scannedCount: 0,
+      attemptedCount: 0,
+      enrichedCount: 0,
+      failedCount: 0,
+      skippedCount: 0,
+      message: `每日精选已生成，但原文正文自动抓取失败：${getErrorMessage(error)}`,
+    };
   }
 
   try {
@@ -113,11 +142,13 @@ export async function attachCandidateTranslationsToDailyResult(
 
     return {
       ...result,
+      articleEnrichment,
       translation,
     };
   } catch (error) {
     return {
       ...result,
+      articleEnrichment,
       translation: {
         status: "failed",
         provider: "openai-compatible",
