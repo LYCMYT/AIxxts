@@ -134,7 +134,7 @@ $env:NODE_ENV = "production"
 pnpm start
 ```
 
-`pnpm job:collect` 和 `pnpm job:daily` 可作为首次部署后的冒烟验证；如果未配置 `YOUTUBE_API_KEY`，YouTube source 会记录为 `SKIPPED`，不影响 RSS 类来源采集。若后续重新启用登录，先设置 `ADMIN_EMAIL` 和 `ADMIN_PASSWORD`，再执行 `pnpm seed:admin`。
+`pnpm job:collect` 和 `pnpm job:daily` 可作为首次部署后的冒烟验证；如果未配置 `YOUTUBE_API_KEY`，YouTube source 会使用默认频道 RSS fallback 采集真实视频，不影响 RSS 类来源采集。若后续重新启用登录，先设置 `ADMIN_EMAIL` 和 `ADMIN_PASSWORD`，再执行 `pnpm seed:admin`。
 
 ## Caddy 反向代理示例
 
@@ -163,7 +163,7 @@ ai.example.com {
 
 ## Windows Task Scheduler 任务脚本
 
-确认 `.env.local`、数据库迁移、管理员 seed 和数据源 seed 已完成后，可用 PowerShell 创建计划任务。脚本默认不写入任何 API key、密码或 `.env.local` 内容，只注册当前项目路径、运行频率和 pnpm 路径；任务以当前 Windows 用户的交互式登录身份运行。
+确认 `.env.local`、数据库迁移、管理员 seed 和数据源 seed 已完成后，可用 PowerShell 创建计划任务。脚本默认不写入任何 API key、密码或 `.env.local` 内容，只注册当前项目路径、运行频率和 pnpm 路径；任务以当前 Windows 用户的交互式登录身份运行。任务 runner 使用独立进程捕获 stdout/stderr，并以真实 ExitCode 判断成功失败，避免 PowerShell 5.1 把 pnpm 的普通 stderr 输出误判为失败。
 
 ```powershell
 Set-Location -LiteralPath "C:\Users\Administrator\Desktop\AIxxts"

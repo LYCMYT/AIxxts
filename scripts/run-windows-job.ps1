@@ -61,17 +61,31 @@ Set-Location -LiteralPath $ResolvedProjectPath
 Write-TaskLogLine "START $PackageScript"
 
 $ExitCode = 0
+$StdoutPath = [IO.Path]::GetTempFileName()
+$StderrPath = [IO.Path]::GetTempFileName()
 
 try {
-  & $ResolvedPnpmPath $PackageScript *>> $LogPath
-  $ExitCode = $LASTEXITCODE
+  $Process = Start-Process `
+    -FilePath $ResolvedPnpmPath `
+    -ArgumentList @($PackageScript) `
+    -WorkingDirectory $ResolvedProjectPath `
+    -RedirectStandardOutput $StdoutPath `
+    -RedirectStandardError $StderrPath `
+    -Wait `
+    -PassThru `
+    -WindowStyle Hidden
 
-  if ($null -eq $ExitCode) {
-    $ExitCode = 0
-  }
+  Get-Content -LiteralPath $StdoutPath -ErrorAction SilentlyContinue |
+    Add-Content -LiteralPath $LogPath -Encoding UTF8
+  Get-Content -LiteralPath $StderrPath -ErrorAction SilentlyContinue |
+    Add-Content -LiteralPath $LogPath -Encoding UTF8
+
+  $ExitCode = $Process.ExitCode
 } catch {
   $_ | Out-String | Add-Content -LiteralPath $LogPath -Encoding UTF8
   $ExitCode = 1
+} finally {
+  Remove-Item -LiteralPath $StdoutPath, $StderrPath -Force -ErrorAction SilentlyContinue
 }
 
 Write-TaskLogLine "END $PackageScript exit=$ExitCode"

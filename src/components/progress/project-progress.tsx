@@ -73,17 +73,18 @@ const completedItems: ProgressItem[] = [
     description: "当前阶段已取消页面和 API 登录拦截，保留 auth 基础代码以便未来恢复。",
     status: "done",
   },
+  {
+    title: "真实密钥和定时任务",
+    description:
+      "LLM key 已接入 DeepSeek；YouTube 无 key 时走频道 RSS 真实视频。Windows 计划任务已注册：采集每 30 分钟一次，每日精选 08:00 生成。",
+    status: "done",
+  },
 ];
 
 const nextItems: ProgressItem[] = [
   {
-    title: "配置真实密钥",
-    description: "LLM key 已接入 DeepSeek；YouTube 当前用频道 RSS 获取真实视频，后续补齐 YOUTUBE_API_KEY 后可升级全站搜索。",
-    status: "active",
-  },
-  {
-    title: "接入定时任务",
-    description: "用 Windows Task Scheduler 或 WSL cron 调用 pnpm job:collect 和 pnpm job:daily，形成固定每日运行。",
+    title: "扩展默认数据源池",
+    description: "继续补充 YouTube AI 频道、中文科技媒体 RSS、GitHub repo / release 信号，提高候选池覆盖面。",
     status: "next",
   },
   {
@@ -277,7 +278,7 @@ export function ProjectProgress({ adminData, archive }: ProjectProgressProps) {
         <div className="flex items-start gap-3 rounded-[16px] border border-transparent bg-[var(--warning-soft)] p-3 text-sm leading-6 text-[var(--warning)]">
           <PlayCircle className="mt-1 shrink-0" size={17} weight="bold" />
           <p>
-            下一次开发优先处理“真实密钥配置”和“定时任务接入”，这样团队可以稳定获得真实候选、每日生成和历史回看。
+            下一次开发优先扩展默认数据源池和管理后台动作，这样团队可以在不改代码的情况下持续提高候选覆盖面。
           </p>
         </div>
       </section>

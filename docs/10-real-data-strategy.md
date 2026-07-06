@@ -61,8 +61,8 @@
 
 ## 下一步开发顺序
 
-1. 运行 `pnpm seed:sources`，把 arXiv 等新增真实来源写入本地库。
-2. 运行 `pnpm job:collect`，确认真实来源采集结果和空结果都能被记录。
-3. 继续维护 YouTube 默认频道池；如需全站搜索，再配置 `YOUTUBE_API_KEY`。
-4. 配置 `LLM_API_KEY` 后验证模型排序和 1-2 句解读。
-5. 接 Windows Task Scheduler 或 WSL cron，固定采集和每日生成。
+1. 继续维护 YouTube 默认频道池，优先补团队认可的 AI 公司、研究者和开发者频道；如需全站搜索，再配置 `YOUTUBE_API_KEY`。
+2. 补充中文科技媒体 RSS、AI 公司官方博客和 GitHub repo / release 信号，提高候选覆盖面。
+3. 把管理后台的 source 保存、启停、重跑动作接入真实 API，减少后续改配置时对脚本的依赖。
+4. 按预算决定 X / Twitter 是否进入 Phase 2。
+5. 对抖音、小红书单独调研人工整理、官方权限或付费数据服务路径。
