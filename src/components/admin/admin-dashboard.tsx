@@ -197,6 +197,14 @@ export function AdminDashboard({
           <div className="grid min-w-0 gap-2 lg:min-w-[260px]">
             <JobActionButtons digestDate={digestDate} />
             <DigestPublishButton digestDate={digestDate} />
+            <form action="/api/auth/logout" method="post">
+              <button
+                className="focus-ring inline-flex min-h-10 w-full items-center justify-center rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)] px-3.5 py-2 text-sm font-semibold text-[var(--muted-strong)] shadow-[var(--shadow-subtle)] transition hover:border-[var(--accent)] hover:bg-[var(--accent-soft)] hover:text-[var(--accent-strong)] active:translate-y-px"
+                type="submit"
+              >
+                退出登录
+              </button>
+            </form>
           </div>
         </div>
 

@@ -1,6 +1,6 @@
 # 部署与运行
 
-本文档覆盖 Phase 1.4 的本地运行、生产部署、定时任务、环境变量、SQLite 备份恢复和首次推送检查。当前仓库已存在的脚本以 `package.json` 为准；采集、每日精选和数据源 seed 都已提供独立 Node.js 入口。当前版本取消登录拦截，管理员 seed 仅作为后续恢复权限控制的保留脚本。
+本文档覆盖 Phase 1.4 的本地运行、生产部署、定时任务、环境变量、SQLite 备份恢复和首次推送检查。当前仓库已存在的脚本以 `package.json` 为准；采集、每日精选和数据源 seed 都已提供独立 Node.js 入口。当前版本普通阅读页开放访问，管理后台、开发进度页和 `/api/admin/*` 需要管理员登录。
 
 ## 技术栈基线
 
@@ -25,6 +25,7 @@ notepad .env.local
 pnpm check:env
 pnpm db:generate
 pnpm db:migrate
+pnpm seed:admin
 pnpm dev
 ```
 
@@ -50,7 +51,7 @@ pnpm dev
 http://127.0.0.1:3000/api/health
 ```
 
-管理后台预留的任务触发 API 当前不做登录校验，供开放预览版本和后续按钮接入：
+管理后台任务触发 API 需要管理员 session cookie：
 
 ```text
 POST http://127.0.0.1:3000/api/admin/jobs/collect
@@ -113,8 +114,8 @@ pnpm dev
 | `YOUTUBE_API_KEY` | 是 | YouTube Data API key，不允许提交。 |
 | `GITHUB_TOKEN` | 否 | GitHub REST collector 可选 token。不配置也能读取公开数据，但速率限制更低。 |
 | `X_API_BEARER_TOKEN` | 是 | 后续 X 接入预留，不允许提交。 |
-| `ADMIN_EMAIL` | 否 | 当前不启用登录，仅作为后续管理员 seed 预留变量。 |
-| `ADMIN_PASSWORD` | 是 | 当前不启用登录，仅作为后续管理员 seed 预留变量。 |
+| `ADMIN_EMAIL` | 否 | 管理员 seed 账号；本地默认 `admin`，生产环境必须替换。 |
+| `ADMIN_PASSWORD` | 是 | 管理员 seed 密码；本地默认 `admin123`，生产环境必须替换。 |
 
 生成 `SESSION_SECRET` 示例：
 
@@ -133,6 +134,7 @@ pnpm check:env
 pnpm db:prepare
 pnpm db:generate
 pnpm prisma migrate deploy
+pnpm seed:admin
 pnpm seed:sources
 pnpm job:collect
 pnpm job:daily
@@ -141,7 +143,7 @@ $env:NODE_ENV = "production"
 pnpm start
 ```
 
-`pnpm job:collect` 和 `pnpm job:daily` 可作为首次部署后的冒烟验证；如果未配置 `YOUTUBE_API_KEY`，YouTube source 会使用默认频道 RSS fallback 采集真实视频，不影响 RSS 类来源采集。GitHub REST source 可无 token 读取公开数据，生产环境建议配置 `GITHUB_TOKEN` 降低限流风险。若后续重新启用登录，先设置 `ADMIN_EMAIL` 和 `ADMIN_PASSWORD`，再执行 `pnpm seed:admin`。
+`pnpm seed:admin` 会创建或更新管理员账号。本地默认账号为 `admin` / `admin123`；生产环境先设置 `ADMIN_EMAIL` 和 `ADMIN_PASSWORD`，再执行 seed。`pnpm job:collect` 和 `pnpm job:daily` 可作为首次部署后的冒烟验证；如果未配置 `YOUTUBE_API_KEY`，YouTube source 会使用默认频道 RSS fallback 采集真实视频，不影响 RSS 类来源采集。GitHub REST source 可无 token 读取公开数据，生产环境建议配置 `GITHUB_TOKEN` 降低限流风险。
 
 ## Caddy 反向代理示例
 

@@ -61,8 +61,8 @@ function invalidLoginResponse(request: NextRequest, nextPath: string): NextRespo
     return NextResponse.json({ error: "Invalid email or password." }, { status: 401 });
   }
 
-  const url = sameOriginUrl("/", request);
-  url.searchParams.set("auth", "disabled");
+  const url = sameOriginUrl("/login", request);
+  url.searchParams.set("auth", "invalid");
 
   if (nextPath !== "/") {
     url.searchParams.set("next", nextPath);

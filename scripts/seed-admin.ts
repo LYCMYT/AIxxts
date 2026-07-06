@@ -3,9 +3,7 @@ import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
 import { PrismaClient } from "@/generated/prisma/client";
 import { UserRole } from "@/generated/prisma/enums";
 import { hashPassword } from "@/server/auth/password";
-
-const DEFAULT_ADMIN_EMAIL = "admin@xone.local";
-const DEFAULT_ADMIN_PASSWORD = "ChangeMe123!";
+import { DEFAULT_ADMIN_ACCOUNT, DEFAULT_ADMIN_PASSWORD } from "./seed-admin-defaults";
 
 loadEnvConfig(process.cwd());
 
@@ -15,9 +13,9 @@ const adapter = new PrismaBetterSqlite3({
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
-  const email = (process.env.ADMIN_EMAIL ?? DEFAULT_ADMIN_EMAIL).trim().toLowerCase();
+  const email = (process.env.ADMIN_EMAIL ?? DEFAULT_ADMIN_ACCOUNT).trim().toLowerCase();
   const password = process.env.ADMIN_PASSWORD ?? DEFAULT_ADMIN_PASSWORD;
-  const usesDefaultEmail = email === DEFAULT_ADMIN_EMAIL;
+  const usesDefaultEmail = email === DEFAULT_ADMIN_ACCOUNT;
   const usesDefaultPassword = password === DEFAULT_ADMIN_PASSWORD;
 
   if (!email) {
@@ -49,7 +47,7 @@ async function main() {
 
   if (usesDefaultEmail || usesDefaultPassword) {
     console.warn(
-      `警告：当前使用默认管理员凭据 ${DEFAULT_ADMIN_EMAIL} / ${DEFAULT_ADMIN_PASSWORD}，生产环境必须通过 ADMIN_EMAIL 和 ADMIN_PASSWORD 替换。`,
+      `警告：当前使用默认管理员凭据 ${DEFAULT_ADMIN_ACCOUNT} / ${DEFAULT_ADMIN_PASSWORD}，生产环境必须通过 ADMIN_EMAIL 和 ADMIN_PASSWORD 替换。`,
     );
   }
 }

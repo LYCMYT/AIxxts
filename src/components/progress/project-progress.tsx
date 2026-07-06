@@ -69,8 +69,8 @@ const completedItems: ProgressItem[] = [
     status: "done",
   },
   {
-    title: "登录取消",
-    description: "当前阶段已取消页面和 API 登录拦截，保留 auth 基础代码以便未来恢复。",
+    title: "轻量管理员登录",
+    description: "普通阅读页保持开放访问；管理后台、开发进度页和 /api/admin/* 已恢复管理员登录保护。",
     status: "done",
   },
   {
@@ -97,12 +97,17 @@ const completedItems: ProgressItem[] = [
       "已接入 GitHub REST repository search / releases，支持 star、fork、release 下载数和限流错误信息，GITHUB_TOKEN 可选。",
     status: "done",
   },
+  {
+    title: "管理后台动作落地",
+    description: "已接入新增、编辑、启停、单源重跑、全量采集、每日精选、正文回填、翻译补齐、发布草稿和手动候选录入。",
+    status: "done",
+  },
 ];
 
 const nextItems: ProgressItem[] = [
   {
-    title: "管理后台动作落地",
-    description: "新增、编辑、启停、重跑、全量采集、每日精选、发布草稿和手动候选已接入；下一步补删除、批量操作和确认弹窗。",
+    title: "数据源覆盖扩展",
+    description: "继续扩展默认真实数据源池，并补充删除、批量操作和确认弹窗等后台维护细节。",
     status: "next",
   },
   {
@@ -219,7 +224,7 @@ export function ProjectProgress({ adminData, archive }: ProjectProgressProps) {
               当前做了什么，下一步做什么
             </h1>
             <p className="max-w-3xl text-sm leading-6 text-[var(--muted)]">
-              这个页面用于把开发状态放到产品里直接查看。当前版本取消登录拦截，团队打开网页即可看到 MVP 的运行状态和下一批工作。
+              这个页面用于把开发状态放到产品里直接查看。当前版本普通阅读页开放访问，管理和进度入口需要管理员登录。
             </p>
           </div>
           <a
@@ -291,7 +296,7 @@ export function ProjectProgress({ adminData, archive }: ProjectProgressProps) {
         <div className="flex items-start gap-3 rounded-[var(--radius)] border border-transparent bg-[var(--warning-soft)] p-3 text-sm leading-6 text-[var(--warning)]">
           <PlayCircle className="mt-1 shrink-0" size={17} weight="bold" />
           <p>
-            下一次开发优先扩展默认数据源池和管理后台动作，这样团队可以在不改代码的情况下持续提高候选覆盖面。
+            下一次开发优先扩展默认数据源池和 Phase 2 平台决策；管理后台任务按钮已支持采集、每日精选、正文回填和翻译补齐。
           </p>
         </div>
       </section>
