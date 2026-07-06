@@ -34,7 +34,15 @@ pnpm dev
 http://127.0.0.1:3000
 ```
 
-当前 `pnpm dev` 使用 `next dev --webpack -H 127.0.0.1`。在本机 Windows + Node 24 环境下，Next 16 的默认 Turbopack dev server 启用 Proxy 后出现过 `JavaScript heap out of memory`，因此开发环境先固定使用 webpack dev server；生产构建仍使用 `pnpm build`。
+当前 `pnpm dev` 使用 `package.json` 中的 `next dev -H 127.0.0.1`，即 Next.js 当前默认 dev server（Turbopack）。生产构建仍使用 `pnpm build`。
+
+如果从旧 webpack dev server 切回默认 Turbopack 后遇到 `.next` 下的 manifest/dev 残留、页面无法加载或 dev server 状态异常，先停止当前仓库的 Next/Node 开发进程，再删除 `.next` 并重启：
+
+```powershell
+Set-Location -LiteralPath "C:\Users\Administrator\Desktop\AIxxts"
+Remove-Item -Recurse -Force .next
+pnpm dev
+```
 
 健康检查地址：
 
@@ -153,37 +161,49 @@ ai.example.com {
 - Caddy 负责 TLS 证书申请和续期。
 - 防火墙只开放 80 和 443，除非有明确运维需求，不开放 3000。
 
-## Windows Task Scheduler 任务示例
+## Windows Task Scheduler 任务脚本
 
-确认 `.env.local`、数据库迁移、管理员 seed 和数据源 seed 已完成后，可用管理员 PowerShell 创建计划任务：
+确认 `.env.local`、数据库迁移、管理员 seed 和数据源 seed 已完成后，可用 PowerShell 创建计划任务。脚本默认不写入任何 API key、密码或 `.env.local` 内容，只注册当前项目路径、运行频率和 pnpm 路径；任务以当前 Windows 用户的交互式登录身份运行。
 
 ```powershell
-$Project = "C:\Users\Administrator\Desktop\AIxxts"
-
-schtasks /Create /F /TN "AIxxts Collect" /SC MINUTE /MO 30 /TR "powershell -NoProfile -ExecutionPolicy Bypass -Command ""Set-Location -LiteralPath '$Project'; pnpm job:collect >> output\collect.log 2>&1"""
-
-schtasks /Create /F /TN "AIxxts Daily Digest" /SC DAILY /ST 08:00 /TR "powershell -NoProfile -ExecutionPolicy Bypass -Command ""Set-Location -LiteralPath '$Project'; pnpm job:daily >> output\daily.log 2>&1"""
+Set-Location -LiteralPath "C:\Users\Administrator\Desktop\AIxxts"
+.\scripts\install-windows-tasks.ps1 -ProjectPath "C:\Users\Administrator\Desktop\AIxxts" -DailyTime "08:00" -CollectMinutes 30
 ```
+
+参数说明：
+
+- `ProjectPath`：仓库根目录，默认取脚本所在仓库。
+- `DailyTime`：每日精选任务时间，24 小时制 `HH:mm`，默认 `08:00`。
+- `CollectMinutes`：采集任务间隔分钟数，默认 `30`。
+- `PnpmPath`：可选；如果计划任务找不到 pnpm，可传入 `pnpm.cmd` 或 pnpm 可执行文件的绝对路径。
 
 检查任务：
 
 ```powershell
-schtasks /Query /TN "AIxxts Collect"
-schtasks /Query /TN "AIxxts Daily Digest"
+Get-ScheduledTask -TaskName "AIxxts Collect","AIxxts Daily Digest"
+Get-ScheduledTaskInfo -TaskName "AIxxts Collect","AIxxts Daily Digest"
+```
+
+查看日志：
+
+```powershell
+Get-Content -Tail 80 .\output\collect.log
+Get-Content -Tail 80 .\output\daily.log
 ```
 
 删除任务：
 
 ```powershell
-schtasks /Delete /F /TN "AIxxts Collect"
-schtasks /Delete /F /TN "AIxxts Daily Digest"
+Set-Location -LiteralPath "C:\Users\Administrator\Desktop\AIxxts"
+.\scripts\uninstall-windows-tasks.ps1
 ```
 
 注意事项：
 
 - 运行账号必须能读取项目目录、`.env.local` 和 SQLite 数据库。
+- 如果需要“无用户登录也运行”，在 Windows Task Scheduler 图形界面中为任务单独配置运行账户；不要把密码或密钥写进脚本参数。
 - `output/` 已在 `.gitignore` 中，不要提交任务日志。
-- 若任务依赖 pnpm 的用户级安装路径，应在任务命令中使用 pnpm 的绝对路径。
+- 若任务依赖 pnpm 的用户级安装路径，执行安装脚本时使用 `-PnpmPath` 传入 pnpm 的绝对路径。
 
 ## WSL cron 任务示例
 
@@ -193,11 +213,27 @@ schtasks /Delete /F /TN "AIxxts Daily Digest"
 SHELL=/bin/bash
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
-*/30 * * * * cd /mnt/c/Users/Administrator/Desktop/AIxxts && pnpm job:collect >> output/collect.log 2>&1
-0 8 * * * cd /mnt/c/Users/Administrator/Desktop/AIxxts && pnpm job:daily >> output/daily.log 2>&1
+*/30 * * * * bash /mnt/c/Users/Administrator/Desktop/AIxxts/scripts/run-wsl-job.sh collect /mnt/c/Users/Administrator/Desktop/AIxxts
+0 8 * * * bash /mnt/c/Users/Administrator/Desktop/AIxxts/scripts/run-wsl-job.sh daily /mnt/c/Users/Administrator/Desktop/AIxxts
 ```
 
-如果项目部署在 WSL Linux 文件系统中，把路径替换为实际部署目录，例如 `~/apps/AIxxts`。cron 的时区以 WSL 系统时区为准，首次启用后要检查日志时间是否符合预期。
+如果项目部署在 WSL Linux 文件系统中，把路径替换为实际部署目录，例如 `~/apps/AIxxts`。也可以先给脚本增加执行权限，再直接调用：
+
+```bash
+cd /mnt/c/Users/Administrator/Desktop/AIxxts
+chmod +x scripts/run-wsl-job.sh
+scripts/run-wsl-job.sh collect
+scripts/run-wsl-job.sh daily
+```
+
+查看日志：
+
+```bash
+tail -n 80 output/collect.log
+tail -n 80 output/daily.log
+```
+
+删除 cron 任务时执行 `crontab -e`，移除包含 `run-wsl-job.sh` 的两行。cron 的时区以 WSL 系统时区为准，首次启用后要检查日志时间是否符合预期。
 
 ## SQLite 备份策略
 

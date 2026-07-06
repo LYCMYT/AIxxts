@@ -10,7 +10,9 @@ import {
   YoutubeLogo,
 } from "@phosphor-icons/react/dist/ssr";
 import type { AdminDashboardData } from "@/server/admin/queries";
+import { DigestPublishButton } from "./digest-publish-button";
 import { JobActionButtons } from "./job-action-buttons";
+import { ManualCandidateForm } from "./manual-candidate-form";
 
 type BadgeTone = "success" | "danger" | "warning" | "muted" | "accent";
 
@@ -189,6 +191,20 @@ const fallbackSummary: AdminDashboardData["summary"] = {
 const inputClass =
   "w-full rounded-[14px] border border-[var(--line-soft)] bg-white/85 px-3.5 py-2.5 text-sm text-[var(--foreground)] shadow-[inset_0_1px_0_rgba(255,255,255,0.72)] transition placeholder:text-[var(--muted)] focus:border-[var(--accent)] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--accent-soft)]";
 
+function currentDigestDate() {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/New_York",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+  const value = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((part) => part.type === type)?.value ?? "";
+  const date = `${value("year")}-${value("month")}-${value("day")}`;
+
+  return /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : null;
+}
+
 function StatusBadge({ label, tone }: StatusBadgeProps) {
   return (
     <span
@@ -283,9 +299,12 @@ function Field({
   );
 }
 
-type AdminDashboardProps = Partial<AdminDashboardData>;
+type AdminDashboardProps = Partial<AdminDashboardData> & {
+  digestDate?: string | null;
+};
 
 export function AdminDashboard({
+  digestDate = currentDigestDate(),
   jobs = fallbackJobRows,
   sources = fallbackDataSources,
   summary = fallbackSummary,
@@ -304,7 +323,10 @@ export function AdminDashboard({
             </p>
           </div>
 
-          <JobActionButtons />
+          <div className="grid min-w-0 gap-2 lg:min-w-[260px]">
+            <JobActionButtons />
+            <DigestPublishButton digestDate={digestDate} />
+          </div>
         </div>
 
         <div className="grid gap-2 border-t border-[var(--line-soft)] pt-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -440,40 +462,7 @@ export function AdminDashboard({
         id="manual"
         title="手动候选录入"
       >
-        <form className="grid gap-4" aria-label="手动候选录入">
-          <div className="grid gap-4 lg:grid-cols-2">
-            <Field label="标题">
-              <input className={inputClass} defaultValue="某模型发布新一代多模态能力" type="text" />
-            </Field>
-            <Field label="来源">
-              <input className={inputClass} defaultValue="官方直播回放" type="text" />
-            </Field>
-            <Field label="URL">
-              <input className={inputClass} defaultValue="https://example.com/ai-launch" type="url" />
-            </Field>
-            <Field label="发布时间">
-              <input className={inputClass} defaultValue="2026-07-06T07:30" type="datetime-local" />
-            </Field>
-          </div>
-          <Field label="摘要" helper="建议保留事实信息，不写未经核验的判断。">
-            <textarea
-              className={`${inputClass} min-h-28 resize-y leading-6`}
-              defaultValue="发布内容包含模型能力、开发者工具更新和企业版可用性，适合作为每日精选候选。"
-              rows={4}
-            />
-          </Field>
-          <div className="flex flex-col gap-3 rounded-[16px] border border-[var(--line-soft)] bg-white/60 p-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm text-[var(--muted)]">静态设计中不提交数据，真实保存将在后续接入 API。</p>
-            <button
-              aria-label="加入候选池"
-              className="focus-ring inline-flex min-h-10 items-center justify-center gap-2 rounded-[14px] bg-[var(--foreground)] px-3.5 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(24,24,27,0.14)] transition hover:bg-[var(--accent-strong)] active:translate-y-px"
-              type="button"
-            >
-              <Plus size={16} weight="bold" />
-              加入候选池
-            </button>
-          </div>
-        </form>
+        <ManualCandidateForm />
       </SectionHeading>
 
       <SectionHeading
