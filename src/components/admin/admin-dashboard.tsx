@@ -195,7 +195,7 @@ export function AdminDashboard({
           </div>
 
           <div className="grid min-w-0 gap-2 lg:min-w-[260px]">
-            <JobActionButtons />
+            <JobActionButtons digestDate={digestDate} />
             <DigestPublishButton digestDate={digestDate} />
           </div>
         </div>

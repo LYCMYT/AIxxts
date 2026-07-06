@@ -2,14 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CalendarBlank, Database, House, Kanban } from "@phosphor-icons/react";
-
-const navItems = [
-  { href: "/", label: "今日精选", icon: House },
-  { href: "/digests", label: "历史回看", icon: CalendarBlank },
-  { href: "/admin", label: "管理后台", icon: Database },
-  { href: "/progress", label: "开发进度", icon: Kanban },
-];
+import { publicNavItems } from "./nav-config";
 
 function isActivePath(pathname: string, href: string) {
   if (href === "/") {
@@ -27,7 +20,7 @@ export function DesktopNav() {
       aria-label="主导航"
       className="hidden items-center gap-1 rounded-full border border-[var(--line)] bg-[var(--surface)] p-1 md:flex"
     >
-      {navItems.map((item) => {
+      {publicNavItems.map((item) => {
         const Icon = item.icon;
         const active = isActivePath(pathname, item.href);
 
@@ -59,7 +52,7 @@ export function MobileNav() {
       aria-label="移动端主导航"
       className="flex gap-1 overflow-x-auto border-t border-[var(--line)] px-4 py-2 [scrollbar-width:none] md:hidden [&::-webkit-scrollbar]:hidden"
     >
-      {navItems.map((item) => {
+      {publicNavItems.map((item) => {
         const Icon = item.icon;
         const active = isActivePath(pathname, item.href);
 

@@ -55,13 +55,19 @@ http://127.0.0.1:3000/api/health
 ```text
 POST http://127.0.0.1:3000/api/admin/jobs/collect
 POST http://127.0.0.1:3000/api/admin/jobs/daily
+POST http://127.0.0.1:3000/api/admin/jobs/enrich-articles
+POST http://127.0.0.1:3000/api/admin/jobs/translate
 ```
 
-`/api/admin/jobs/collect` 复用 `runCollectJob()` 并返回采集 summary。`/api/admin/jobs/daily` 复用 `runDailyDigestJob()` 并返回每日精选生成 summary；请求体可留空，也可传入指定日期：
+`/api/admin/jobs/collect` 复用 `runCollectJob()` 并返回采集 summary。`/api/admin/jobs/daily` 复用 `runDailyDigestJob()` 并返回每日精选生成 summary。`/api/admin/jobs/enrich-articles` 复用正文回填任务，`/api/admin/jobs/translate` 复用候选内容中文翻译任务。
+
+除 collect 外，请求体可留空，也可传入指定日期、处理上限和是否只处理每日精选内容：
 
 ```json
 {
-  "digestDate": "2026-07-06"
+  "digestDate": "2026-07-06",
+  "limit": 20,
+  "selectedOnly": true
 }
 ```
 

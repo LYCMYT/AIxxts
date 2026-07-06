@@ -7,6 +7,7 @@
 - 采集任务：`pnpm job:collect` 在写入候选池前，会对缺少有效正文的普通网页候选做一次轻量抓取和清洗。
 - 每日任务：`pnpm job:daily` 在每日精选生成成功后，会先运行正文回填，再运行中文翻译，确保翻译基于最新正文。
 - 手动回填：`pnpm job:enrich-articles -- --date=YYYY-MM-DD --limit=20` 可对指定日期的精选内容补抓正文。
+- 管理后台：`/admin` 的任务控制区可触发正文回填和翻译补齐；对应 API 为 `/api/admin/jobs/enrich-articles` 和 `/api/admin/jobs/translate`。
 
 ## 清洗规则
 

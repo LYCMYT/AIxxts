@@ -1,13 +1,15 @@
 import { jobErrorResponse, readAdminJobOptions } from "@/server/admin/job-options";
-import { runDailyDigestJob } from "@/server/jobs/daily";
+import { runCandidateTranslationJob } from "@/server/jobs/translate-candidates";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
   try {
     const options = await readAdminJobOptions(request);
-    const summary = await runDailyDigestJob({
+    const summary = await runCandidateTranslationJob({
       digestDate: options.digestDate,
+      limit: options.limit,
+      selectedOnly: options.selectedOnly,
     });
 
     return Response.json(summary);

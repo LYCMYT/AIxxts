@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowClockwise, CheckCircle, Play, WarningCircle } from "@phosphor-icons/react";
+import { CheckCircle, WarningCircle } from "@phosphor-icons/react";
+import { adminJobActions, type AdminJobActionKind } from "./job-action-config";
 
 type JobActionState = {
+  activeKind?: AdminJobActionKind;
   label: string;
   tone: "idle" | "running" | "success" | "error";
 };
@@ -13,22 +15,30 @@ const initialState: JobActionState = {
   tone: "idle",
 };
 
-async function postJob(url: string) {
+async function postJob(url: string, body?: Record<string, unknown>) {
   const response = await fetch(url, {
     method: "POST",
+    ...(body
+      ? {
+          body: JSON.stringify(body),
+          headers: {
+            "content-type": "application/json",
+          },
+        }
+      : {}),
   });
-  const body = (await response.json().catch(() => null)) as unknown;
+  const responseBody = (await response.json().catch(() => null)) as unknown;
 
   if (!response.ok) {
     const message =
-      body && typeof body === "object" && "error" in body
-        ? String((body as { error?: unknown }).error)
+      responseBody && typeof responseBody === "object" && "error" in responseBody
+        ? String((responseBody as { error?: unknown }).error)
         : `请求失败：${response.status}`;
 
     throw new Error(message);
   }
 
-  return body;
+  return responseBody;
 }
 
 function summarizeJobResult(result: unknown) {
@@ -57,20 +67,45 @@ function summarizeJobResult(result: unknown) {
   return "任务已完成";
 }
 
-export function JobActionButtons() {
+function buildJobBody(kind: AdminJobActionKind, digestDate: string) {
+  if (kind === "collect") {
+    return undefined;
+  }
+
+  const body: Record<string, unknown> = {
+    selectedOnly: true,
+  };
+
+  if (digestDate) {
+    body.digestDate = digestDate;
+  }
+
+  if (kind === "enrichArticles" || kind === "translate") {
+    body.limit = 20;
+  }
+
+  return body;
+}
+
+export function JobActionButtons({ digestDate }: { digestDate?: string | null }) {
+  const [selectedDate, setSelectedDate] = useState(digestDate ?? "");
   const [state, setState] = useState<JobActionState>(initialState);
 
-  async function runAction(kind: "collect" | "daily") {
-    const label = kind === "collect" ? "正在执行采集" : "正在重跑每日精选";
-    const url = kind === "collect" ? "/api/admin/jobs/collect" : "/api/admin/jobs/daily";
+  async function runAction(kind: AdminJobActionKind) {
+    const action = adminJobActions.find((item) => item.kind === kind);
+
+    if (!action) {
+      return;
+    }
 
     setState({
-      label,
+      activeKind: kind,
+      label: action.runningLabel,
       tone: "running",
     });
 
     try {
-      const result = await postJob(url);
+      const result = await postJob(action.url, buildJobBody(kind, selectedDate));
 
       setState({
         label: summarizeJobResult(result),
@@ -88,27 +123,40 @@ export function JobActionButtons() {
 
   return (
     <div className="grid gap-2">
-      <div className="flex flex-col gap-2 sm:flex-row lg:justify-end">
-        <button
-          aria-label="重跑每日精选"
-          className="focus-ring inline-flex min-h-10 items-center justify-center gap-2 rounded-[var(--radius)] bg-[var(--accent)] px-3.5 py-2 text-sm font-semibold text-white shadow-[var(--shadow-subtle)] transition hover:bg-[var(--accent-strong)] active:translate-y-px disabled:cursor-wait disabled:opacity-70"
-          disabled={running}
-          onClick={() => void runAction("daily")}
-          type="button"
-        >
-          <ArrowClockwise size={16} weight="bold" />
-          重跑每日精选
-        </button>
-        <button
-          aria-label="执行采集任务"
-          className="focus-ring inline-flex min-h-10 items-center justify-center gap-2 rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)] px-3.5 py-2 text-sm font-semibold text-[var(--accent-strong)] shadow-[var(--shadow-subtle)] transition hover:border-[var(--accent)] hover:bg-[var(--accent-soft)] active:translate-y-px disabled:cursor-wait disabled:opacity-70"
-          disabled={running}
-          onClick={() => void runAction("collect")}
-          type="button"
-        >
-          <Play size={16} weight="bold" />
-          执行采集
-        </button>
+      <label className="grid gap-1.5 text-xs font-medium text-[var(--muted-strong)]">
+        <span>任务日期</span>
+        <input
+          className="focus-ring min-h-10 rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--foreground)]"
+          onChange={(event) => setSelectedDate(event.target.value)}
+          type="date"
+          value={selectedDate}
+        />
+      </label>
+
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+        {adminJobActions.map((action) => {
+          const Icon = action.icon;
+          const primary = action.tone === "primary";
+          const active = running && state.activeKind === action.kind;
+
+          return (
+            <button
+              aria-label={action.label}
+              className={`focus-ring inline-flex min-h-10 items-center justify-center gap-2 rounded-[var(--radius)] px-3.5 py-2 text-sm font-semibold shadow-[var(--shadow-subtle)] transition active:translate-y-px disabled:cursor-wait disabled:opacity-70 ${
+                primary
+                  ? "bg-[var(--accent)] text-white hover:bg-[var(--accent-strong)]"
+                  : "border border-[var(--line-soft)] bg-[var(--surface)] text-[var(--accent-strong)] hover:border-[var(--accent)] hover:bg-[var(--accent-soft)]"
+              }`}
+              disabled={running}
+              key={action.kind}
+              onClick={() => void runAction(action.kind)}
+              type="button"
+            >
+              <Icon size={16} weight="bold" />
+              {active ? action.runningLabel : action.label}
+            </button>
+          );
+        })}
       </div>
 
       <p
