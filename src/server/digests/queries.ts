@@ -13,6 +13,7 @@ export type DigestSourceType =
   | "Manual";
 
 export type HomeDigestItem = {
+  id: string;
   rank: number;
   title: string;
   source: string;
@@ -444,7 +445,7 @@ function digestItemToPreview(item: {
   };
 }
 
-function digestItemToHome(item: {
+export function digestItemToHome(item: {
   rank: number;
   titleSnapshot: string;
   sourceSnapshot: string;
@@ -452,6 +453,7 @@ function digestItemToHome(item: {
   interpretation: string;
   signals: unknown;
   candidate: {
+    id: string;
     publishedAt: Date;
     source: {
       type: string;
@@ -459,6 +461,7 @@ function digestItemToHome(item: {
   };
 }): HomeDigestItem {
   return {
+    id: item.candidate.id,
     rank: item.rank,
     title: item.titleSnapshot,
     source: item.sourceSnapshot,

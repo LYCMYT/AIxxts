@@ -1,5 +1,6 @@
+import Link from "next/link";
 import {
-  ArrowSquareOut,
+  ArrowRight,
   CheckCircle,
   Clock,
   Database,
@@ -10,6 +11,7 @@ import {
 } from "@phosphor-icons/react/dist/ssr";
 
 export type DigestItem = {
+  id: string;
   rank: number;
   title: string;
   source: string;
@@ -127,7 +129,7 @@ export function DigestHome({
             <div>
               <h2 className="text-base font-semibold text-[var(--foreground)]">排序列表</h2>
               <p className="text-sm leading-6 text-[var(--muted)]">
-                统一排序，不按来源分组。每条保留原文入口，便于继续核验。
+                统一排序，不按来源分组。每条先进入站内中文详情，原文入口保留在详情页用于核验。
               </p>
             </div>
             <span className="text-xs font-medium text-[var(--muted-strong)]">
@@ -138,7 +140,7 @@ export function DigestHome({
           {items.length > 0 ? (
             <div className="grid gap-3">
               {items.map((item) => (
-                <DigestListItem item={item} key={`${item.rank}-${item.title}`} />
+                <DigestListItem item={item} key={item.id} />
               ))}
             </div>
           ) : (
@@ -211,7 +213,12 @@ function DigestListItem({ item }: { item: DigestItem }) {
           </span>
         </div>
         <h3 className="mt-3 break-words text-base font-semibold leading-6 text-[var(--foreground)]">
-          {item.title}
+          <Link
+            className="focus-ring rounded-[var(--radius-sm)] transition hover:text-[var(--accent-strong)]"
+            href={`/items/${item.id}`}
+          >
+            {item.title}
+          </Link>
         </h3>
         <p className="mt-2 break-words text-sm leading-6 text-[var(--muted-strong)] [overflow-wrap:anywhere]">
           <span className="font-semibold text-[var(--foreground)]">AI 解读：</span>
@@ -224,16 +231,14 @@ function DigestListItem({ item }: { item: DigestItem }) {
           <TrendUp size={15} weight="bold" className="mt-0.5 shrink-0 text-[var(--accent)]" />
           <span>{item.signals}</span>
         </p>
-        <a
-          aria-label={`打开原文：${item.title}`}
+        <Link
+          aria-label={`查看站内详情：${item.title}`}
           className="focus-ring inline-flex w-fit items-center gap-2 rounded-full border border-[var(--line-soft)] bg-[var(--surface)] px-3 py-2 text-sm font-medium text-[var(--accent-strong)] transition hover:border-[var(--accent)] hover:bg-[var(--accent-soft)]"
-          href={item.url}
-          rel="noreferrer"
-          target="_blank"
+          href={`/items/${item.id}`}
         >
-          原文
-          <ArrowSquareOut size={15} weight="bold" />
-        </a>
+          查看详情
+          <ArrowRight size={15} weight="bold" />
+        </Link>
       </div>
     </article>
   );

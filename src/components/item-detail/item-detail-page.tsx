@@ -2,7 +2,6 @@ import Link from "next/link";
 import {
   ArrowSquareOut,
   CalendarBlank,
-  ChartBar,
   CheckCircle,
   FileText,
   LinkSimple,
@@ -132,6 +131,10 @@ export function ItemDetailPage({
     return <EmptyItemState itemId={itemId} />;
   }
 
+  const digestHref = item.digestRank > 0 ? `/digests/${item.digestDate}` : "/digests";
+  const digestBackLabel = item.digestRank > 0 ? "返回当日精选" : "返回历史回看";
+  const detailLead = item.aiInterpretation || item.selectionReason || item.originalSummary;
+
   return (
     <main className="mx-auto grid w-full max-w-[1160px] gap-6 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
       <header className="grid gap-4 rounded-[var(--radius-lg)] border border-[var(--line-soft)] bg-[var(--surface)] p-5 shadow-[var(--shadow-subtle)] sm:p-6">
@@ -167,6 +170,9 @@ export function ItemDetailPage({
               <span className="rounded-full bg-[var(--accent-soft)] px-2.5 py-1 font-medium text-[var(--accent-strong)]">
                 {item.sourceType}
               </span>
+              <span className="rounded-full border border-[var(--line-soft)] bg-[var(--surface-soft)] px-2.5 py-1 font-medium text-[var(--muted-strong)]">
+                站内中文详情
+              </span>
               <span>{item.source}</span>
               <span>{item.author}</span>
             </div>
@@ -174,30 +180,27 @@ export function ItemDetailPage({
               {item.title}
             </h1>
             <p className="max-w-3xl break-words text-sm leading-6 text-[var(--muted)] [overflow-wrap:anywhere]">
-              {item.originalSummary}
+              {detailLead}
             </p>
           </div>
 
           <div className="grid gap-2">
-            <a
-              aria-label={`打开原文：${item.title}`}
+            <Link
+              aria-label={digestBackLabel}
               className="focus-ring inline-flex items-center justify-center gap-2 rounded-full bg-[var(--accent)] px-3 py-2 text-sm font-medium text-white shadow-[var(--shadow-subtle)] transition hover:bg-[var(--accent-strong)]"
+              href={digestHref}
+            >
+              {digestBackLabel}
+            </Link>
+            <a
+              aria-label={`打开原文网站：${item.title}`}
+              className="focus-ring inline-flex items-center justify-center gap-2 rounded-full border border-[var(--line-soft)] bg-[var(--surface)] px-3 py-2 text-sm font-medium text-[var(--muted-strong)] transition hover:border-[var(--accent)] hover:bg-[var(--accent-soft)] hover:text-[var(--accent-strong)]"
               href={item.originalUrl}
               rel="noreferrer"
               target="_blank"
             >
-              打开原文
+              打开原文网站
               <ArrowSquareOut size={15} />
-            </a>
-            <a
-              aria-label={`查看来源主页：${item.source}`}
-              className="focus-ring inline-flex items-center justify-center gap-2 rounded-full border border-[var(--line-soft)] bg-[var(--surface)] px-3 py-2 text-sm font-medium text-[var(--muted-strong)] transition hover:border-[var(--accent)] hover:bg-[var(--accent-soft)] hover:text-[var(--accent-strong)]"
-              href={item.sourceUrl}
-              rel="noreferrer"
-              target="_blank"
-            >
-              查看来源
-              <LinkSimple size={15} />
             </a>
           </div>
         </div>
@@ -208,21 +211,17 @@ export function ItemDetailPage({
           <section className="rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)] p-5 shadow-[var(--shadow-subtle)]">
             <h2 className="flex items-center gap-2 text-base font-semibold">
               <CheckCircle size={18} className="text-[var(--accent)]" />
-              入选原因
+              中文详情
             </h2>
             <p className="mt-3 break-words text-sm leading-7 text-[var(--muted-strong)] [overflow-wrap:anywhere]">
-              {item.selectionReason}
+              {detailLead}
             </p>
-          </section>
-
-          <section className="rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)] p-5 shadow-[var(--shadow-subtle)]">
-            <h2 className="flex items-center gap-2 text-base font-semibold">
-              <ChartBar size={18} className="text-[var(--accent)]" />
-              AI 解读
-            </h2>
-            <p className="mt-3 break-words text-sm leading-7 text-[var(--muted-strong)] [overflow-wrap:anywhere]">
-              {item.aiInterpretation}
-            </p>
+            <div className="mt-4 rounded-[var(--radius-sm)] border border-[var(--line-soft)] bg-[var(--surface-soft)] p-3">
+              <p className="text-xs font-semibold text-[var(--foreground)]">入选原因</p>
+              <p className="mt-2 break-words text-sm leading-6 text-[var(--muted-strong)] [overflow-wrap:anywhere]">
+                {item.selectionReason}
+              </p>
+            </div>
             <div className="mt-4 flex flex-wrap gap-2">
               {item.llmSignals.map((signal) => (
                 <span

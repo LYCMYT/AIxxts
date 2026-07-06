@@ -1,6 +1,6 @@
 import Link from "next/link";
 import {
-  ArrowSquareOut,
+  ArrowRight,
   CalendarBlank,
   CheckCircle,
   Clock,
@@ -109,7 +109,14 @@ export function DigestDayPage({
                   <span>{item.sourceType}</span>
                   <span>{item.publishedAt}</span>
                 </div>
-                <h2 className="mt-2 text-lg font-semibold leading-7">{item.title}</h2>
+                <h2 className="mt-2 text-lg font-semibold leading-7">
+                  <Link
+                    className="focus-ring rounded-[var(--radius-sm)] transition hover:text-[var(--accent-strong)]"
+                    href={`/items/${item.id}`}
+                  >
+                    {item.title}
+                  </Link>
+                </h2>
                 <p className="mt-2 break-words text-sm leading-6 text-[var(--muted)] [overflow-wrap:anywhere]">
                   {item.interpretation}
                 </p>
@@ -120,23 +127,13 @@ export function DigestDayPage({
 
               <div className="flex flex-col gap-2 md:items-end">
                 <Link
-                  aria-label={`查看详情：${item.title}`}
+                  aria-label={`查看站内详情：${item.title}`}
                   className="focus-ring inline-flex items-center justify-center gap-2 rounded-full border border-[var(--accent-soft)] bg-[var(--surface)] px-3 py-2 text-sm font-medium text-[var(--accent-strong)] transition hover:border-[var(--accent)] hover:bg-[var(--accent-soft)]"
                   href={`/items/${item.id}`}
                 >
                   查看详情
-                  <ArrowSquareOut size={15} />
+                  <ArrowRight size={15} />
                 </Link>
-                <a
-                  aria-label={`打开原文：${item.title}`}
-                  className="focus-ring inline-flex items-center justify-center gap-2 rounded-full border border-[var(--line-soft)] bg-[var(--surface)] px-3 py-2 text-sm font-medium text-[var(--muted-strong)] transition hover:border-[var(--accent)] hover:bg-[var(--accent-soft)] hover:text-[var(--accent-strong)]"
-                  href={item.originalUrl}
-                  rel="noreferrer"
-                  target="_blank"
-                >
-                  打开原文
-                  <ArrowSquareOut size={15} />
-                </a>
               </div>
             </article>
           ))}
