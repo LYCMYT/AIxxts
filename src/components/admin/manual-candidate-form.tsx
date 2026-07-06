@@ -17,7 +17,7 @@ const initialState: SubmitState = {
 };
 
 const inputClass =
-  "min-w-0 w-full rounded-[14px] border border-[var(--line-soft)] bg-white/85 px-3.5 py-2.5 text-sm text-[var(--foreground)] shadow-[inset_0_1px_0_rgba(255,255,255,0.72)] transition placeholder:text-[var(--muted)] focus:border-[var(--accent)] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--accent-soft)] disabled:cursor-not-allowed disabled:bg-[var(--surface-soft)] disabled:text-[var(--muted)]";
+  "min-w-0 w-full rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)] px-3.5 py-2.5 text-sm text-[var(--foreground)] transition placeholder:text-[var(--muted)] focus:border-[var(--accent)] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--accent-soft)] disabled:cursor-not-allowed disabled:bg-[var(--surface-soft)] disabled:text-[var(--muted)]";
 
 function defaultPublishedAt() {
   const date = new Date();
@@ -203,10 +203,10 @@ export function ManualCandidateForm() {
         />
       </Field>
 
-      <div className="flex min-w-0 flex-col gap-3 rounded-[16px] border border-[var(--line-soft)] bg-white/60 p-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex min-w-0 flex-col gap-3 rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface-soft)] p-3 sm:flex-row sm:items-center sm:justify-between">
         <p
           aria-live="polite"
-          className={`min-w-0 break-words rounded-[14px] px-3 py-2 text-sm leading-6 ${
+          className={`min-w-0 break-words rounded-[var(--radius-sm)] px-3 py-2 text-sm leading-6 ${
             state.tone === "error"
               ? "bg-[var(--danger-soft)] text-[var(--danger)]"
               : state.tone === "success"
@@ -226,7 +226,7 @@ export function ManualCandidateForm() {
         </p>
         <button
           aria-label="加入候选池"
-          className="focus-ring inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-[14px] bg-[var(--foreground)] px-3.5 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(24,24,27,0.14)] transition hover:bg-[var(--accent-strong)] active:translate-y-px disabled:cursor-not-allowed disabled:opacity-70"
+          className="focus-ring inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-[var(--radius)] bg-[var(--foreground)] px-3.5 py-2 text-sm font-semibold text-white shadow-[var(--shadow-subtle)] transition hover:bg-[var(--accent-strong)] active:translate-y-px disabled:cursor-not-allowed disabled:opacity-70"
           disabled={running || !canSubmit}
           type="submit"
         >

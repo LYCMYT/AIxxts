@@ -26,7 +26,7 @@ type ProjectProgressProps = {
 const statusClass: Record<ProgressStatus, string> = {
   done: "border-transparent bg-[var(--success-soft)] text-[var(--success)]",
   active: "border-transparent bg-[var(--accent-soft)] text-[var(--accent-strong)]",
-  next: "border-[var(--line-soft)] bg-white/80 text-[var(--muted-strong)]",
+  next: "border-[var(--line-soft)] bg-[var(--surface)] text-[var(--muted-strong)]",
   risk: "border-transparent bg-[var(--warning-soft)] text-[var(--warning)]",
 };
 
@@ -150,7 +150,7 @@ function Metric({
   icon: typeof Database;
 }) {
   return (
-    <div className="rounded-[18px] border border-[var(--line-soft)] bg-white/80 px-4 py-3 shadow-[0_14px_36px_rgba(15,23,42,0.045),inset_0_1px_0_rgba(255,255,255,0.72)]">
+    <div className="rounded-[var(--radius-lg)] border border-[var(--line-soft)] bg-[var(--surface)] px-4 py-3 shadow-[var(--shadow-subtle)]">
       <div className="flex items-center justify-between gap-3">
         <p className="text-sm text-[var(--muted)]">{label}</p>
         <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[14px] bg-[var(--accent-soft)] text-[var(--accent-strong)]">
@@ -164,10 +164,10 @@ function Metric({
 
 function ProgressList({ items }: { items: ProgressItem[] }) {
   return (
-    <div className="overflow-hidden rounded-[18px] border border-[var(--line-soft)] bg-[var(--surface-glass)] shadow-[0_18px_50px_rgba(15,23,42,0.05)] backdrop-blur">
+    <div className="overflow-hidden rounded-[var(--radius-lg)] border border-[var(--line-soft)] bg-[var(--surface)] shadow-[var(--shadow-subtle)]">
       {items.map((item) => (
         <div
-          className="grid gap-3 border-b border-[var(--line-soft)] p-4 transition last:border-b-0 hover:bg-white/70 sm:grid-cols-[1fr_auto] sm:items-start"
+          className="grid gap-3 border-b border-[var(--line-soft)] p-4 transition last:border-b-0 hover:bg-[var(--surface-soft)] sm:grid-cols-[1fr_auto] sm:items-start"
           key={item.title}
         >
           <div className="grid min-w-0 gap-1">
@@ -208,9 +208,9 @@ export function ProjectProgress({ adminData, archive }: ProjectProgressProps) {
   const pendingErrors = summary ? `${summary.pendingErrors} 条` : "暂无";
 
   return (
-    <main className="min-h-[100dvh] bg-[linear-gradient(180deg,#f7f8fb_0%,#ffffff_42%,#f7f8fb_100%)] px-4 py-6 sm:px-6 lg:px-8">
+    <main className="min-h-[100dvh] bg-[var(--background)] px-4 py-6 sm:px-6 lg:px-8">
       <div className="mx-auto flex w-full max-w-[1180px] flex-col gap-5">
-      <header className="rounded-[18px] border border-[var(--line-soft)] bg-[var(--surface-glass)] p-4 shadow-[0_20px_60px_rgba(15,23,42,0.06)] backdrop-blur sm:p-6">
+      <header className="rounded-[var(--radius-lg)] border border-[var(--line-soft)] bg-[var(--surface)] p-4 shadow-[var(--shadow-subtle)] sm:p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="grid min-w-0 gap-2">
             <p className="text-sm font-medium text-[var(--accent-strong)]">开发进度</p>
@@ -223,7 +223,7 @@ export function ProjectProgress({ adminData, archive }: ProjectProgressProps) {
           </div>
           <a
             aria-label="查看管理后台"
-            className="focus-ring inline-flex min-h-10 items-center justify-center gap-2 rounded-[14px] bg-[var(--accent)] px-3.5 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(0,113,227,0.18)] transition hover:bg-[var(--accent-strong)] active:translate-y-px"
+            className="focus-ring inline-flex min-h-10 items-center justify-center gap-2 rounded-[var(--radius)] bg-[var(--accent)] px-3.5 py-2 text-sm font-semibold text-white shadow-[var(--shadow-subtle)] transition hover:bg-[var(--accent-strong)] active:translate-y-px"
             href="/admin"
           >
             查看管理后台
@@ -243,7 +243,7 @@ export function ProjectProgress({ adminData, archive }: ProjectProgressProps) {
         <div className="grid gap-3">
           <div className="flex items-center justify-between gap-3 px-1">
             <h2 className="text-base font-semibold">已完成</h2>
-            <span className="rounded-[14px] border border-[var(--line-soft)] bg-white/75 px-2.5 py-1 text-xs font-semibold text-[var(--muted-strong)]">
+            <span className="rounded-[var(--radius-sm)] border border-[var(--line-soft)] bg-[var(--surface)] px-2.5 py-1 text-xs font-semibold text-[var(--muted-strong)]">
               {completedItems.length} 项
             </span>
           </div>
@@ -253,7 +253,7 @@ export function ProjectProgress({ adminData, archive }: ProjectProgressProps) {
         <div className="grid content-start gap-3">
           <div className="flex items-center justify-between gap-3 px-1">
             <h2 className="text-base font-semibold">下一步</h2>
-            <span className="rounded-[14px] border border-[var(--line-soft)] bg-white/75 px-2.5 py-1 text-xs font-semibold text-[var(--muted-strong)]">
+            <span className="rounded-[var(--radius-sm)] border border-[var(--line-soft)] bg-[var(--surface)] px-2.5 py-1 text-xs font-semibold text-[var(--muted-strong)]">
               {nextItems.length} 项
             </span>
           </div>
@@ -261,7 +261,7 @@ export function ProjectProgress({ adminData, archive }: ProjectProgressProps) {
         </div>
       </section>
 
-      <section className="grid gap-4 rounded-[18px] border border-[var(--line-soft)] bg-[var(--surface-glass)] p-4 shadow-[0_18px_50px_rgba(15,23,42,0.05)] backdrop-blur sm:p-5">
+      <section className="grid gap-4 rounded-[var(--radius-lg)] border border-[var(--line-soft)] bg-[var(--surface)] p-4 shadow-[var(--shadow-subtle)] sm:p-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="grid min-w-0 gap-1">
             <h2 className="text-base font-semibold">开发运行方式</h2>
@@ -269,7 +269,7 @@ export function ProjectProgress({ adminData, archive }: ProjectProgressProps) {
               这些命令已经写入 package scripts。当前最新任务状态：{latestJobLabel(archive)}。
             </p>
           </div>
-          <span className="inline-flex w-fit items-center gap-2 rounded-[14px] border border-transparent bg-[var(--accent-soft)] px-2.5 py-1 text-xs font-semibold text-[var(--accent-strong)]">
+          <span className="inline-flex w-fit items-center gap-2 rounded-[var(--radius-sm)] border border-transparent bg-[var(--accent-soft)] px-2.5 py-1 text-xs font-semibold text-[var(--accent-strong)]">
             <ClockClockwise size={14} weight="bold" />
             本地开发可用
           </span>
@@ -278,7 +278,7 @@ export function ProjectProgress({ adminData, archive }: ProjectProgressProps) {
         <div className="grid gap-2 sm:grid-cols-2">
           {commandItems.map((item) => (
             <div
-              className="grid gap-1 rounded-[16px] border border-[var(--line-soft)] bg-white/75 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.72)]"
+              className="grid gap-1 rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface-soft)] p-3"
               key={item.command}
             >
               <code className="text-sm font-semibold text-[var(--foreground)]">{item.command}</code>
@@ -287,7 +287,7 @@ export function ProjectProgress({ adminData, archive }: ProjectProgressProps) {
           ))}
         </div>
 
-        <div className="flex items-start gap-3 rounded-[16px] border border-transparent bg-[var(--warning-soft)] p-3 text-sm leading-6 text-[var(--warning)]">
+        <div className="flex items-start gap-3 rounded-[var(--radius)] border border-transparent bg-[var(--warning-soft)] p-3 text-sm leading-6 text-[var(--warning)]">
           <PlayCircle className="mt-1 shrink-0" size={17} weight="bold" />
           <p>
             下一次开发优先扩展默认数据源池和管理后台动作，这样团队可以在不改代码的情况下持续提高候选覆盖面。

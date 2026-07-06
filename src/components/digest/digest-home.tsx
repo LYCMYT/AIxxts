@@ -62,11 +62,11 @@ export function DigestHome({
 }: DigestHomeProps) {
   return (
     <main className="mx-auto w-full max-w-[1160px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-      <section className="rounded-[20px] border border-[var(--line-soft)] bg-[var(--surface-glass)] p-5 shadow-[var(--shadow-soft)] backdrop-blur sm:p-6">
+      <section className="rounded-[var(--radius-lg)] border border-[var(--line-soft)] bg-[var(--surface)] p-5 shadow-[var(--shadow-subtle)] sm:p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div className="grid gap-3">
             <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-[var(--muted-strong)]">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--line-soft)] bg-[var(--surface)] px-3 py-1.5 shadow-[var(--shadow-subtle)]">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--line-soft)] bg-[var(--surface-soft)] px-3 py-1.5">
                 <CheckCircle size={15} weight="bold" className="text-[var(--accent)]" />
                 {taskStatus}
               </span>

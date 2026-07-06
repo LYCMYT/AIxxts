@@ -26,7 +26,7 @@ const badgeToneClass: Record<BadgeTone, string> = {
   success: "border-transparent bg-[var(--success-soft)] text-[var(--success)]",
   danger: "border-transparent bg-[var(--danger-soft)] text-[var(--danger)]",
   warning: "border-transparent bg-[var(--warning-soft)] text-[var(--warning)]",
-  muted: "border-[var(--line-soft)] bg-white/80 text-[var(--muted-strong)]",
+  muted: "border-[var(--line-soft)] bg-[var(--surface)] text-[var(--muted-strong)]",
   accent: "border-transparent bg-[var(--accent-soft)] text-[var(--accent-strong)]",
 };
 
@@ -47,7 +47,7 @@ const emptySummary: AdminDashboardData["summary"] = {
 };
 
 const inputClass =
-  "w-full rounded-[14px] border border-[var(--line-soft)] bg-white/85 px-3.5 py-2.5 text-sm text-[var(--foreground)] shadow-[inset_0_1px_0_rgba(255,255,255,0.72)] transition placeholder:text-[var(--muted)] focus:border-[var(--accent)] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--accent-soft)]";
+  "w-full rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)] px-3.5 py-2.5 text-sm text-[var(--foreground)] transition placeholder:text-[var(--muted)] focus:border-[var(--accent)] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--accent-soft)]";
 
 function currentDigestDate() {
   const parts = new Intl.DateTimeFormat("en-CA", {
@@ -88,12 +88,12 @@ function SectionHeading({
 }) {
   return (
     <section
-      className="scroll-mt-28 overflow-hidden rounded-[18px] border border-[var(--line-soft)] bg-[var(--surface-glass)] shadow-[0_18px_50px_rgba(15,23,42,0.05)] backdrop-blur"
+      className="scroll-mt-28 overflow-hidden rounded-[var(--radius-lg)] border border-[var(--line-soft)] bg-[var(--surface)] shadow-[var(--shadow-subtle)]"
       id={id}
     >
       <div className="flex flex-col gap-3 border-b border-[var(--line-soft)] px-4 py-4 sm:flex-row sm:items-start sm:justify-between sm:px-5">
         <div className="flex min-w-0 gap-3">
-          <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-[14px] border border-[var(--line-soft)] bg-white/75 text-[var(--accent-strong)] shadow-[inset_0_1px_0_rgba(255,255,255,0.72)]">
+          <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--radius-sm)] border border-[var(--line-soft)] bg-[var(--surface-soft)] text-[var(--accent-strong)]">
             <Icon size={18} weight="bold" />
           </span>
           <div className="grid min-w-0 gap-1">
@@ -110,7 +110,7 @@ function SectionHeading({
 function TableFrame({ children }: { children: React.ReactNode }) {
   return (
     <div className="-mx-4 max-w-[calc(100%+2rem)] overflow-x-auto px-4 sm:mx-0 sm:max-w-full sm:px-0">
-      <div className="min-w-full overflow-hidden rounded-[16px] border border-[var(--line-soft)] bg-white/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.72)]">
+      <div className="min-w-full overflow-hidden rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)]">
         {children}
       </div>
     </div>
@@ -182,9 +182,9 @@ export function AdminDashboard({
   users = [],
 }: AdminDashboardProps = {}) {
   return (
-    <main className="min-h-[100dvh] bg-[linear-gradient(180deg,#f7f8fb_0%,#ffffff_42%,#f7f8fb_100%)] px-4 py-6 sm:px-6 lg:px-8">
+    <main className="min-h-[100dvh] bg-[var(--background)] px-4 py-6 sm:px-6 lg:px-8">
       <div className="mx-auto flex w-full max-w-[1180px] flex-col gap-5">
-      <header className="grid gap-4 rounded-[18px] border border-[var(--line-soft)] bg-[var(--surface-glass)] p-4 shadow-[0_20px_60px_rgba(15,23,42,0.06)] backdrop-blur sm:p-6">
+      <header className="grid gap-4 rounded-[var(--radius-lg)] border border-[var(--line-soft)] bg-[var(--surface)] p-4 shadow-[var(--shadow-subtle)] sm:p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="grid min-w-0 gap-2">
             <p className="text-sm font-medium text-[var(--accent-strong)]">管理后台</p>
@@ -201,21 +201,21 @@ export function AdminDashboard({
         </div>
 
         <div className="grid gap-2 border-t border-[var(--line-soft)] pt-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-[16px] border border-[var(--line-soft)] bg-white/75 px-3.5 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.72)]">
+          <div className="rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface-soft)] px-3.5 py-3">
             <p className="text-xs text-[var(--muted)]">启用数据源</p>
             <p className="mt-1 text-lg font-semibold">
               {summary.enabledSources} / {summary.totalSources}
             </p>
           </div>
-          <div className="rounded-[16px] border border-[var(--line-soft)] bg-white/75 px-3.5 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.72)]">
+          <div className="rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface-soft)] px-3.5 py-3">
             <p className="text-xs text-[var(--muted)]">今日候选池</p>
             <p className="mt-1 text-lg font-semibold">{summary.todayCandidates} 条</p>
           </div>
-          <div className="rounded-[16px] border border-[var(--line-soft)] bg-white/75 px-3.5 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.72)]">
+          <div className="rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface-soft)] px-3.5 py-3">
             <p className="text-xs text-[var(--muted)]">每日生成</p>
             <p className="mt-1 text-lg font-semibold">{summary.dailySchedule}</p>
           </div>
-          <div className="rounded-[16px] border border-[var(--line-soft)] bg-white/75 px-3.5 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.72)]">
+          <div className="rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface-soft)] px-3.5 py-3">
             <p className="text-xs text-[var(--muted)]">待处理错误</p>
             <p className="mt-1 text-lg font-semibold text-[var(--danger)]">
               {summary.pendingErrors} 条
@@ -226,7 +226,7 @@ export function AdminDashboard({
         <nav className="flex gap-2 overflow-x-auto border-t border-[var(--line-soft)] pt-4" aria-label="管理区块">
           {sectionLinks.map((item) => (
             <a
-              className="focus-ring shrink-0 rounded-[14px] border border-[var(--line-soft)] bg-white/75 px-3.5 py-2 text-sm font-medium text-[var(--muted-strong)] transition hover:border-[var(--accent)] hover:bg-[var(--accent-soft)] hover:text-[var(--accent-strong)]"
+              className="focus-ring shrink-0 rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface-soft)] px-3.5 py-2 text-sm font-medium text-[var(--muted-strong)] transition hover:border-[var(--accent)] hover:bg-[var(--accent-soft)] hover:text-[var(--accent-strong)]"
               href={item.href}
               key={item.href}
             >
@@ -379,7 +379,7 @@ export function AdminDashboard({
         id="users"
         title="用户角色管理"
       >
-        <div className="mb-4 grid gap-4 rounded-[16px] border border-[var(--line-soft)] bg-white/60 p-3 lg:grid-cols-[1fr_220px]">
+        <div className="mb-4 grid gap-4 rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface-soft)] p-3 lg:grid-cols-[1fr_220px]">
           <Field label="搜索成员">
             <span className="relative">
               <MagnifyingGlass

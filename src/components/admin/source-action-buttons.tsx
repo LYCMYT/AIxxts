@@ -122,7 +122,7 @@ export function SourceActionButtons({
       <div className="flex flex-wrap gap-2">
         <button
           aria-label={enabled ? "停用来源" : "启用来源"}
-          className="focus-ring inline-flex min-h-9 items-center justify-center gap-1.5 rounded-[14px] border border-[var(--line-soft)] bg-white/85 px-3 py-1.5 text-xs font-semibold text-[var(--foreground)] transition hover:border-[var(--accent)] hover:bg-[var(--accent-soft)] hover:text-[var(--accent-strong)] active:translate-y-px disabled:cursor-wait disabled:opacity-70"
+          className="focus-ring inline-flex min-h-9 items-center justify-center gap-1.5 rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)] px-3 py-1.5 text-xs font-semibold text-[var(--foreground)] transition hover:border-[var(--accent)] hover:bg-[var(--accent-soft)] hover:text-[var(--accent-strong)] active:translate-y-px disabled:cursor-wait disabled:opacity-70"
           disabled={running}
           onClick={() => void updateEnabled(!enabled)}
           type="button"
@@ -132,7 +132,7 @@ export function SourceActionButtons({
         </button>
         <button
           aria-label="重跑该来源"
-          className="focus-ring inline-flex min-h-9 items-center justify-center gap-1.5 rounded-[14px] border border-[var(--line-soft)] bg-white/85 px-3 py-1.5 text-xs font-semibold text-[var(--accent-strong)] transition hover:border-[var(--accent)] hover:bg-[var(--accent-soft)] active:translate-y-px disabled:cursor-not-allowed disabled:opacity-50"
+          className="focus-ring inline-flex min-h-9 items-center justify-center gap-1.5 rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)] px-3 py-1.5 text-xs font-semibold text-[var(--accent-strong)] transition hover:border-[var(--accent)] hover:bg-[var(--accent-soft)] active:translate-y-px disabled:cursor-not-allowed disabled:opacity-50"
           disabled={running || !enabled || !canCollect}
           onClick={() => void collectOneSource()}
           title={canCollect ? undefined : "该来源类型暂不支持自动采集"}

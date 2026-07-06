@@ -56,7 +56,7 @@ export function DigestDayPage({
 
   return (
     <main className="mx-auto grid w-full max-w-[1160px] gap-6 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-      <header className="grid gap-4 rounded-[20px] border border-[var(--line-soft)] bg-[var(--surface-glass)] p-5 shadow-[var(--shadow-soft)] backdrop-blur sm:p-6">
+      <header className="grid gap-4 rounded-[var(--radius-lg)] border border-[var(--line-soft)] bg-[var(--surface)] p-5 shadow-[var(--shadow-subtle)] sm:p-6">
         <Link
           className="focus-ring inline-flex w-fit items-center gap-2 rounded-full px-2 py-1 text-sm font-medium text-[var(--accent-strong)] hover:bg-[var(--accent-soft)]"
           href="/digests"

@@ -11,10 +11,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       >
         跳到主内容
       </a>
-      <header className="sticky top-0 z-30 border-b border-[rgb(210_210_215_/_0.72)] bg-[var(--surface-glass)] backdrop-blur-xl">
-        <div className="mx-auto flex h-[60px] w-full max-w-[1180px] items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+      <header className="sticky top-0 z-30 border-b border-[var(--line)] bg-[rgb(245_245_247_/_0.86)] backdrop-blur-xl">
+        <div className="mx-auto flex h-14 w-full max-w-[1180px] items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
           <Link className="focus-ring flex items-center gap-3 rounded-[var(--radius-sm)]" href="/">
-            <span className="flex h-[34px] w-[34px] items-center justify-center rounded-[var(--radius-sm)] bg-[var(--foreground)] text-white shadow-[var(--shadow-subtle)]">
+            <span className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-sm)] bg-[var(--foreground)] text-white">
               <ChartBar size={19} weight="bold" />
             </span>
             <span className="min-w-0">
@@ -28,13 +28,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <DesktopNav />
 
           <div className="flex items-center gap-2">
-            <span className="hidden items-center gap-2 rounded-full border border-[rgb(210_210_215_/_0.86)] bg-white/70 px-3 py-1.5 text-xs font-medium text-[var(--muted-strong)] shadow-[var(--shadow-subtle)] sm:flex">
+            <span className="hidden items-center gap-2 rounded-full border border-[var(--line)] bg-[var(--surface)] px-3 py-1.5 text-xs font-medium text-[var(--muted-strong)] sm:flex">
               <GlobeHemisphereWest size={15} className="text-[var(--accent)]" />
               开放预览
             </span>
             <a
               aria-label="打开 GitHub 仓库"
-              className="focus-ring flex h-9 w-9 items-center justify-center rounded-full border border-[rgb(210_210_215_/_0.86)] bg-white/70 text-[var(--muted-strong)] shadow-[var(--shadow-subtle)] transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
+              className="focus-ring flex h-9 w-9 items-center justify-center rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--muted-strong)] transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
               href="https://github.com/LYCMYT/AIxxts"
               rel="noreferrer"
               target="_blank"

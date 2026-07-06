@@ -69,7 +69,7 @@ function EmptyItemState({ itemId }: { itemId: string }) {
         <CalendarBlank size={16} />
         返回历史回看
       </Link>
-      <section className="rounded-[20px] border border-dashed border-[var(--line)] bg-[var(--surface)] p-6 shadow-[var(--shadow-subtle)]">
+      <section className="rounded-[var(--radius-lg)] border border-dashed border-[var(--line)] bg-[var(--surface)] p-6 shadow-[var(--shadow-subtle)]">
         <FileText size={26} className="text-[var(--muted)]" />
         <h1 className="mt-3 text-2xl font-semibold">未找到内容详情</h1>
         <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
@@ -134,7 +134,7 @@ export function ItemDetailPage({
 
   return (
     <main className="mx-auto grid w-full max-w-[1160px] gap-6 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-      <header className="grid gap-4 rounded-[20px] border border-[var(--line-soft)] bg-[var(--surface-glass)] p-5 shadow-[var(--shadow-soft)] backdrop-blur sm:p-6">
+      <header className="grid gap-4 rounded-[var(--radius-lg)] border border-[var(--line-soft)] bg-[var(--surface)] p-5 shadow-[var(--shadow-subtle)] sm:p-6">
         <div className="flex flex-wrap items-center gap-3 text-sm">
           <Link
             className="focus-ring inline-flex items-center gap-2 rounded-full px-2 py-1 font-medium text-[var(--accent-strong)] hover:bg-[var(--accent-soft)]"

@@ -61,7 +61,7 @@ export function HistoryPage({ digests = [], jobRuns = [] }: HistoryPageProps = {
 
   return (
     <main className="mx-auto grid w-full max-w-[1160px] gap-6 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-      <header className="grid gap-4 rounded-[20px] border border-[var(--line-soft)] bg-[var(--surface-glass)] p-5 shadow-[var(--shadow-soft)] backdrop-blur sm:p-6">
+      <header className="grid gap-4 rounded-[var(--radius-lg)] border border-[var(--line-soft)] bg-[var(--surface)] p-5 shadow-[var(--shadow-subtle)] sm:p-6">
         <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
           <div className="grid gap-2">
             <h1 className="text-3xl font-semibold tracking-normal sm:text-4xl">历史回看</h1>

@@ -88,7 +88,7 @@ export function DigestPublishButton({ digestDate }: { digestDate?: string | null
     <div className="grid min-w-0 gap-2">
       <button
         aria-label="发布今日草稿"
-        className="focus-ring inline-flex min-h-10 items-center justify-center gap-2 rounded-[14px] border border-[var(--line-soft)] bg-white/85 px-3.5 py-2 text-sm font-semibold text-[var(--foreground)] shadow-[inset_0_1px_0_rgba(255,255,255,0.72)] transition hover:border-[var(--accent)] hover:bg-[var(--accent-soft)] hover:text-[var(--accent-strong)] active:translate-y-px disabled:cursor-not-allowed disabled:opacity-70"
+        className="focus-ring inline-flex min-h-10 items-center justify-center gap-2 rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)] px-3.5 py-2 text-sm font-semibold text-[var(--foreground)] shadow-[var(--shadow-subtle)] transition hover:border-[var(--accent)] hover:bg-[var(--accent-soft)] hover:text-[var(--accent-strong)] active:translate-y-px disabled:cursor-not-allowed disabled:opacity-70"
         disabled={disabled}
         onClick={() => void publishDigest()}
         type="button"
@@ -98,12 +98,12 @@ export function DigestPublishButton({ digestDate }: { digestDate?: string | null
       </button>
       <p
         aria-live="polite"
-        className={`flex min-w-0 items-start gap-2 break-words rounded-[14px] border px-3 py-2 text-xs leading-5 ${
+        className={`flex min-w-0 items-start gap-2 break-words rounded-[var(--radius)] border px-3 py-2 text-xs leading-5 ${
           state.tone === "error"
             ? "border-[var(--danger-soft)] bg-[var(--danger-soft)] text-[var(--danger)]"
             : state.tone === "success"
               ? "border-[var(--success-soft)] bg-[var(--success-soft)] text-[var(--success)]"
-              : "border-[var(--line-soft)] bg-white/70 text-[var(--muted)]"
+              : "border-[var(--line-soft)] bg-[var(--surface-soft)] text-[var(--muted)]"
         }`}
         role="status"
       >

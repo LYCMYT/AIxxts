@@ -33,7 +33,7 @@ const sourceTypeOptions = [
 ];
 
 const inputClass =
-  "w-full rounded-[14px] border border-[var(--line-soft)] bg-white/85 px-3.5 py-2.5 text-sm text-[var(--foreground)] shadow-[inset_0_1px_0_rgba(255,255,255,0.72)] transition placeholder:text-[var(--muted)] focus:border-[var(--accent)] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--accent-soft)]";
+  "w-full rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)] px-3.5 py-2.5 text-sm text-[var(--foreground)] transition placeholder:text-[var(--muted)] focus:border-[var(--accent)] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--accent-soft)]";
 
 function newSourceState(): FormState {
   return {
@@ -173,13 +173,13 @@ export function SourceEditor({ sources }: SourceEditorProps) {
   }
 
   return (
-    <div className="mb-4 grid gap-4 rounded-[16px] border border-[var(--line-soft)] bg-white/60 p-3">
+    <div className="mb-4 grid gap-4 rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface-soft)] p-3">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2 text-sm text-[var(--muted)]">
           <CheckCircle size={16} className="text-[var(--success)]" weight="bold" />
           来源状态来自数据库，保存后会刷新下方列表。
         </div>
-        <div className="flex rounded-[14px] border border-[var(--line-soft)] bg-white/80 p-1">
+        <div className="flex rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)] p-1">
           <button
             className={`focus-ring inline-flex min-h-8 items-center gap-1.5 rounded-[11px] px-3 text-xs font-semibold transition ${
               mode === "create"
@@ -305,7 +305,7 @@ export function SourceEditor({ sources }: SourceEditorProps) {
           <span>{state.message}</span>
         </p>
         <button
-          className="focus-ring inline-flex min-h-10 items-center justify-center gap-2 rounded-[14px] bg-[var(--accent)] px-3.5 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(0,113,227,0.18)] transition hover:bg-[var(--accent-strong)] active:translate-y-px disabled:cursor-wait disabled:opacity-70"
+          className="focus-ring inline-flex min-h-10 items-center justify-center gap-2 rounded-[var(--radius)] bg-[var(--accent)] px-3.5 py-2 text-sm font-semibold text-white shadow-[var(--shadow-subtle)] transition hover:bg-[var(--accent-strong)] active:translate-y-px disabled:cursor-wait disabled:opacity-70"
           disabled={running || (mode === "edit" && !form.sourceId)}
           onClick={() => void saveSource()}
           type="button"

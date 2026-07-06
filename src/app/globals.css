@@ -3,27 +3,30 @@
 :root {
   --background: #f5f5f7;
   --foreground: #1d1d1f;
-  --muted: #6e6e73;
-  --muted-strong: #3f3f46;
-  --line: #d7d7dd;
-  --line-soft: #e7e7ec;
+  --muted: #7a7a7a;
+  --muted-strong: #333333;
+  --line: #e0e0e0;
+  --line-soft: #f0f0f0;
   --surface: #ffffff;
-  --surface-soft: #fbfbfd;
-  --surface-strong: #f0f0f4;
-  --surface-glass: rgb(255 255 255 / 0.78);
-  --accent: #0071e3;
-  --accent-strong: #0057b8;
-  --accent-soft: #e7f1ff;
+  --surface-soft: #fafafc;
+  --surface-strong: #f5f5f7;
+  --accent: #0066cc;
+  --accent-strong: #004d99;
+  --accent-focus: #0071e3;
+  --accent-on-dark: #2997ff;
+  --accent-soft: #eaf4ff;
   --danger: #c2261f;
   --danger-soft: #fff0ee;
   --warning: #8a5a00;
   --warning-soft: #fff7df;
   --success: #0a7f44;
   --success-soft: #e8f7ef;
-  --radius: 16px;
-  --radius-sm: 12px;
-  --shadow-soft: 0 18px 50px rgb(29 29 31 / 0.08);
-  --shadow-subtle: 0 1px 2px rgb(29 29 31 / 0.05);
+  --radius-lg: 18px;
+  --radius: 14px;
+  --radius-sm: 11px;
+  --radius-xs: 8px;
+  --shadow-soft: 0 18px 45px rgb(29 29 31 / 0.045);
+  --shadow-subtle: 0 1px 2px rgb(29 29 31 / 0.04);
 }
 
 html,
@@ -67,9 +70,7 @@ select {
 }
 
 .page-shell {
-  background:
-    linear-gradient(180deg, rgb(255 255 255 / 0.86), rgb(245 245 247 / 0) 24rem),
-    var(--background);
+  background: var(--background);
 }
 
 .focus-ring {
@@ -78,7 +79,7 @@ select {
 }
 
 .focus-ring:focus-visible {
-  outline-color: var(--accent);
+  outline-color: var(--accent-focus);
 }
 
 @media (prefers-reduced-motion: reduce) {

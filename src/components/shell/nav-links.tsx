@@ -25,7 +25,7 @@ export function DesktopNav() {
   return (
     <nav
       aria-label="主导航"
-      className="hidden items-center gap-1 rounded-full border border-[rgb(210_210_215_/_0.72)] bg-white/72 p-1 shadow-[var(--shadow-subtle)] md:flex"
+      className="hidden items-center gap-1 rounded-full border border-[var(--line)] bg-[var(--surface)] p-1 md:flex"
     >
       {navItems.map((item) => {
         const Icon = item.icon;
@@ -36,7 +36,7 @@ export function DesktopNav() {
             aria-current={active ? "page" : undefined}
             className={`focus-ring flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium transition ${
               active
-                ? "bg-[var(--foreground)] text-white shadow-[var(--shadow-subtle)]"
+                ? "bg-[var(--surface-strong)] text-[var(--foreground)]"
                 : "text-[var(--muted-strong)] hover:bg-[var(--surface-soft)] hover:text-[var(--foreground)]"
             }`}
             href={item.href}
@@ -57,7 +57,7 @@ export function MobileNav() {
   return (
     <nav
       aria-label="移动端主导航"
-      className="flex gap-1 overflow-x-auto border-t border-[rgb(210_210_215_/_0.72)] px-4 py-2 [scrollbar-width:none] md:hidden [&::-webkit-scrollbar]:hidden"
+      className="flex gap-1 overflow-x-auto border-t border-[var(--line)] px-4 py-2 [scrollbar-width:none] md:hidden [&::-webkit-scrollbar]:hidden"
     >
       {navItems.map((item) => {
         const Icon = item.icon;
@@ -68,8 +68,8 @@ export function MobileNav() {
             aria-current={active ? "page" : undefined}
             className={`focus-ring flex shrink-0 items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-medium ${
               active
-                ? "border-[var(--foreground)] bg-[var(--foreground)] text-white"
-                : "border-[rgb(210_210_215_/_0.86)] bg-white/72 text-[var(--muted-strong)]"
+                ? "border-[var(--line)] bg-[var(--surface-strong)] text-[var(--foreground)]"
+                : "border-[var(--line)] bg-[var(--surface)] text-[var(--muted-strong)]"
             }`}
             href={item.href}
             key={item.href}

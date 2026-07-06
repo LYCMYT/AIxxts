@@ -91,7 +91,7 @@ export function JobActionButtons() {
       <div className="flex flex-col gap-2 sm:flex-row lg:justify-end">
         <button
           aria-label="重跑每日精选"
-          className="focus-ring inline-flex min-h-10 items-center justify-center gap-2 rounded-[14px] bg-[var(--accent)] px-3.5 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(0,113,227,0.18)] transition hover:bg-[var(--accent-strong)] active:translate-y-px disabled:cursor-wait disabled:opacity-70"
+          className="focus-ring inline-flex min-h-10 items-center justify-center gap-2 rounded-[var(--radius)] bg-[var(--accent)] px-3.5 py-2 text-sm font-semibold text-white shadow-[var(--shadow-subtle)] transition hover:bg-[var(--accent-strong)] active:translate-y-px disabled:cursor-wait disabled:opacity-70"
           disabled={running}
           onClick={() => void runAction("daily")}
           type="button"
@@ -101,7 +101,7 @@ export function JobActionButtons() {
         </button>
         <button
           aria-label="执行采集任务"
-          className="focus-ring inline-flex min-h-10 items-center justify-center gap-2 rounded-[14px] border border-[var(--line-soft)] bg-white/80 px-3.5 py-2 text-sm font-semibold text-[var(--accent-strong)] shadow-[inset_0_1px_0_rgba(255,255,255,0.72)] transition hover:border-[var(--accent)] hover:bg-[var(--accent-soft)] active:translate-y-px disabled:cursor-wait disabled:opacity-70"
+          className="focus-ring inline-flex min-h-10 items-center justify-center gap-2 rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)] px-3.5 py-2 text-sm font-semibold text-[var(--accent-strong)] shadow-[var(--shadow-subtle)] transition hover:border-[var(--accent)] hover:bg-[var(--accent-soft)] active:translate-y-px disabled:cursor-wait disabled:opacity-70"
           disabled={running}
           onClick={() => void runAction("collect")}
           type="button"
@@ -113,12 +113,12 @@ export function JobActionButtons() {
 
       <p
         aria-live="polite"
-        className={`flex items-start gap-2 rounded-[14px] border px-3 py-2 text-xs leading-5 ${
+        className={`flex items-start gap-2 rounded-[var(--radius)] border px-3 py-2 text-xs leading-5 ${
           state.tone === "error"
             ? "border-[var(--danger-soft)] bg-[var(--danger-soft)] text-[var(--danger)]"
             : state.tone === "success"
               ? "border-[var(--success-soft)] bg-[var(--success-soft)] text-[var(--success)]"
-              : "border-[var(--line-soft)] bg-white/70 text-[var(--muted)]"
+              : "border-[var(--line-soft)] bg-[var(--surface-soft)] text-[var(--muted)]"
         }`}
       >
         {state.tone === "error" ? (
