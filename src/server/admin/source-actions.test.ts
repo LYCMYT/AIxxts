@@ -4,6 +4,8 @@ import test from "node:test";
 import {
   AdminSourceActionError,
   collectAdminSource,
+  createAdminSource,
+  saveAdminSource,
   sourceActionErrorResponse,
   updateAdminSourceEnabled,
 } from "./source-actions";
@@ -32,11 +34,127 @@ function deps(overrides: Partial<SourceActionDeps> = {}): SourceActionDeps {
       createdCount: 1,
       skippedCount: 0,
     }),
+    createSource: async () => "new-source-1",
     findCollectableSource: async () => baseSource,
+    saveSource: async () => true,
     setEnabled: async () => true,
     ...overrides,
   };
 }
+
+const validSaveBody = {
+  config: {
+    category: "github-release",
+    owner: "owner/repo",
+  },
+  enabled: true,
+  fetchIntervalMinutes: 120,
+  name: "GitHub Release Feed",
+  type: "RSS",
+  url: "https://github.com/owner/repo/releases.atom",
+};
+
+test("createAdminSource validates and creates a collectable source", async () => {
+  let savedName: string | null = null;
+  const result = await createAdminSource(
+    validSaveBody,
+    deps({
+      createSource: async (input) => {
+        savedName = input.name;
+        assert.equal(input.type, "RSS");
+        assert.equal(input.fetchIntervalMinutes, 120);
+        assert.deepEqual(input.config, {
+          category: "github-release",
+          owner: "owner/repo",
+        });
+
+        return "created-source";
+      },
+    }),
+  );
+
+  assert.equal(savedName, "GitHub Release Feed");
+  assert.deepEqual(result, {
+    sourceId: "created-source",
+  });
+});
+
+test("createAdminSource rejects unsupported source types", async () => {
+  await assert.rejects(
+    () =>
+      createAdminSource(
+        {
+          ...validSaveBody,
+          type: "X",
+        },
+        deps(),
+      ),
+    {
+      message: "type must be a supported collectable source type.",
+      status: 400,
+    },
+  );
+});
+
+test("createAdminSource rejects invalid config JSON", async () => {
+  await assert.rejects(
+    () =>
+      createAdminSource(
+        {
+          ...validSaveBody,
+          config: "{",
+        },
+        deps(),
+      ),
+    {
+      message: "config must be valid JSON.",
+      status: 400,
+    },
+  );
+});
+
+test("saveAdminSource updates an existing source", async () => {
+  let savedSourceId: string | null = null;
+  const result = await saveAdminSource(
+    "source-1",
+    {
+      ...validSaveBody,
+      config: "{\"topic\":\"AI\"}",
+    },
+    deps({
+      saveSource: async (sourceId, input) => {
+        savedSourceId = sourceId;
+        assert.deepEqual(input.config, {
+          topic: "AI",
+        });
+
+        return true;
+      },
+    }),
+  );
+
+  assert.equal(savedSourceId, "source-1");
+  assert.deepEqual(result, {
+    sourceId: "source-1",
+  });
+});
+
+test("saveAdminSource reports missing sources", async () => {
+  await assert.rejects(
+    () =>
+      saveAdminSource(
+        "missing",
+        validSaveBody,
+        deps({
+          saveSource: async () => false,
+        }),
+      ),
+    {
+      message: "source not found.",
+      status: 404,
+    },
+  );
+});
 
 test("updateAdminSourceEnabled rejects non-boolean enabled values", async () => {
   await assert.rejects(() => updateAdminSourceEnabled("source-1", "true", deps()), {

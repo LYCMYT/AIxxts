@@ -1,5 +1,4 @@
 import {
-  CheckCircle,
   Database,
   ListChecks,
   MagnifyingGlass,
@@ -14,6 +13,7 @@ import { DigestPublishButton } from "./digest-publish-button";
 import { JobActionButtons } from "./job-action-buttons";
 import { ManualCandidateForm } from "./manual-candidate-form";
 import { SourceActionButtons } from "./source-action-buttons";
+import { SourceEditor } from "./source-editor";
 
 type BadgeTone = "success" | "danger" | "warning" | "muted" | "accent";
 
@@ -242,20 +242,7 @@ export function AdminDashboard({
         id="sources"
         title="数据源管理"
       >
-        <div className="mb-4 flex flex-col gap-3 rounded-[16px] border border-[var(--line-soft)] bg-white/60 p-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-2 text-sm text-[var(--muted)]">
-            <CheckCircle size={16} className="text-[var(--success)]" weight="bold" />
-            来源状态来自数据库，最近结果见下方列表
-          </div>
-          <button
-            aria-label="新增数据来源"
-            className="focus-ring inline-flex min-h-9 items-center justify-center gap-2 rounded-[14px] border border-[var(--line-soft)] bg-white/85 px-3.5 py-2 text-sm font-semibold text-[var(--foreground)] transition hover:border-[var(--accent)] hover:bg-[var(--accent-soft)] hover:text-[var(--accent-strong)] active:translate-y-px"
-            type="button"
-          >
-            <Plus size={15} weight="bold" />
-            新增来源
-          </button>
-        </div>
+        <SourceEditor sources={sources} />
         <TableFrame>
           <table className="min-w-[1040px] w-full border-collapse text-left">
             <thead>

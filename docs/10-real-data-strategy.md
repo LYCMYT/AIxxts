@@ -64,6 +64,5 @@
 1. 继续维护 YouTube 默认频道池，优先补团队认可的 AI 公司、研究者和开发者频道；如需全站搜索，再配置 `YOUTUBE_API_KEY`。
 2. 补充中文科技媒体 RSS 和 AI 公司官方博客，提高中文候选覆盖面。
 3. 将 GitHub releases.atom 过渡到正式 GitHub REST collector，补 star/fork/release 热度和 token 限流处理。
-4. 把管理后台的 source 新增/保存表单接入真实 API，减少后续改配置时对脚本的依赖。
-5. 按预算决定 X / Twitter 是否进入 Phase 2。
-6. 对抖音、小红书单独调研人工整理、官方权限或付费数据服务路径。
+4. 按预算决定 X / Twitter 是否进入 Phase 2。
+5. 对抖音、小红书单独调研人工整理、官方权限或付费数据服务路径。

@@ -6,10 +6,14 @@ type BadgeTone = "success" | "danger" | "warning" | "muted" | "accent";
 
 export type AdminSourceRow = {
   canCollect: boolean;
+  configText: string;
   enabled: boolean;
+  fetchIntervalMinutes: number;
   id: string;
   name: string;
+  sourceType: string;
   type: string;
+  rawUrl: string;
   url: string;
   interval: string;
   owner: string;
@@ -203,14 +207,14 @@ function jobLabel(status: string) {
 }
 
 function configString(value: unknown, keys: string[], fallback: string) {
-  if (!value || typeof value !== "object" || Array.isArray(value)) {
+  const config = normalizedConfig(value);
+
+  if (!config) {
     return fallback;
   }
 
-  const record = value as Record<string, unknown>;
-
   for (const key of keys) {
-    const item = record[key];
+    const item = config[key];
 
     if (typeof item === "string" && item.trim()) {
       return item;
@@ -220,19 +224,53 @@ function configString(value: unknown, keys: string[], fallback: string) {
   return fallback;
 }
 
+function normalizedConfig(value: unknown) {
+  if (!value) {
+    return null;
+  }
+
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value) as unknown;
+
+      return parsed && typeof parsed === "object" && !Array.isArray(parsed)
+        ? (parsed as Record<string, unknown>)
+        : null;
+    } catch {
+      return null;
+    }
+  }
+
+  return typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : null;
+}
+
+function configText(value: unknown) {
+  const config = normalizedConfig(value);
+
+  return config ? JSON.stringify(config, null, 2) : "";
+}
+
 function mapSource(source: RawSourceRow, latestJob: RawJobRunRow | null): AdminSourceRow {
   const failed = Boolean(source.lastError ?? latestJob?.errorMessage);
   const running = latestJob?.status === "RUNNING";
   const enabled = rawBoolean(source.enabled);
+  const fetchIntervalMinutes = rawNumber(source.fetchIntervalMinutes);
+  const rawUrl = source.url ?? "";
 
   return {
     canCollect: canCollectSourceType(source.type),
+    configText: configText(source.config),
     enabled,
+    fetchIntervalMinutes,
     id: source.id,
     name: source.name,
+    sourceType: source.type,
     type: sourceTypeLabel(source.type),
-    url: source.url ?? "未配置",
-    interval: enabled ? `${rawNumber(source.fetchIntervalMinutes)} 分钟` : "停用",
+    rawUrl,
+    url: rawUrl || "未配置",
+    interval: enabled ? `${fetchIntervalMinutes} 分钟` : "停用",
     owner: configString(source.config, ["owner", "category", "topic"], "未配置"),
     status: {
       label: enabled ? (running ? "运行中" : failed ? "有错误" : "启用") : "停用",

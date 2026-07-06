@@ -1,4 +1,6 @@
 import {
+  isEnabledOnlyPatch,
+  saveAdminSource,
   sourceActionErrorResponse,
   updateAdminSourceEnabled,
 } from "@/server/admin/source-actions";
@@ -22,11 +24,9 @@ export const dynamic = "force-dynamic";
 export async function PATCH(request: Request, context: SourceRouteContext) {
   try {
     const [{ id }, body] = await Promise.all([context.params, requestJson(request)]);
-    const enabled =
-      body && typeof body === "object" && !Array.isArray(body)
-        ? (body as Record<string, unknown>).enabled
-        : undefined;
-    const result = await updateAdminSourceEnabled(id, enabled);
+    const result = isEnabledOnlyPatch(body)
+      ? await updateAdminSourceEnabled(id, (body as { enabled: unknown }).enabled)
+      : await saveAdminSource(id, body);
 
     return Response.json(result);
   } catch (error) {

@@ -85,12 +85,18 @@ const completedItems: ProgressItem[] = [
       "已补充 MIT Technology Review、VentureBeat AI，以及 vLLM、Transformers、LangChain、llama.cpp 的 GitHub release Atom 信号。",
     status: "done",
   },
+  {
+    title: "source 新增和编辑",
+    description:
+      "管理后台已支持新增和编辑自动采集来源，可维护名称、类型、URL、间隔、启用状态和 JSON config。",
+    status: "done",
+  },
 ];
 
 const nextItems: ProgressItem[] = [
   {
-    title: "补齐 source 保存表单",
-    description: "本轮已接入行级启停和单源重跑；下一步补新增/编辑 source 表单，减少改 seed 脚本的依赖。",
+    title: "GitHub REST collector",
+    description: "当前 GitHub 信号先用 releases.atom；下一步接入 REST Search / Releases，补 star、fork、release 热度和限流处理。",
     status: "next",
   },
   {

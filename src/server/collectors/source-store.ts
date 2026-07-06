@@ -13,6 +13,15 @@ type RawSourceRow = Omit<SourceRow, "config"> & {
   config: string | null;
 };
 
+export type SourceSaveRecord = {
+  config: unknown | null;
+  enabled: boolean;
+  fetchIntervalMinutes: number;
+  name: string;
+  type: CollectableSourceType;
+  url: string | null;
+};
+
 function parseJsonValue(value: unknown) {
   if (typeof value !== "string") {
     return value ?? null;
@@ -106,6 +115,60 @@ export async function setSourceEnabled(sourceId: string, enabled: boolean) {
     UPDATE "Source"
     SET
       "enabled" = ${enabled},
+      "updatedAt" = ${nowIso()}
+    WHERE "id" = ${sourceId}
+  `;
+
+  return updatedCount > 0;
+}
+
+function jsonParameter(value: unknown | null) {
+  return value === null ? null : JSON.stringify(value);
+}
+
+export async function createSourceRecord(input: SourceSaveRecord) {
+  const id = createId();
+  const now = nowIso();
+
+  await prisma.$executeRaw`
+    INSERT INTO "Source" (
+      "id",
+      "name",
+      "type",
+      "url",
+      "config",
+      "enabled",
+      "fetchIntervalMinutes",
+      "createdAt",
+      "updatedAt"
+    )
+    VALUES (
+      ${id},
+      ${input.name},
+      ${input.type},
+      ${input.url},
+      ${jsonParameter(input.config)},
+      ${input.enabled},
+      ${input.fetchIntervalMinutes},
+      ${now},
+      ${now}
+    )
+  `;
+
+  return id;
+}
+
+export async function updateSourceRecord(sourceId: string, input: SourceSaveRecord) {
+  const updatedCount = await prisma.$executeRaw`
+    UPDATE "Source"
+    SET
+      "name" = ${input.name},
+      "type" = ${input.type},
+      "url" = ${input.url},
+      "config" = ${jsonParameter(input.config)},
+      "enabled" = ${input.enabled},
+      "fetchIntervalMinutes" = ${input.fetchIntervalMinutes},
+      "lastError" = NULL,
       "updatedAt" = ${nowIso()}
     WHERE "id" = ${sourceId}
   `;
