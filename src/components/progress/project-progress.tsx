@@ -1,0 +1,287 @@
+import {
+  ArrowRight,
+  CheckCircle,
+  ClockClockwise,
+  Database,
+  ListChecks,
+  PlayCircle,
+  WarningCircle,
+} from "@phosphor-icons/react/dist/ssr";
+import type { AdminDashboardData } from "@/server/admin/queries";
+import type { DigestArchiveData } from "@/server/digests/queries";
+
+type ProgressStatus = "done" | "active" | "next" | "risk";
+
+type ProgressItem = {
+  title: string;
+  description: string;
+  status: ProgressStatus;
+};
+
+type ProjectProgressProps = {
+  adminData: AdminDashboardData | null;
+  archive: DigestArchiveData;
+};
+
+const statusClass: Record<ProgressStatus, string> = {
+  done: "border-transparent bg-[var(--success-soft)] text-[var(--success)]",
+  active: "border-transparent bg-[var(--accent-soft)] text-[var(--accent-strong)]",
+  next: "border-[var(--line-soft)] bg-white/80 text-[var(--muted-strong)]",
+  risk: "border-transparent bg-[var(--warning-soft)] text-[var(--warning)]",
+};
+
+const statusLabel: Record<ProgressStatus, string> = {
+  done: "已完成",
+  active: "进行中",
+  next: "下一步",
+  risk: "待确认",
+};
+
+const completedItems: ProgressItem[] = [
+  {
+    title: "PRD 拆解和技术栈基线",
+    description: "已确定 Next.js App Router、TypeScript、Tailwind CSS、Prisma、SQLite、pnpm、Caddy 自托管路线。",
+    status: "done",
+  },
+  {
+    title: "数据模型和本地数据库",
+    description: "已落地 Source、CandidateItem、DailyDigest、DigestItem、LlmRun、JobRun 等核心表和迁移。",
+    status: "done",
+  },
+  {
+    title: "RSS / 社区采集闭环",
+    description: "已接入 RSS、官方博客、Hacker News、Reddit、YouTube source 配置和采集任务。",
+    status: "done",
+  },
+  {
+    title: "每日精选生成",
+    description: "已实现每日任务入口，未配置 LLM key 时使用确定性 fallback 生成 10 到 20 条草稿。",
+    status: "done",
+  },
+  {
+    title: "前端工作台",
+    description: "已完成今日精选、历史回看、条目详情、管理后台和开发进度页面。",
+    status: "done",
+  },
+  {
+    title: "登录取消",
+    description: "当前阶段已取消页面和 API 登录拦截，保留 auth 基础代码以便未来恢复。",
+    status: "done",
+  },
+];
+
+const nextItems: ProgressItem[] = [
+  {
+    title: "把每日草稿发布到首页",
+    description: "当前首页优先读取已发布日报，下一步需要增加草稿预览或发布按钮，让 2026-07-06 的 20 条结果直接成为首页数据。",
+    status: "active",
+  },
+  {
+    title: "配置真实密钥",
+    description: "补齐 YOUTUBE_API_KEY 和 LLM_API_KEY 后，YouTube 候选和模型评分会从跳过 / fallback 切换到真实流程。",
+    status: "next",
+  },
+  {
+    title: "接入定时任务",
+    description: "用 Windows Task Scheduler 或 WSL cron 调用 pnpm job:collect 和 pnpm job:daily，形成固定每日运行。",
+    status: "next",
+  },
+  {
+    title: "管理后台动作落地",
+    description: "现在按钮和手动候选表单是界面形态，下一步接入保存、重跑、停用 source 的 API。",
+    status: "next",
+  },
+  {
+    title: "Phase 2 平台决策",
+    description: "X 需要预算上限；抖音和小红书需要选择人工整理还是付费数据服务。",
+    status: "risk",
+  },
+];
+
+const commandItems = [
+  {
+    command: "pnpm dev",
+    note: "启动本地网页，当前固定使用 webpack dev server。",
+  },
+  {
+    command: "pnpm seed:sources",
+    note: "写入或更新默认数据源。",
+  },
+  {
+    command: "pnpm job:collect",
+    note: "运行一轮候选内容采集。",
+  },
+  {
+    command: "pnpm job:daily",
+    note: "生成当天每日精选草稿。",
+  },
+];
+
+function StatusPill({ status }: { status: ProgressStatus }) {
+  return (
+    <span
+      className={`inline-flex shrink-0 items-center rounded-[14px] border px-2.5 py-1 text-xs font-semibold ${statusClass[status]}`}
+    >
+      {statusLabel[status]}
+    </span>
+  );
+}
+
+function Metric({
+  label,
+  value,
+  icon: Icon,
+}: {
+  label: string;
+  value: string;
+  icon: typeof Database;
+}) {
+  return (
+    <div className="rounded-[18px] border border-[var(--line-soft)] bg-white/80 px-4 py-3 shadow-[0_14px_36px_rgba(15,23,42,0.045),inset_0_1px_0_rgba(255,255,255,0.72)]">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-sm text-[var(--muted)]">{label}</p>
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[14px] bg-[var(--accent-soft)] text-[var(--accent-strong)]">
+          <Icon size={17} weight="bold" />
+        </span>
+      </div>
+      <p className="mt-2 text-2xl font-semibold tracking-normal">{value}</p>
+    </div>
+  );
+}
+
+function ProgressList({ items }: { items: ProgressItem[] }) {
+  return (
+    <div className="overflow-hidden rounded-[18px] border border-[var(--line-soft)] bg-[var(--surface-glass)] shadow-[0_18px_50px_rgba(15,23,42,0.05)] backdrop-blur">
+      {items.map((item) => (
+        <div
+          className="grid gap-3 border-b border-[var(--line-soft)] p-4 transition last:border-b-0 hover:bg-white/70 sm:grid-cols-[1fr_auto] sm:items-start"
+          key={item.title}
+        >
+          <div className="grid min-w-0 gap-1">
+            <h3 className="text-sm font-semibold text-[var(--foreground)]">{item.title}</h3>
+            <p className="text-sm leading-6 text-[var(--muted)]">{item.description}</p>
+          </div>
+          <StatusPill status={item.status} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function latestDigestLabel(archive: DigestArchiveData) {
+  const latest = archive.digests[0];
+
+  if (!latest) {
+    return "暂无";
+  }
+
+  return `${latest.date}，${latest.selectedCount} 条`;
+}
+
+function latestJobLabel(archive: DigestArchiveData) {
+  const latest = archive.jobRuns[0];
+
+  if (!latest) {
+    return "暂无";
+  }
+
+  return `${latest.statusLabel}，${latest.finishedAt}`;
+}
+
+export function ProjectProgress({ adminData, archive }: ProjectProgressProps) {
+  const summary = adminData?.summary;
+  const enabledSources = summary ? `${summary.enabledSources} / ${summary.totalSources}` : "暂无";
+  const todayCandidates = summary ? `${summary.todayCandidates} 条` : "暂无";
+  const pendingErrors = summary ? `${summary.pendingErrors} 条` : "暂无";
+
+  return (
+    <main className="min-h-[100dvh] bg-[linear-gradient(180deg,#f7f8fb_0%,#ffffff_42%,#f7f8fb_100%)] px-4 py-6 sm:px-6 lg:px-8">
+      <div className="mx-auto flex w-full max-w-[1180px] flex-col gap-5">
+      <header className="rounded-[18px] border border-[var(--line-soft)] bg-[var(--surface-glass)] p-4 shadow-[0_20px_60px_rgba(15,23,42,0.06)] backdrop-blur sm:p-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div className="grid min-w-0 gap-2">
+            <p className="text-sm font-medium text-[var(--accent-strong)]">开发进度</p>
+            <h1 className="text-2xl font-semibold tracking-normal sm:text-3xl">
+              当前做了什么，下一步做什么
+            </h1>
+            <p className="max-w-3xl text-sm leading-6 text-[var(--muted)]">
+              这个页面用于把开发状态放到产品里直接查看。当前版本取消登录拦截，团队打开网页即可看到 MVP 的运行状态和下一批工作。
+            </p>
+          </div>
+          <a
+            aria-label="查看管理后台"
+            className="focus-ring inline-flex min-h-10 items-center justify-center gap-2 rounded-[14px] bg-[var(--accent)] px-3.5 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(0,113,227,0.18)] transition hover:bg-[var(--accent-strong)] active:translate-y-px"
+            href="/admin"
+          >
+            查看管理后台
+            <ArrowRight size={16} weight="bold" />
+          </a>
+        </div>
+      </header>
+
+      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4" aria-label="当前运行指标">
+        <Metric icon={Database} label="启用数据源" value={enabledSources} />
+        <Metric icon={ListChecks} label="24 小时候选" value={todayCandidates} />
+        <Metric icon={CheckCircle} label="最近日报" value={latestDigestLabel(archive)} />
+        <Metric icon={WarningCircle} label="历史失败任务" value={pendingErrors} />
+      </section>
+
+      <section className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
+        <div className="grid gap-3">
+          <div className="flex items-center justify-between gap-3 px-1">
+            <h2 className="text-base font-semibold">已完成</h2>
+            <span className="rounded-[14px] border border-[var(--line-soft)] bg-white/75 px-2.5 py-1 text-xs font-semibold text-[var(--muted-strong)]">
+              {completedItems.length} 项
+            </span>
+          </div>
+          <ProgressList items={completedItems} />
+        </div>
+
+        <div className="grid content-start gap-3">
+          <div className="flex items-center justify-between gap-3 px-1">
+            <h2 className="text-base font-semibold">下一步</h2>
+            <span className="rounded-[14px] border border-[var(--line-soft)] bg-white/75 px-2.5 py-1 text-xs font-semibold text-[var(--muted-strong)]">
+              {nextItems.length} 项
+            </span>
+          </div>
+          <ProgressList items={nextItems} />
+        </div>
+      </section>
+
+      <section className="grid gap-4 rounded-[18px] border border-[var(--line-soft)] bg-[var(--surface-glass)] p-4 shadow-[0_18px_50px_rgba(15,23,42,0.05)] backdrop-blur sm:p-5">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="grid min-w-0 gap-1">
+            <h2 className="text-base font-semibold">开发运行方式</h2>
+            <p className="text-sm leading-6 text-[var(--muted)]">
+              这些命令已经写入 package scripts。当前最新任务状态：{latestJobLabel(archive)}。
+            </p>
+          </div>
+          <span className="inline-flex w-fit items-center gap-2 rounded-[14px] border border-transparent bg-[var(--accent-soft)] px-2.5 py-1 text-xs font-semibold text-[var(--accent-strong)]">
+            <ClockClockwise size={14} weight="bold" />
+            本地开发可用
+          </span>
+        </div>
+
+        <div className="grid gap-2 sm:grid-cols-2">
+          {commandItems.map((item) => (
+            <div
+              className="grid gap-1 rounded-[16px] border border-[var(--line-soft)] bg-white/75 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.72)]"
+              key={item.command}
+            >
+              <code className="text-sm font-semibold text-[var(--foreground)]">{item.command}</code>
+              <p className="text-sm leading-6 text-[var(--muted)]">{item.note}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex items-start gap-3 rounded-[16px] border border-transparent bg-[var(--warning-soft)] p-3 text-sm leading-6 text-[var(--warning)]">
+          <PlayCircle className="mt-1 shrink-0" size={17} weight="bold" />
+          <p>
+            下一次开发优先处理“草稿发布到首页”和“管理后台动作 API”，这样团队可以不看命令行也能完成采集、生成和发布。
+          </p>
+        </div>
+      </section>
+      </div>
+    </main>
+  );
+}

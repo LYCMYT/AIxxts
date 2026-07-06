@@ -1,0 +1,51 @@
+{
+  "name": "ai-industry-intel",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@11.7.0",
+  "scripts": {
+    "dev": "next dev -H 127.0.0.1",
+    "build": "next build",
+    "start": "next start -H 127.0.0.1",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "check:env": "tsx scripts/check-env.ts",
+    "db:prepare": "tsx scripts/ensure-sqlite.ts",
+    "db:generate": "prisma generate",
+    "predb:migrate": "pnpm db:prepare",
+    "db:migrate": "prisma migrate dev",
+    "db:studio": "prisma studio",
+    "seed:admin": "tsx scripts/seed-admin.ts",
+    "seed:sources": "tsx scripts/seed-sources.ts",
+    "job:collect": "tsx scripts/run-collect.ts",
+    "job:daily": "tsx scripts/run-daily.ts"
+  },
+  "dependencies": {
+    "@next/env": "latest",
+    "@phosphor-icons/react": "^2.1.10",
+    "@prisma/adapter-better-sqlite3": "latest",
+    "@prisma/client": "latest",
+    "better-sqlite3": "latest",
+    "dotenv": "latest",
+    "googleapis": "latest",
+    "next": "latest",
+    "openai": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "rss-parser": "latest",
+    "zod": "latest"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "latest",
+    "@types/better-sqlite3": "latest",
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "eslint": "^9.39.4",
+    "eslint-config-next": "latest",
+    "prisma": "latest",
+    "tailwindcss": "latest",
+    "tsx": "latest",
+    "typescript": "latest"
+  }
+}
