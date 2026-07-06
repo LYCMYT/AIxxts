@@ -2,10 +2,11 @@ import { randomUUID } from "node:crypto";
 
 import { prisma } from "@/server/db/prisma";
 
-import type {
-  CollectableSourceType,
-  JobRunStatus,
-  SourceRow,
+import {
+  COLLECTABLE_SOURCE_TYPES,
+  type CollectableSourceType,
+  type JobRunStatus,
+  type SourceRow,
 } from "./types";
 
 type RawSourceRow = Omit<SourceRow, "config"> & {
@@ -66,6 +67,50 @@ export async function findEnabledSources(types: readonly CollectableSourceType[]
     ...row,
     config: parseJsonValue(row.config),
   }));
+}
+
+export async function findCollectableSourceById(sourceId: string) {
+  const placeholders = COLLECTABLE_SOURCE_TYPES.map(() => "?").join(", ");
+  const rows = await prisma.$queryRawUnsafe<RawSourceRow[]>(
+    `
+      SELECT
+        "id",
+        "name",
+        "type",
+        "url",
+        "config",
+        "enabled",
+        "fetchIntervalMinutes",
+        "lastFetchedAt",
+        "lastError"
+      FROM "Source"
+      WHERE "id" = ?
+        AND "type" IN (${placeholders})
+      LIMIT 1
+    `,
+    sourceId,
+    ...COLLECTABLE_SOURCE_TYPES,
+  );
+  const row = rows[0];
+
+  return row
+    ? {
+        ...row,
+        config: parseJsonValue(row.config),
+      }
+    : null;
+}
+
+export async function setSourceEnabled(sourceId: string, enabled: boolean) {
+  const updatedCount = await prisma.$executeRaw`
+    UPDATE "Source"
+    SET
+      "enabled" = ${enabled},
+      "updatedAt" = ${nowIso()}
+    WHERE "id" = ${sourceId}
+  `;
+
+  return updatedCount > 0;
 }
 
 export async function createJobRun(sourceId: string, jobType: string, metadata?: unknown) {

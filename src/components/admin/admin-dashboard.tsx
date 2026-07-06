@@ -13,6 +13,7 @@ import type { AdminDashboardData } from "@/server/admin/queries";
 import { DigestPublishButton } from "./digest-publish-button";
 import { JobActionButtons } from "./job-action-buttons";
 import { ManualCandidateForm } from "./manual-candidate-form";
+import { SourceActionButtons } from "./source-action-buttons";
 
 type BadgeTone = "success" | "danger" | "warning" | "muted" | "accent";
 
@@ -256,7 +257,7 @@ export function AdminDashboard({
           </button>
         </div>
         <TableFrame>
-          <table className="min-w-[860px] w-full border-collapse text-left">
+          <table className="min-w-[1040px] w-full border-collapse text-left">
             <thead>
               <tr>
                 <TableHead>来源名称</TableHead>
@@ -266,6 +267,7 @@ export function AdminDashboard({
                 <TableHead>负责人</TableHead>
                 <TableHead>状态</TableHead>
                 <TableHead>最近结果</TableHead>
+                <TableHead>操作</TableHead>
               </tr>
             </thead>
             <tbody>
@@ -283,10 +285,17 @@ export function AdminDashboard({
                       <StatusBadge label={source.status.label} tone={source.status.tone} />
                     </TableCell>
                     <TableCell>{source.lastRun}</TableCell>
+                    <TableCell>
+                      <SourceActionButtons
+                        canCollect={source.canCollect}
+                        enabled={source.enabled}
+                        sourceId={source.id}
+                      />
+                    </TableCell>
                   </tr>
                 ))
               ) : (
-                <EmptyTableRow colSpan={7}>暂无数据源记录。请先执行 pnpm seed:sources 或在后续管理功能中新增来源。</EmptyTableRow>
+                <EmptyTableRow colSpan={8}>暂无数据源记录。请先执行 pnpm seed:sources 或在后续管理功能中新增来源。</EmptyTableRow>
               )}
             </tbody>
           </table>

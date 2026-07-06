@@ -1,0 +1,52 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+
+import * as collectRoute from "./[id]/collect/route";
+import * as sourceRoute from "./[id]/route";
+
+test("admin source routes expose PATCH and POST handlers", () => {
+  assert.equal(typeof sourceRoute.PATCH, "function");
+  assert.equal(typeof collectRoute.POST, "function");
+});
+
+test("admin source PATCH rejects invalid JSON", async () => {
+  const response = await sourceRoute.PATCH(
+    new Request("http://localhost/api/admin/sources/source-1", {
+      body: "{",
+      method: "PATCH",
+    }),
+    {
+      params: Promise.resolve({
+        id: "source-1",
+      }),
+    },
+  );
+  const body = await response.json();
+
+  assert.equal(response.status, 400);
+  assert.deepEqual(body, {
+    error: "request body must be valid JSON.",
+  });
+});
+
+test("admin source PATCH rejects invalid enabled values", async () => {
+  const response = await sourceRoute.PATCH(
+    new Request("http://localhost/api/admin/sources/source-1", {
+      body: JSON.stringify({
+        enabled: "true",
+      }),
+      method: "PATCH",
+    }),
+    {
+      params: Promise.resolve({
+        id: "source-1",
+      }),
+    },
+  );
+  const body = await response.json();
+
+  assert.equal(response.status, 400);
+  assert.deepEqual(body, {
+    error: "enabled must be a boolean.",
+  });
+});

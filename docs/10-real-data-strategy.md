@@ -18,12 +18,12 @@
 | 来源 | 接入方式 | 当前状态 | 说明 |
 |---|---|---|---|
 | AI 公司官方博客 | RSS/Atom | 已接入 | OpenAI、Google AI、Hugging Face 等可按源持续扩展 |
-| 科技媒体 AI 栏目 | RSS/Atom | 已接入 | TechCrunch AI 已接入，后续可补机器之心、量子位、MIT Technology Review 等可用 RSS |
+| 科技媒体 AI 栏目 | RSS/Atom | 已接入 | TechCrunch AI、MIT Technology Review AI、VentureBeat AI 已接入，后续可补机器之心、量子位等可用 RSS |
 | Hacker News | HN RSS 或官方 Firebase API | 已接入 RSS | 适合开发者社区热度信号 |
 | Reddit | RSS 或 Data API | 已接入 subreddit RSS | 先使用公开 RSS，若要更稳定的搜索和互动指标再申请 Data API |
 | YouTube | 频道 RSS fallback + YouTube Data API `search.list` | 已接入 | 无 key 时采集默认 AI 频道池的真实 RSS；配置 `YOUTUBE_API_KEY` 后可升级为全站关键词搜索 |
 | arXiv | 官方 RSS/API | 已加入默认来源 | `cs.AI`、`cs.CL`、`cs.LG` 作为无 key 的研究动态补充 |
-| GitHub | REST Search API | 待做 | 可监测 AI repo、agent 框架、LLM 工具的 star/update/release 信号 |
+| GitHub | releases.atom + REST Search API | 部分接入 | vLLM、Transformers、LangChain、llama.cpp release Atom 已作为 RSS 接入；REST 搜索、star/fork 热度和 token 限流处理后续单独做 |
 
 参考资料：
 
@@ -62,7 +62,8 @@
 ## 下一步开发顺序
 
 1. 继续维护 YouTube 默认频道池，优先补团队认可的 AI 公司、研究者和开发者频道；如需全站搜索，再配置 `YOUTUBE_API_KEY`。
-2. 补充中文科技媒体 RSS、AI 公司官方博客和 GitHub repo / release 信号，提高候选覆盖面。
-3. 把管理后台的 source 保存、启停、重跑动作接入真实 API，减少后续改配置时对脚本的依赖。
-4. 按预算决定 X / Twitter 是否进入 Phase 2。
-5. 对抖音、小红书单独调研人工整理、官方权限或付费数据服务路径。
+2. 补充中文科技媒体 RSS 和 AI 公司官方博客，提高中文候选覆盖面。
+3. 将 GitHub releases.atom 过渡到正式 GitHub REST collector，补 star/fork/release 热度和 token 限流处理。
+4. 把管理后台的 source 新增/保存表单接入真实 API，减少后续改配置时对脚本的依赖。
+5. 按预算决定 X / Twitter 是否进入 Phase 2。
+6. 对抖音、小红书单独调研人工整理、官方权限或付费数据服务路径。

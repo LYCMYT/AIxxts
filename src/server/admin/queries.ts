@@ -1,8 +1,12 @@
+import { COLLECTABLE_SOURCE_TYPES } from "@/server/collectors/types";
+
 type PrismaClientLike = Awaited<typeof import("@/server/db/prisma")>["prisma"];
 
 type BadgeTone = "success" | "danger" | "warning" | "muted" | "accent";
 
 export type AdminSourceRow = {
+  canCollect: boolean;
+  enabled: boolean;
   id: string;
   name: string;
   type: string;
@@ -165,6 +169,12 @@ function sourceTypeLabel(type: string) {
   return sourceTypeLabels[type] ?? type;
 }
 
+function canCollectSourceType(type: string) {
+  return COLLECTABLE_SOURCE_TYPES.includes(
+    type as (typeof COLLECTABLE_SOURCE_TYPES)[number],
+  );
+}
+
 function jobTone(status: string): BadgeTone {
   if (status === "SUCCESS") {
     return "success";
@@ -216,6 +226,8 @@ function mapSource(source: RawSourceRow, latestJob: RawJobRunRow | null): AdminS
   const enabled = rawBoolean(source.enabled);
 
   return {
+    canCollect: canCollectSourceType(source.type),
+    enabled,
     id: source.id,
     name: source.name,
     type: sourceTypeLabel(source.type),

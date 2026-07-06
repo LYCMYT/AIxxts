@@ -79,12 +79,18 @@ const completedItems: ProgressItem[] = [
       "LLM key 已接入 DeepSeek；YouTube 无 key 时走频道 RSS 真实视频。Windows 计划任务已注册：采集每 30 分钟一次，每日精选 08:00 生成。",
     status: "done",
   },
+  {
+    title: "默认数据源池扩展",
+    description:
+      "已补充 MIT Technology Review、VentureBeat AI，以及 vLLM、Transformers、LangChain、llama.cpp 的 GitHub release Atom 信号。",
+    status: "done",
+  },
 ];
 
 const nextItems: ProgressItem[] = [
   {
-    title: "扩展默认数据源池",
-    description: "继续补充 YouTube AI 频道、中文科技媒体 RSS、GitHub repo / release 信号，提高候选池覆盖面。",
+    title: "补齐 source 保存表单",
+    description: "本轮已接入行级启停和单源重跑；下一步补新增/编辑 source 表单，减少改 seed 脚本的依赖。",
     status: "next",
   },
   {

@@ -52,6 +52,26 @@ const seedSources: SeedSource[] = [
     fetchIntervalMinutes: 120,
   },
   {
+    name: "MIT Technology Review AI",
+    type: "RSS",
+    url: "https://www.technologyreview.com/topic/artificial-intelligence/feed/",
+    config: {
+      category: "media",
+      topic: "AI",
+    },
+    fetchIntervalMinutes: 120,
+  },
+  {
+    name: "VentureBeat AI",
+    type: "RSS",
+    url: "https://venturebeat.com/category/ai/feed/",
+    config: {
+      category: "media",
+      topic: "AI",
+    },
+    fetchIntervalMinutes: 120,
+  },
+  {
     name: "arXiv cs.AI",
     type: "RSS",
     url: "https://rss.arxiv.org/rss/cs.AI",
@@ -80,6 +100,46 @@ const seedSources: SeedSource[] = [
     type: "REDDIT",
     url: "https://www.reddit.com/r/LocalLLaMA/.rss",
     fetchIntervalMinutes: 60,
+  },
+  {
+    name: "GitHub vLLM Releases",
+    type: "RSS",
+    url: "https://github.com/vllm-project/vllm/releases.atom",
+    config: {
+      category: "github-release",
+      owner: "vllm-project/vllm",
+    },
+    fetchIntervalMinutes: 360,
+  },
+  {
+    name: "GitHub Transformers Releases",
+    type: "RSS",
+    url: "https://github.com/huggingface/transformers/releases.atom",
+    config: {
+      category: "github-release",
+      owner: "huggingface/transformers",
+    },
+    fetchIntervalMinutes: 360,
+  },
+  {
+    name: "GitHub LangChain Releases",
+    type: "RSS",
+    url: "https://github.com/langchain-ai/langchain/releases.atom",
+    config: {
+      category: "github-release",
+      owner: "langchain-ai/langchain",
+    },
+    fetchIntervalMinutes: 360,
+  },
+  {
+    name: "GitHub llama.cpp Releases",
+    type: "RSS",
+    url: "https://github.com/ggml-org/llama.cpp/releases.atom",
+    config: {
+      category: "github-release",
+      owner: "ggml-org/llama.cpp",
+    },
+    fetchIntervalMinutes: 360,
   },
   {
     name: "YouTube OpenAI",
