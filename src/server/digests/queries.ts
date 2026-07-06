@@ -1,3 +1,5 @@
+import { resolveCandidateDetailText } from "@/server/translation/candidate-text";
+
 type PrismaClientLike = Awaited<typeof import("@/server/db/prisma")>["prisma"];
 
 export type DigestSourceType =
@@ -85,6 +87,7 @@ export type DigestArchiveData = {
 export type ItemDetailData = {
   id: string;
   title: string;
+  originalTitle: string;
   source: string;
   sourceType: string;
   sourceUrl: string;
@@ -95,6 +98,9 @@ export type ItemDetailData = {
   digestRank: number;
   author: string;
   originalSummary: string;
+  translatedSummary: string;
+  translatedContent: string | null;
+  translationStatus: "ready" | "missing";
   selectionReason: string;
   aiInterpretation: string;
   llmSignals: string[];
@@ -805,10 +811,21 @@ export async function getItemDetailById(id: string): Promise<ItemDetailData | nu
       ...(item.duplicateOf ? [relatedSourceFromCandidate(item.duplicateOf)] : []),
       ...item.duplicates.map(relatedSourceFromCandidate),
     ];
+    const detailText = resolveCandidateDetailText({
+      title: item.title,
+      summary: item.summary,
+      contentText: item.contentText,
+      translatedTitle: item.translatedTitle,
+      translatedSummary: item.translatedSummary,
+      translatedContent: item.translatedContent,
+      translatedAt: item.translatedAt,
+      digestInterpretation: publishedDigestItem?.interpretation ?? null,
+    });
 
     return {
       id: item.id,
-      title: item.title,
+      title: detailText.displayTitle,
+      originalTitle: detailText.originalTitle,
       source: item.source.name,
       sourceType: mapSourceType(item.source.type),
       sourceUrl: item.source.url ?? item.canonicalUrl,
@@ -818,11 +835,13 @@ export async function getItemDetailById(id: string): Promise<ItemDetailData | nu
       digestDate: publishedDigestItem?.digest.digestDate ?? "未入选日报",
       digestRank: publishedDigestItem?.rank ?? 0,
       author: item.author ?? "未记录作者",
-      originalSummary: item.summary ?? item.contentText ?? "暂无原文摘要。",
+      originalSummary: detailText.originalSummary,
+      translatedSummary: detailText.chineseSummary,
+      translatedContent: detailText.chineseContent,
+      translationStatus: detailText.translationStatus,
       selectionReason:
-        publishedDigestItem?.interpretation ?? item.summary ?? "该候选内容尚未进入已发布日报。",
-      aiInterpretation:
-        publishedDigestItem?.interpretation ?? item.summary ?? "当前条目暂无日报解读。",
+        publishedDigestItem?.interpretation ?? detailText.chineseSummary ?? "该候选内容尚未进入已发布日报。",
+      aiInterpretation: detailText.chineseSummary,
       llmSignals: digestSignals.length > 0 ? digestSignals : ["暂无日报信号"],
       interactions: [
         {

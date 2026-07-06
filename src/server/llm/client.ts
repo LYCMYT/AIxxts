@@ -8,6 +8,8 @@ import type {
   RankingCandidate,
   RankingLimits,
 } from "@/server/ranking/types";
+import { buildCandidateTranslationPrompt } from "@/server/translation/candidate-text";
+import type { CandidateTranslationPromptInput } from "@/server/translation/candidate-text";
 
 const llmRankingSchema = z.object({
   digestTitle: z.string().min(1).max(120),
@@ -26,8 +28,24 @@ const llmRankingSchema = z.object({
     .max(20),
 });
 
+const candidateTranslationSchema = z.object({
+  translatedTitle: z.string().min(1).max(500),
+  translatedSummary: z.string().min(1).max(2_000),
+  translatedContent: z.string().min(1).max(24_000).nullable().optional(),
+});
+
 export type LlmRankingResult = {
   ranking: DigestRankingResult;
+  rawJson: Prisma.InputJsonValue;
+  promptHash: string;
+  inputTokens?: number;
+  outputTokens?: number;
+};
+
+export type LlmCandidateTranslationResult = {
+  translatedTitle: string;
+  translatedSummary: string;
+  translatedContent: string | null;
   rawJson: Prisma.InputJsonValue;
   promptHash: string;
   inputTokens?: number;
@@ -72,6 +90,51 @@ export async function rankCandidatesWithLlm(
 
   return {
     ranking,
+    rawJson,
+    promptHash: hashPrompt(prompt.system, prompt.user),
+    inputTokens: completion.usage?.prompt_tokens,
+    outputTokens: completion.usage?.completion_tokens,
+  };
+}
+
+export async function translateCandidateWithLlm(
+  input: CandidateTranslationPromptInput,
+): Promise<LlmCandidateTranslationResult> {
+  const prompt = buildCandidateTranslationPrompt(input);
+  const client = new OpenAI({
+    apiKey: env.LLM_API_KEY,
+    baseURL: env.LLM_BASE_URL,
+  });
+
+  const completion = await client.chat.completions.create({
+    model: env.LLM_MODEL,
+    temperature: 0.1,
+    response_format: { type: "json_object" },
+    messages: [
+      {
+        role: "system",
+        content: prompt.system,
+      },
+      {
+        role: "user",
+        content: prompt.user,
+      },
+    ],
+  });
+
+  const content = completion.choices[0]?.message?.content;
+
+  if (!content) {
+    throw new Error("LLM translation response is empty.");
+  }
+
+  const rawJson = parseJsonObject(content);
+  const parsed = candidateTranslationSchema.parse(rawJson);
+
+  return {
+    translatedTitle: parsed.translatedTitle,
+    translatedSummary: parsed.translatedSummary,
+    translatedContent: parsed.translatedContent?.trim() || null,
     rawJson,
     promptHash: hashPrompt(prompt.system, prompt.user),
     inputTokens: completion.usage?.prompt_tokens,

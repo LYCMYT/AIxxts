@@ -75,26 +75,30 @@ model Source {
 }
 
 model CandidateItem {
-  id            String           @id @default(cuid())
-  sourceId      String
-  source        Source           @relation(fields: [sourceId], references: [id], onDelete: Cascade)
-  externalId    String?
-  canonicalUrl  String           @unique
-  title         String
-  summary       String?
-  contentText   String?
-  author        String?
-  publishedAt   DateTime
-  collectedAt   DateTime         @default(now())
-  hotScore      Float?
-  influenceScore Float?
-  rawEngagement Json?
-  rawPayload    Json?
-  status        CandidateStatus  @default(NEW)
-  duplicateOfId String?
-  duplicateOf   CandidateItem?   @relation("DuplicateItems", fields: [duplicateOfId], references: [id])
-  duplicates    CandidateItem[]  @relation("DuplicateItems")
-  digestItems   DigestItem[]
+  id                String          @id @default(cuid())
+  sourceId          String
+  source            Source          @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  externalId        String?
+  canonicalUrl      String          @unique
+  title             String
+  summary           String?
+  contentText       String?
+  translatedTitle   String?
+  translatedSummary String?
+  translatedContent String?
+  translatedAt      DateTime?
+  author            String?
+  publishedAt       DateTime
+  collectedAt       DateTime        @default(now())
+  hotScore          Float?
+  influenceScore    Float?
+  rawEngagement     Json?
+  rawPayload        Json?
+  status            CandidateStatus @default(NEW)
+  duplicateOfId     String?
+  duplicateOf       CandidateItem?  @relation("DuplicateItems", fields: [duplicateOfId], references: [id])
+  duplicates        CandidateItem[] @relation("DuplicateItems")
+  digestItems       DigestItem[]
 
   @@index([publishedAt])
   @@index([sourceId, publishedAt])

@@ -18,7 +18,8 @@
     "seed:admin": "tsx scripts/seed-admin.ts",
     "seed:sources": "tsx scripts/seed-sources.ts",
     "job:collect": "tsx scripts/run-collect.ts",
-    "job:daily": "tsx scripts/run-daily.ts"
+    "job:daily": "tsx scripts/run-daily.ts",
+    "job:translate": "tsx scripts/run-translate.ts"
   },
   "dependencies": {
     "@next/env": "latest",

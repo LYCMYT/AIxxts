@@ -133,7 +133,8 @@ export function ItemDetailPage({
 
   const digestHref = item.digestRank > 0 ? `/digests/${item.digestDate}` : "/digests";
   const digestBackLabel = item.digestRank > 0 ? "返回当日精选" : "返回历史回看";
-  const detailLead = item.aiInterpretation || item.selectionReason || item.originalSummary;
+  const detailLead = item.translatedSummary || item.aiInterpretation || item.selectionReason;
+  const showOriginalTitle = item.originalTitle !== item.title;
 
   return (
     <main className="mx-auto grid w-full max-w-[1160px] gap-6 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
@@ -173,6 +174,9 @@ export function ItemDetailPage({
               <span className="rounded-full border border-[var(--line-soft)] bg-[var(--surface-soft)] px-2.5 py-1 font-medium text-[var(--muted-strong)]">
                 站内中文详情
               </span>
+              <span className="rounded-full border border-[var(--line-soft)] bg-[var(--surface-soft)] px-2.5 py-1 font-medium text-[var(--muted-strong)]">
+                {item.translationStatus === "ready" ? "已缓存中文翻译" : "待生成完整翻译"}
+              </span>
               <span>{item.source}</span>
               <span>{item.author}</span>
             </div>
@@ -182,6 +186,11 @@ export function ItemDetailPage({
             <p className="max-w-3xl break-words text-sm leading-6 text-[var(--muted)] [overflow-wrap:anywhere]">
               {detailLead}
             </p>
+            {showOriginalTitle ? (
+              <p className="max-w-3xl break-words text-xs leading-5 text-[var(--muted)] [overflow-wrap:anywhere]">
+                原文标题：{item.originalTitle}
+              </p>
+            ) : null}
           </div>
 
           <div className="grid gap-2">
@@ -214,7 +223,7 @@ export function ItemDetailPage({
               中文详情
             </h2>
             <p className="mt-3 break-words text-sm leading-7 text-[var(--muted-strong)] [overflow-wrap:anywhere]">
-              {detailLead}
+              {item.translatedSummary}
             </p>
             <div className="mt-4 rounded-[var(--radius-sm)] border border-[var(--line-soft)] bg-[var(--surface-soft)] p-3">
               <p className="text-xs font-semibold text-[var(--foreground)]">入选原因</p>
@@ -233,6 +242,15 @@ export function ItemDetailPage({
               ))}
             </div>
           </section>
+
+          {item.translatedContent ? (
+            <section className="rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)] p-5 shadow-[var(--shadow-subtle)]">
+              <h2 className="text-base font-semibold">中文正文</h2>
+              <p className="mt-3 whitespace-pre-wrap break-words text-sm leading-7 text-[var(--muted-strong)] [overflow-wrap:anywhere]">
+                {item.translatedContent}
+              </p>
+            </section>
+          ) : null}
 
           <section className="rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)] p-5 shadow-[var(--shadow-subtle)]">
             <h2 className="text-base font-semibold">重复来源 / 补充来源</h2>
