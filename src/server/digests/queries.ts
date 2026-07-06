@@ -6,6 +6,7 @@ export type DigestSourceType =
   | "HN"
   | "Reddit"
   | "YouTube"
+  | "GitHub"
   | "X"
   | "Douyin"
   | "Xiaohongshu"
@@ -139,6 +140,7 @@ const sourceTypeMap: Record<string, DigestSourceType> = {
   HACKER_NEWS: "HN",
   REDDIT: "Reddit",
   YOUTUBE: "YouTube",
+  GITHUB: "GitHub",
   X: "X",
   DOUYIN: "Douyin",
   XIAOHONGSHU: "Xiaohongshu",
@@ -312,6 +314,43 @@ function readableValue(value: unknown): string {
   return JSON.stringify(value);
 }
 
+function compactText(value: unknown, maxLength = 140) {
+  const text = readableValue(value).replace(/\s+/g, " ").trim();
+
+  if (!text) {
+    return "";
+  }
+
+  return text.length <= maxLength ? text : `${text.slice(0, maxLength - 1)}...`;
+}
+
+function recordSignalParts(record: Record<string, unknown>) {
+  const parts = [
+    typeof record.impactReason === "string" && record.impactReason.trim()
+      ? `影响力：${compactText(record.impactReason)}`
+      : "",
+    typeof record.heatReason === "string" && record.heatReason.trim()
+      ? `热度：${compactText(record.heatReason)}`
+      : "",
+  ].filter(Boolean);
+
+  if (parts.length > 0) {
+    return parts;
+  }
+
+  const engagementParts = [
+    typeof record.stars === "number" ? `${record.stars} stars` : "",
+    typeof record.forks === "number" ? `${record.forks} forks` : "",
+    typeof record.releaseDownloads === "number" ? `${record.releaseDownloads} downloads` : "",
+  ].filter(Boolean);
+
+  if (engagementParts.length > 0) {
+    return [`GitHub 热度：${engagementParts.join("，")}`];
+  }
+
+  return [];
+}
+
 function signalsText(value: unknown, fallback = "暂无结构化信号") {
   if (!value) {
     return fallback;
@@ -331,8 +370,14 @@ function signalsText(value: unknown, fallback = "暂无结构化信号") {
     return fallback;
   }
 
+  const preferredParts = recordSignalParts(record);
+  if (preferredParts.length > 0) {
+    return preferredParts.join("；");
+  }
+
   const text = Object.entries(record)
-    .map(([key, item]) => `${key}: ${readableValue(item)}`)
+    .filter(([key]) => !["method", "model", "sourceType", "publishedAt"].includes(key))
+    .map(([key, item]) => `${key}: ${compactText(item, 80)}`)
     .filter(Boolean)
     .join("，");
 
@@ -358,8 +403,14 @@ function signalTags(value: unknown) {
     return ["暂无结构化信号"];
   }
 
+  const preferredParts = recordSignalParts(record);
+  if (preferredParts.length > 0) {
+    return preferredParts;
+  }
+
   const tags = Object.entries(record)
-    .map(([key, item]) => `${key}: ${readableValue(item)}`)
+    .filter(([key]) => !["method", "model", "sourceType", "publishedAt"].includes(key))
+    .map(([key, item]) => `${key}: ${compactText(item, 80)}`)
     .filter(Boolean);
 
   return tags.length > 0 ? tags : ["暂无结构化信号"];

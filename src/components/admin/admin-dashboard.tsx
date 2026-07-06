@@ -237,7 +237,7 @@ export function AdminDashboard({
       </header>
 
       <SectionHeading
-        description="维护 RSS、官方博客、HN 和 Reddit 等候选来源，控制抓取间隔和启用状态。"
+        description="维护 RSS、官方博客、HN、Reddit、YouTube 和 GitHub 等候选来源，控制抓取间隔和启用状态。"
         icon={Database}
         id="sources"
         title="数据源管理"

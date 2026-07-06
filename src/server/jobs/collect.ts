@@ -1,4 +1,5 @@
 import { collectRssSource } from "@/server/collectors/rss";
+import { collectGitHubSource } from "@/server/collectors/github";
 import {
   createJobRun,
   findEnabledSources,
@@ -40,6 +41,10 @@ async function fetchSource(source: SourceRow): Promise<AdapterFetchResult> {
 
   if (source.type === "YOUTUBE") {
     return collectYouTubeSource(source);
+  }
+
+  if (source.type === "GITHUB") {
+    return collectGitHubSource(source);
   }
 
   return {

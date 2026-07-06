@@ -105,6 +105,7 @@ pnpm dev
 | `LLM_API_KEY` | 是 | LLM API key，不允许提交。 |
 | `LLM_MODEL` | 否 | 每日精选使用的模型名，当前示例为 `deepseek-v4-flash`。 |
 | `YOUTUBE_API_KEY` | 是 | YouTube Data API key，不允许提交。 |
+| `GITHUB_TOKEN` | 否 | GitHub REST collector 可选 token。不配置也能读取公开数据，但速率限制更低。 |
 | `X_API_BEARER_TOKEN` | 是 | 后续 X 接入预留，不允许提交。 |
 | `ADMIN_EMAIL` | 否 | 当前不启用登录，仅作为后续管理员 seed 预留变量。 |
 | `ADMIN_PASSWORD` | 是 | 当前不启用登录，仅作为后续管理员 seed 预留变量。 |
@@ -134,7 +135,7 @@ $env:NODE_ENV = "production"
 pnpm start
 ```
 
-`pnpm job:collect` 和 `pnpm job:daily` 可作为首次部署后的冒烟验证；如果未配置 `YOUTUBE_API_KEY`，YouTube source 会使用默认频道 RSS fallback 采集真实视频，不影响 RSS 类来源采集。若后续重新启用登录，先设置 `ADMIN_EMAIL` 和 `ADMIN_PASSWORD`，再执行 `pnpm seed:admin`。
+`pnpm job:collect` 和 `pnpm job:daily` 可作为首次部署后的冒烟验证；如果未配置 `YOUTUBE_API_KEY`，YouTube source 会使用默认频道 RSS fallback 采集真实视频，不影响 RSS 类来源采集。GitHub REST source 可无 token 读取公开数据，生产环境建议配置 `GITHUB_TOKEN` 降低限流风险。若后续重新启用登录，先设置 `ADMIN_EMAIL` 和 `ADMIN_PASSWORD`，再执行 `pnpm seed:admin`。
 
 ## Caddy 反向代理示例
 
@@ -313,7 +314,7 @@ pnpm build
 敏感信息搜索示例：
 
 ```powershell
-rg -n "sk-|AIza|Bearer [A-Za-z0-9._-]+|LLM_API_KEY=.+|YOUTUBE_API_KEY=.+|X_API_BEARER_TOKEN=.+|SESSION_SECRET=.+|ADMIN_PASSWORD=.+" . --glob "!node_modules/**" --glob "!.git/**" --glob "!.next/**"
+rg -n "sk-|AIza|ghp_[A-Za-z0-9_]+|github_pat_[A-Za-z0-9_]+|Bearer [A-Za-z0-9._-]+|LLM_API_KEY=.+|YOUTUBE_API_KEY=.+|GITHUB_TOKEN=.+|X_API_BEARER_TOKEN=.+|SESSION_SECRET=.+|ADMIN_PASSWORD=.+" . --glob "!node_modules/**" --glob "!.git/**" --glob "!.next/**"
 ```
 
 首次推送示例：

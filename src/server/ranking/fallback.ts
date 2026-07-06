@@ -11,6 +11,7 @@ const sourceTypePriority: Record<SourceType, number> = {
   HACKER_NEWS: 8,
   REDDIT: 7,
   YOUTUBE: 6,
+  GITHUB: 6,
   RSS: 5,
   X: 4,
   MANUAL: 4,

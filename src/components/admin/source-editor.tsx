@@ -30,6 +30,7 @@ const sourceTypeOptions = [
   { label: "Hacker News", value: "HACKER_NEWS" },
   { label: "Reddit", value: "REDDIT" },
   { label: "YouTube", value: "YOUTUBE" },
+  { label: "GitHub", value: "GITHUB" },
 ];
 
 const inputClass =
@@ -272,7 +273,7 @@ export function SourceEditor({ sources }: SourceEditorProps) {
         <input
           className={inputClass}
           onChange={(event) => updateField("url", event.target.value)}
-          placeholder="https://example.com/feed.xml"
+          placeholder="RSS/Atom URL；GitHub search 可留空"
           value={form.url}
         />
       </Field>
@@ -281,7 +282,7 @@ export function SourceEditor({ sources }: SourceEditorProps) {
         <textarea
           className={`${inputClass} min-h-[104px] resize-y font-mono text-xs leading-5`}
           onChange={(event) => updateField("config", event.target.value)}
-          placeholder='{"category":"github-release","owner":"owner/repo"}'
+          placeholder='{"mode":"search","queries":["topic:llm"],"maxResultsPerQuery":10}'
           value={form.config}
         />
       </Field>

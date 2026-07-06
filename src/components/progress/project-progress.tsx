@@ -91,17 +91,18 @@ const completedItems: ProgressItem[] = [
       "管理后台已支持新增和编辑自动采集来源，可维护名称、类型、URL、间隔、启用状态和 JSON config。",
     status: "done",
   },
+  {
+    title: "GitHub REST collector",
+    description:
+      "已接入 GitHub REST repository search / releases，支持 star、fork、release 下载数和限流错误信息，GITHUB_TOKEN 可选。",
+    status: "done",
+  },
 ];
 
 const nextItems: ProgressItem[] = [
   {
-    title: "GitHub REST collector",
-    description: "当前 GitHub 信号先用 releases.atom；下一步接入 REST Search / Releases，补 star、fork、release 热度和限流处理。",
-    status: "next",
-  },
-  {
     title: "管理后台动作落地",
-    description: "现在按钮和手动候选表单是界面形态，下一步接入保存、重跑、停用 source 的 API。",
+    description: "新增、编辑、启停、重跑、全量采集、每日精选、发布草稿和手动候选已接入；下一步补删除、批量操作和确认弹窗。",
     status: "next",
   },
   {

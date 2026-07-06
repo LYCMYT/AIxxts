@@ -26,7 +26,7 @@ export type AdminSourceSaveRecord = {
   fetchIntervalMinutes: number;
   name: string;
   type: CollectableSourceType;
-  url: string;
+  url: string | null;
 };
 
 const defaultDeps: SourceActionDeps = {
@@ -120,6 +120,21 @@ function sourceTypeValue(value: unknown) {
   throw new AdminSourceActionError("type must be a supported collectable source type.", 400);
 }
 
+function sourceUrlValue(body: Record<string, unknown>, type: CollectableSourceType) {
+  const value = body.url;
+  const url = typeof value === "string" ? value.trim() : "";
+
+  if (url) {
+    return url;
+  }
+
+  if (type === "GITHUB" || type === "YOUTUBE") {
+    return null;
+  }
+
+  throw new AdminSourceActionError("url is required.", 400);
+}
+
 function intervalValue(value: unknown) {
   const numberValue = typeof value === "number" ? value : Number(value);
 
@@ -146,7 +161,7 @@ function saveRecordFromBody(bodyValue: unknown): AdminSourceSaveRecord {
   const body = objectBody(bodyValue);
   const name = stringField(body, "name", "name");
   const type = sourceTypeValue(body.type);
-  const url = stringField(body, "url", "url");
+  const url = sourceUrlValue(body, type);
 
   return {
     config: optionalConfig(body.config),

@@ -142,6 +142,37 @@ const seedSources: SeedSource[] = [
     fetchIntervalMinutes: 360,
   },
   {
+    name: "GitHub Core LLM Releases REST",
+    type: "GITHUB",
+    url: null,
+    config: {
+      mode: "releases",
+      repositories: [
+        "vllm-project/vllm",
+        "huggingface/transformers",
+        "langchain-ai/langchain",
+        "ggml-org/llama.cpp",
+      ],
+      maxReleasesPerRepo: 2,
+      includePrereleases: false,
+    },
+    fetchIntervalMinutes: 360,
+  },
+  {
+    name: "GitHub AI Repository Search",
+    type: "GITHUB",
+    url: null,
+    config: {
+      mode: "search",
+      queries: ["topic:llm", "topic:generative-ai", "topic:ai-agent"],
+      sort: "updated",
+      order: "desc",
+      sinceDays: 14,
+      maxResultsPerQuery: 10,
+    },
+    fetchIntervalMinutes: 360,
+  },
+  {
     name: "YouTube OpenAI",
     type: "YOUTUBE",
     url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCXZCJLdBC09xxGZ6gcdrc6A",

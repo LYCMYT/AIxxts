@@ -98,6 +98,7 @@ const sourceTypeLabels: Record<string, string> = {
   HACKER_NEWS: "Hacker News",
   REDDIT: "Reddit",
   YOUTUBE: "YouTube",
+  GITHUB: "GitHub",
   X: "X",
   DOUYIN: "抖音",
   XIAOHONGSHU: "小红书",

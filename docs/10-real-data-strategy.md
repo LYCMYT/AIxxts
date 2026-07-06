@@ -23,7 +23,7 @@
 | Reddit | RSS 或 Data API | 已接入 subreddit RSS | 先使用公开 RSS，若要更稳定的搜索和互动指标再申请 Data API |
 | YouTube | 频道 RSS fallback + YouTube Data API `search.list` | 已接入 | 无 key 时采集默认 AI 频道池的真实 RSS；配置 `YOUTUBE_API_KEY` 后可升级为全站关键词搜索 |
 | arXiv | 官方 RSS/API | 已加入默认来源 | `cs.AI`、`cs.CL`、`cs.LG` 作为无 key 的研究动态补充 |
-| GitHub | releases.atom + REST Search API | 部分接入 | vLLM、Transformers、LangChain、llama.cpp release Atom 已作为 RSS 接入；REST 搜索、star/fork 热度和 token 限流处理后续单独做 |
+| GitHub | releases.atom + REST Search API | 已接入 | 保留 release Atom，同时新增 REST repository search / releases collector，写入 star、fork、release 下载数和限流错误信息 |
 
 参考资料：
 
@@ -63,6 +63,6 @@
 
 1. 继续维护 YouTube 默认频道池，优先补团队认可的 AI 公司、研究者和开发者频道；如需全站搜索，再配置 `YOUTUBE_API_KEY`。
 2. 补充中文科技媒体 RSS 和 AI 公司官方博客，提高中文候选覆盖面。
-3. 将 GitHub releases.atom 过渡到正式 GitHub REST collector，补 star/fork/release 热度和 token 限流处理。
+3. 按团队关注方向继续维护 GitHub REST search query 和核心仓库列表；生产环境建议配置 `GITHUB_TOKEN` 提高速率限制稳定性。
 4. 按预算决定 X / Twitter 是否进入 Phase 2。
 5. 对抖音、小红书单独调研人工整理、官方权限或付费数据服务路径。

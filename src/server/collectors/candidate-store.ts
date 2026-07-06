@@ -71,6 +71,8 @@ export async function upsertCandidateItems(
           "contentText",
           "author",
           "publishedAt",
+          "hotScore",
+          "influenceScore",
           "rawEngagement",
           "rawPayload",
           "status"
@@ -85,6 +87,8 @@ export async function upsertCandidateItems(
           ${item.contentText ?? null},
           ${item.author ?? null},
           ${item.publishedAt.toISOString()},
+          ${item.hotScore ?? null},
+          ${item.influenceScore ?? null},
           ${jsonOrNull(item.rawEngagement)},
           ${jsonOrNull(item.rawPayload)},
           ${"NEW"}

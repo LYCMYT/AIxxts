@@ -8,6 +8,7 @@ export const RSS_LIKE_SOURCE_TYPES = [
 export const COLLECTABLE_SOURCE_TYPES = [
   ...RSS_LIKE_SOURCE_TYPES,
   "YOUTUBE",
+  "GITHUB",
 ] as const;
 
 export type RssLikeSourceType = (typeof RSS_LIKE_SOURCE_TYPES)[number];
@@ -35,6 +36,8 @@ export type CandidateInput = {
   contentText?: string | null;
   author?: string | null;
   publishedAt: Date;
+  hotScore?: number | null;
+  influenceScore?: number | null;
   rawEngagement?: unknown;
   rawPayload?: unknown;
 };

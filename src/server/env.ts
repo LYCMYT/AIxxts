@@ -14,6 +14,7 @@ const envSchema = z.object({
   LLM_API_KEY: z.string().optional(),
   LLM_MODEL: z.string().default("deepseek-v4-flash"),
   YOUTUBE_API_KEY: z.string().optional(),
+  GITHUB_TOKEN: z.string().optional(),
   X_API_BEARER_TOKEN: z.string().optional(),
 });
 

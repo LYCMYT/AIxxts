@@ -6,6 +6,7 @@ const configured = {
   llmModel: env.LLM_MODEL,
   hasLlmKey: Boolean(env.LLM_API_KEY),
   hasYoutubeKey: Boolean(env.YOUTUBE_API_KEY),
+  hasGithubToken: Boolean(env.GITHUB_TOKEN),
 };
 
 console.log(JSON.stringify(configured, null, 2));

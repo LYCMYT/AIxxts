@@ -113,6 +113,53 @@ test("createAdminSource rejects invalid config JSON", async () => {
   );
 });
 
+test("createAdminSource allows config-only GitHub sources", async () => {
+  let savedUrl: string | null | undefined;
+  const result = await createAdminSource(
+    {
+      config: {
+        mode: "search",
+        queries: ["topic:llm"],
+      },
+      enabled: true,
+      fetchIntervalMinutes: 360,
+      name: "GitHub AI Search",
+      type: "GITHUB",
+      url: "",
+    },
+    deps({
+      createSource: async (input) => {
+        savedUrl = input.url;
+        assert.equal(input.type, "GITHUB");
+
+        return "github-source";
+      },
+    }),
+  );
+
+  assert.equal(savedUrl, null);
+  assert.deepEqual(result, {
+    sourceId: "github-source",
+  });
+});
+
+test("createAdminSource still requires URL for RSS sources", async () => {
+  await assert.rejects(
+    () =>
+      createAdminSource(
+        {
+          ...validSaveBody,
+          url: "",
+        },
+        deps(),
+      ),
+    {
+      message: "url is required.",
+      status: 400,
+    },
+  );
+});
+
 test("saveAdminSource updates an existing source", async () => {
   let savedSourceId: string | null = null;
   const result = await saveAdminSource(

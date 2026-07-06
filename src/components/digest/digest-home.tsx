@@ -19,6 +19,7 @@ export type DigestItem = {
     | "HN"
     | "Reddit"
     | "YouTube"
+    | "GitHub"
     | "X"
     | "Douyin"
     | "Xiaohongshu"
@@ -45,6 +46,7 @@ const sourceTypeLabel: Record<DigestItem["sourceType"], string> = {
   HN: "Hacker News",
   Reddit: "Reddit",
   YouTube: "YouTube",
+  GitHub: "GitHub",
   X: "X",
   Douyin: "抖音",
   Xiaohongshu: "小红书",
