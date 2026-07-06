@@ -9,7 +9,9 @@ import {
   ListChecks,
   WarningCircle,
 } from "@phosphor-icons/react/dist/ssr";
-import { getItemDetail, type ItemDetail, type RelatedSource } from "./mock-items";
+import type { ItemDetailData } from "@/server/digests/queries";
+
+type RelatedSource = ItemDetailData["duplicateSources"][number];
 
 function DetailMetric({ label, value, note }: { label: string; value: string; note: string }) {
   return (
@@ -71,14 +73,14 @@ function EmptyItemState({ itemId }: { itemId: string }) {
         <FileText size={26} className="text-[var(--muted)]" />
         <h1 className="mt-3 text-2xl font-semibold">未找到内容详情</h1>
         <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
-          数据库和本地 fallback 数据中都没有 ID 为 {itemId} 的条目。请返回历史页查看已生成日报。
+          数据库中没有 ID 为 {itemId} 的条目。请返回历史页查看已生成日报，或先执行采集和每日精选任务。
         </p>
       </section>
     </main>
   );
 }
 
-function MetadataPanel({ item }: { item: ItemDetail }) {
+function MetadataPanel({ item }: { item: ItemDetailData }) {
   return (
     <section className="rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)] p-4 shadow-[var(--shadow-subtle)]">
       <h2 className="flex items-center gap-2 text-base font-semibold">
@@ -121,13 +123,11 @@ function MetadataPanel({ item }: { item: ItemDetail }) {
 
 export function ItemDetailPage({
   itemId,
-  item: databaseItem,
+  item,
 }: {
   itemId: string;
-  item?: ItemDetail | null;
+  item?: ItemDetailData | null;
 }) {
-  const item = databaseItem ?? getItemDetail(itemId);
-
   if (!item) {
     return <EmptyItemState itemId={itemId} />;
   }
@@ -319,23 +319,6 @@ export function ItemDetailPage({
         </aside>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-2">
-        <article className="rounded-[var(--radius)] border border-dashed border-[var(--line)] bg-[var(--surface)] p-5 shadow-[var(--shadow-subtle)]">
-          <FileText size={22} className="text-[var(--muted)]" />
-          <h2 className="mt-3 text-base font-semibold">空状态静态展示</h2>
-          <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
-            当详情 ID 不存在时，页面显示未找到内容、解释当前状态，并提供返回历史页入口。
-          </p>
-        </article>
-
-        <article className="rounded-[var(--radius)] border border-[var(--danger-soft)] bg-[var(--surface)] p-5 shadow-[var(--shadow-subtle)]">
-          <WarningCircle size={22} className="text-[var(--danger)]" />
-          <h2 className="mt-3 text-base font-semibold">失败状态静态展示</h2>
-          <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
-            当原文解析失败时，详情页仍展示标题、来源、发布时间和已采集摘要，不阻断阅读。
-          </p>
-        </article>
-      </section>
     </main>
   );
 }

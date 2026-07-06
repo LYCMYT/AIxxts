@@ -5,14 +5,12 @@ import {
   CheckCircle,
   CircleNotch,
   Clock,
-  FileText,
   MagnifyingGlass,
   WarningCircle,
 } from "@phosphor-icons/react/dist/ssr";
-import type { DigestJobSummary } from "@/server/digests/queries";
-import { dailyDigests, getLatestSuccessfulDigest, type DigestStatus } from "./mock-digests";
+import type { DailyDigestData, DigestJobSummary, DigestStatusView } from "@/server/digests/queries";
 
-const statusStyles: Record<DigestStatus, string> = {
+const statusStyles: Record<DigestStatusView, string> = {
   success: "border-[var(--success)] bg-[var(--success-soft)] text-[var(--success)]",
   running: "border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent-strong)]",
   failed: "border-[var(--danger)] bg-[var(--danger-soft)] text-[var(--danger)]",
@@ -26,7 +24,7 @@ const statusIcons = {
   empty: Clock,
 };
 
-function StatusBadge({ status, label }: { status: DigestStatus; label: string }) {
+function StatusBadge({ status, label }: { status: DigestStatusView; label: string }) {
   const Icon = statusIcons[status];
 
   return (
@@ -50,14 +48,13 @@ function MetricCard({ label, value, note }: { label: string; value: string; note
 }
 
 type HistoryPageProps = {
-  digests?: typeof dailyDigests;
+  digests?: DailyDigestData[];
   jobRuns?: DigestJobSummary[];
 };
 
-export function HistoryPage({ digests = dailyDigests, jobRuns = [] }: HistoryPageProps = {}) {
-  const sourceDigests = digests.length > 0 ? digests : dailyDigests;
-  const latest =
-    sourceDigests.find((digest) => digest.status === "success") ?? getLatestSuccessfulDigest();
+export function HistoryPage({ digests = [], jobRuns = [] }: HistoryPageProps = {}) {
+  const sourceDigests = digests;
+  const latest = sourceDigests.find((digest) => digest.status === "success") ?? null;
   const successCount = sourceDigests.filter((digest) => digest.status === "success").length;
   const failedCount = sourceDigests.filter((digest) => digest.status === "failed").length;
   const totalCandidates = sourceDigests.reduce((sum, digest) => sum + digest.candidateCount, 0);
@@ -82,7 +79,11 @@ export function HistoryPage({ digests = dailyDigests, jobRuns = [] }: HistoryPag
         </div>
 
         <section className="grid gap-3 sm:grid-cols-3">
-          <MetricCard label="成功日报" value={`${successCount} 天`} note={`最近一次成功生成 ${latest.date}`} />
+          <MetricCard
+            label="成功日报"
+            value={`${successCount} 天`}
+            note={latest ? `最近一次成功生成 ${latest.date}` : "暂无成功日报"}
+          />
           <MetricCard label="失败日报" value={`${failedCount} 天`} note="失败项保留候选池，可重跑" />
           <MetricCard label="候选总量" value={`${totalCandidates}`} note="按当前列表统计" />
         </section>
@@ -96,63 +97,70 @@ export function HistoryPage({ digests = dailyDigests, jobRuns = [] }: HistoryPag
           </div>
 
           <div className="grid gap-2">
-            {sourceDigests.map((digest) => (
-              <article
-                className="rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)] p-3 shadow-[var(--shadow-subtle)] transition hover:border-[var(--line)]"
-                key={digest.date}
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <CalendarBlank size={16} className="shrink-0 text-[var(--accent)]" />
-                      <p className="font-semibold">{digest.date}</p>
-                      <span className="text-xs text-[var(--muted)]">{digest.weekday}</span>
+            {sourceDigests.length > 0 ? (
+              sourceDigests.map((digest) => (
+                <article
+                  className="rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)] p-3 shadow-[var(--shadow-subtle)] transition hover:border-[var(--line)]"
+                  key={digest.date}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <CalendarBlank size={16} className="shrink-0 text-[var(--accent)]" />
+                        <p className="font-semibold">{digest.date}</p>
+                        <span className="text-xs text-[var(--muted)]">{digest.weekday}</span>
+                      </div>
+                      <p className="mt-2 text-xs leading-5 text-[var(--muted)]">
+                        生成 {digest.generatedAt}，耗时 {digest.duration}
+                      </p>
                     </div>
-                    <p className="mt-2 text-xs leading-5 text-[var(--muted)]">
-                      生成 {digest.generatedAt}，耗时 {digest.duration}
-                    </p>
+                    <StatusBadge label={digest.statusLabel} status={digest.status} />
                   </div>
-                  <StatusBadge label={digest.statusLabel} status={digest.status} />
-                </div>
 
-                <dl className="mt-3 grid grid-cols-3 gap-2 text-xs">
-                  <div className="rounded-[var(--radius-sm)] bg-[var(--surface-soft)] px-2 py-2">
-                    <dt className="text-[var(--muted)]">精选</dt>
-                    <dd className="mt-1 font-semibold">{digest.selectedCount}</dd>
-                  </div>
-                  <div className="rounded-[var(--radius-sm)] bg-[var(--surface-soft)] px-2 py-2">
-                    <dt className="text-[var(--muted)]">候选</dt>
-                    <dd className="mt-1 font-semibold">{digest.candidateCount}</dd>
-                  </div>
-                  <div className="rounded-[var(--radius-sm)] bg-[var(--surface-soft)] px-2 py-2">
-                    <dt className="text-[var(--muted)]">失败</dt>
-                    <dd className="mt-1 font-semibold">{digest.failedCount}</dd>
-                  </div>
-                </dl>
+                  <dl className="mt-3 grid grid-cols-3 gap-2 text-xs">
+                    <div className="rounded-[var(--radius-sm)] bg-[var(--surface-soft)] px-2 py-2">
+                      <dt className="text-[var(--muted)]">精选</dt>
+                      <dd className="mt-1 font-semibold">{digest.selectedCount}</dd>
+                    </div>
+                    <div className="rounded-[var(--radius-sm)] bg-[var(--surface-soft)] px-2 py-2">
+                      <dt className="text-[var(--muted)]">候选</dt>
+                      <dd className="mt-1 font-semibold">{digest.candidateCount}</dd>
+                    </div>
+                    <div className="rounded-[var(--radius-sm)] bg-[var(--surface-soft)] px-2 py-2">
+                      <dt className="text-[var(--muted)]">失败</dt>
+                      <dd className="mt-1 font-semibold">{digest.failedCount}</dd>
+                    </div>
+                  </dl>
 
-                <div className="mt-3">
-                  {digest.status === "success" ? (
-                    <Link
-                      aria-label={`打开 ${digest.date} 每日精选`}
-                      className="focus-ring inline-flex w-full items-center justify-center gap-2 rounded-full border border-[var(--accent-soft)] bg-[var(--surface)] px-3 py-2 text-sm font-medium text-[var(--accent-strong)] transition hover:border-[var(--accent)] hover:bg-[var(--accent-soft)]"
-                      href={`/digests/${digest.date}`}
-                    >
-                      打开某日精选
-                      <ArrowSquareOut size={15} />
-                    </Link>
-                  ) : (
-                    <span className="inline-flex w-full items-center justify-center rounded-full border border-[var(--line-soft)] bg-[var(--surface-soft)] px-3 py-2 text-sm font-medium text-[var(--muted)]">
-                      暂无可打开精选
-                    </span>
-                  )}
-                </div>
-              </article>
-            ))}
+                  <div className="mt-3">
+                    {digest.status === "success" ? (
+                      <Link
+                        aria-label={`打开 ${digest.date} 每日精选`}
+                        className="focus-ring inline-flex w-full items-center justify-center gap-2 rounded-full border border-[var(--accent-soft)] bg-[var(--surface)] px-3 py-2 text-sm font-medium text-[var(--accent-strong)] transition hover:border-[var(--accent)] hover:bg-[var(--accent-soft)]"
+                        href={`/digests/${digest.date}`}
+                      >
+                        打开某日精选
+                        <ArrowSquareOut size={15} />
+                      </Link>
+                    ) : (
+                      <span className="inline-flex w-full items-center justify-center rounded-full border border-[var(--line-soft)] bg-[var(--surface-soft)] px-3 py-2 text-sm font-medium text-[var(--muted)]">
+                        暂无可打开精选
+                      </span>
+                    )}
+                  </div>
+                </article>
+              ))
+            ) : (
+              <div className="rounded-[var(--radius)] border border-dashed border-[var(--line)] bg-[var(--surface)] p-4 text-sm leading-6 text-[var(--muted)] shadow-[var(--shadow-subtle)]">
+                暂无日报记录。执行采集和每日精选任务后，这里会显示真实历史数据。
+              </div>
+            )}
           </div>
         </aside>
 
         <div className="grid gap-5">
-          <section className="rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)] p-4 shadow-[var(--shadow-subtle)] sm:p-5">
+          {latest ? (
+            <section className="rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)] p-4 shadow-[var(--shadow-subtle)] sm:p-5">
             <div className="flex flex-col justify-between gap-3 border-b border-[var(--line-soft)] pb-4 md:flex-row md:items-start">
               <div>
                 <div className="flex flex-wrap items-center gap-2">
@@ -210,7 +218,15 @@ export function HistoryPage({ digests = dailyDigests, jobRuns = [] }: HistoryPag
                 </article>
               ))}
             </div>
-          </section>
+            </section>
+          ) : (
+            <section className="rounded-[var(--radius)] border border-dashed border-[var(--line)] bg-[var(--surface)] p-5 shadow-[var(--shadow-subtle)]">
+              <h2 className="text-base font-semibold">暂无成功日报</h2>
+              <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
+                当前数据库没有已发布的每日精选。请先运行采集和每日生成任务，或在管理后台发布草稿。
+              </p>
+            </section>
+          )}
 
           {jobRuns.length > 0 ? (
             <section className="rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)] p-4 shadow-[var(--shadow-subtle)] sm:p-5">
@@ -247,29 +263,6 @@ export function HistoryPage({ digests = dailyDigests, jobRuns = [] }: HistoryPag
             </section>
           ) : null}
 
-          <section className="grid gap-4 md:grid-cols-2">
-            <article className="rounded-[var(--radius)] border border-dashed border-[var(--line)] bg-[var(--surface)] p-5 shadow-[var(--shadow-subtle)]">
-              <FileText size={22} className="text-[var(--muted)]" />
-              <h2 className="mt-3 text-base font-semibold">空状态静态展示</h2>
-              <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
-                当某天没有候选内容时，页面保留日期、状态和说明，不显示空白列表。
-              </p>
-              <div className="mt-4 rounded-[var(--radius-sm)] bg-[var(--surface-soft)] p-3 text-sm text-[var(--muted-strong)]">
-                暂无日报，等待采集任务写入候选池。
-              </div>
-            </article>
-
-            <article className="rounded-[var(--radius)] border border-[var(--danger-soft)] bg-[var(--surface)] p-5 shadow-[var(--shadow-subtle)]">
-              <WarningCircle size={22} className="text-[var(--danger)]" />
-              <h2 className="mt-3 text-base font-semibold">失败状态静态展示</h2>
-              <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
-                当每日生成失败时，明确展示错误摘要、候选数量和重跑入口位置。
-              </p>
-              <div className="mt-4 rounded-[var(--radius-sm)] bg-[var(--danger-soft)] p-3 text-sm text-[var(--danger)]">
-                LLM JSON 输出缺少 candidateId，已保留候选池。
-              </div>
-            </article>
-          </section>
         </div>
       </section>
     </main>

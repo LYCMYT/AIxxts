@@ -52,6 +52,24 @@ const seedSources: SeedSource[] = [
     fetchIntervalMinutes: 120,
   },
   {
+    name: "arXiv cs.AI",
+    type: "RSS",
+    url: "https://rss.arxiv.org/rss/cs.AI",
+    fetchIntervalMinutes: 720,
+  },
+  {
+    name: "arXiv cs.CL",
+    type: "RSS",
+    url: "https://rss.arxiv.org/rss/cs.CL",
+    fetchIntervalMinutes: 720,
+  },
+  {
+    name: "arXiv cs.LG",
+    type: "RSS",
+    url: "https://rss.arxiv.org/rss/cs.LG",
+    fetchIntervalMinutes: 720,
+  },
+  {
     name: "Hacker News AI",
     type: "HACKER_NEWS",
     url: "https://hnrss.org/newest?q=AI",

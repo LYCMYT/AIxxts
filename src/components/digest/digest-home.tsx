@@ -1,10 +1,8 @@
 import {
   ArrowSquareOut,
   CheckCircle,
-  CircleNotch,
   Clock,
   Database,
-  FileMagnifyingGlass,
   Lightning,
   ListChecks,
   Newspaper,
@@ -121,7 +119,7 @@ export function DigestHome({
         />
       </section>
 
-      <section className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_300px] lg:items-start">
+      <section className="grid gap-4">
         <div className="grid gap-3">
           <div className="flex flex-col gap-2 rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)] px-4 py-3 shadow-[var(--shadow-subtle)] sm:flex-row sm:items-end sm:justify-between">
             <div>
@@ -147,29 +145,6 @@ export function DigestHome({
             </div>
           )}
         </div>
-
-        <aside className="grid gap-3">
-          <StatePanel
-            icon={<CircleNotch size={18} weight="bold" />}
-            title="生成中状态"
-            description="每日任务运行时展示候选池扫描、去重和 LLM 排序进度，避免读者误以为当天无内容。"
-            rows={[
-              ["候选扫描", "进行中"],
-              ["去重队列", "等待"],
-              ["LLM 排序", "等待"],
-            ]}
-          />
-          <StatePanel
-            icon={<FileMagnifyingGlass size={18} weight="bold" />}
-            title="空状态"
-            description="当天未生成时展示最近一次成功日期，并保留手动刷新和查看历史的操作位。"
-            rows={[
-              ["今日精选", "未生成"],
-              ["最近成功", lastSuccessDate],
-              ["建议动作", "查看任务日志"],
-            ]}
-          />
-        </aside>
       </section>
     </main>
   );
@@ -259,40 +234,5 @@ function DigestListItem({ item }: { item: DigestItem }) {
         </a>
       </div>
     </article>
-  );
-}
-
-function StatePanel({
-  description,
-  icon,
-  rows,
-  title,
-}: {
-  description: string;
-  icon: React.ReactNode;
-  rows: [string, string][];
-  title: string;
-}) {
-  return (
-    <section className="rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)] p-4 shadow-[var(--shadow-subtle)]">
-      <div className="flex items-center gap-2">
-        <span className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-sm)] bg-[var(--accent-soft)] text-[var(--accent-strong)]">
-          {icon}
-        </span>
-        <h2 className="text-sm font-semibold text-[var(--foreground)]">{title}</h2>
-      </div>
-      <p className="mt-3 text-sm leading-6 text-[var(--muted)]">{description}</p>
-      <dl className="mt-4 grid gap-2">
-        {rows.map(([label, value]) => (
-          <div
-            className="flex items-center justify-between gap-3 border-t border-[var(--line-soft)] pt-2 text-xs"
-            key={label}
-          >
-            <dt className="text-[var(--muted)]">{label}</dt>
-            <dd className="font-medium text-[var(--foreground)]">{value}</dd>
-          </div>
-        ))}
-      </dl>
-    </section>
   );
 }

@@ -12,16 +12,20 @@ export const dynamic = "force-dynamic";
 export default async function AdminPage() {
   const data = await getAdminDashboardData();
 
-  if (!data) {
-    return <AdminDashboard />;
-  }
-
   return (
     <AdminDashboard
-      jobs={data.jobs.length > 0 ? data.jobs : undefined}
-      sources={data.sources.length > 0 ? data.sources : undefined}
-      summary={data.summary}
-      users={data.users.length > 0 ? data.users : undefined}
+      jobs={data?.jobs ?? []}
+      sources={data?.sources ?? []}
+      summary={
+        data?.summary ?? {
+          enabledSources: 0,
+          totalSources: 0,
+          todayCandidates: 0,
+          dailySchedule: "08:00",
+          pendingErrors: 0,
+        }
+      }
+      users={data?.users ?? []}
     />
   );
 }

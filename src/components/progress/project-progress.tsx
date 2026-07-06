@@ -55,12 +55,17 @@ const completedItems: ProgressItem[] = [
   },
   {
     title: "每日精选生成",
-    description: "已实现每日任务入口，未配置 LLM key 时使用确定性 fallback 生成 10 到 20 条草稿。",
+    description: "已实现每日任务入口；未配置 LLM key 时只对真实候选池做规则排序，不注入演示内容。",
     status: "done",
   },
   {
     title: "前端工作台",
     description: "已完成今日精选、历史回看、条目详情、管理后台和开发进度页面。",
+    status: "done",
+  },
+  {
+    title: "发布和后台动作闭环",
+    description: "已完成草稿发布、手动候选录入、来源启停和任务触发入口，首页只读取已发布日报或真实空状态。",
     status: "done",
   },
   {
@@ -72,14 +77,9 @@ const completedItems: ProgressItem[] = [
 
 const nextItems: ProgressItem[] = [
   {
-    title: "把每日草稿发布到首页",
-    description: "当前首页优先读取已发布日报，下一步需要增加草稿预览或发布按钮，让 2026-07-06 的 20 条结果直接成为首页数据。",
-    status: "active",
-  },
-  {
     title: "配置真实密钥",
-    description: "补齐 YOUTUBE_API_KEY 和 LLM_API_KEY 后，YouTube 候选和模型评分会从跳过 / fallback 切换到真实流程。",
-    status: "next",
+    description: "补齐 YOUTUBE_API_KEY 和 LLM_API_KEY 后，YouTube 候选和模型评分进入完整真实流程。",
+    status: "active",
   },
   {
     title: "接入定时任务",
@@ -101,7 +101,7 @@ const nextItems: ProgressItem[] = [
 const commandItems = [
   {
     command: "pnpm dev",
-    note: "启动本地网页，当前固定使用 webpack dev server。",
+    note: "启动本地网页，使用 Next.js 开发服务器。",
   },
   {
     command: "pnpm seed:sources",
@@ -277,7 +277,7 @@ export function ProjectProgress({ adminData, archive }: ProjectProgressProps) {
         <div className="flex items-start gap-3 rounded-[16px] border border-transparent bg-[var(--warning-soft)] p-3 text-sm leading-6 text-[var(--warning)]">
           <PlayCircle className="mt-1 shrink-0" size={17} weight="bold" />
           <p>
-            下一次开发优先处理“草稿发布到首页”和“管理后台动作 API”，这样团队可以不看命令行也能完成采集、生成和发布。
+            下一次开发优先处理“真实密钥配置”和“定时任务接入”，这样团队可以稳定获得真实候选、每日生成和历史回看。
           </p>
         </div>
       </section>

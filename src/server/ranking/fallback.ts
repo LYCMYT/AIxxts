@@ -41,7 +41,7 @@ export function rankCandidatesWithFallback(
     digestTitle: `${digestDate} AI 行业每日精选`,
     digestSummary:
       ranked.length > 0
-        ? "当前未配置 LLM_API_KEY，本次使用确定性 fallback 排序，解读仅引用标题和摘要。"
+        ? "当前未配置 LLM_API_KEY，本次使用确定性规则排序，解读仅引用标题和摘要。"
         : "过去 24 小时没有可用于每日精选的候选内容。",
     items: ranked,
   };

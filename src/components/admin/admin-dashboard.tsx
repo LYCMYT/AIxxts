@@ -37,155 +37,12 @@ const sectionLinks = [
   { href: "#users", label: "用户角色" },
 ];
 
-const fallbackDataSources = [
-  {
-    id: "fallback-openai-blog",
-    name: "OpenAI Blog",
-    type: "官方博客",
-    url: "https://openai.com/blog/rss.xml",
-    interval: "60 分钟",
-    owner: "模型发布",
-    status: { label: "启用", tone: "success" as const },
-    lastRun: "07:42 成功",
-  },
-  {
-    id: "fallback-google-deepmind",
-    name: "Google DeepMind",
-    type: "官方博客",
-    url: "https://deepmind.google/discover/blog/rss.xml",
-    interval: "120 分钟",
-    owner: "研究动态",
-    status: { label: "启用", tone: "success" as const },
-    lastRun: "07:18 成功",
-  },
-  {
-    id: "fallback-hn-ai",
-    name: "Hacker News AI",
-    type: "HN",
-    url: "https://hnrss.org/newest?q=AI",
-    interval: "30 分钟",
-    owner: "开发者社区",
-    status: { label: "运行中", tone: "accent" as const },
-    lastRun: "采集中",
-  },
-  {
-    id: "fallback-reddit-ml",
-    name: "Reddit MachineLearning",
-    type: "Reddit",
-    url: "https://www.reddit.com/r/MachineLearning/.rss",
-    interval: "45 分钟",
-    owner: "社区讨论",
-    status: { label: "启用", tone: "success" as const },
-    lastRun: "07:05 成功",
-  },
-  {
-    id: "fallback-legacy-vendor",
-    name: "Legacy Vendor Feed",
-    type: "RSS",
-    url: "https://example.com/legacy-ai-feed.xml",
-    interval: "停用",
-    owner: "待确认来源",
-    status: { label: "停用", tone: "muted" as const },
-    lastRun: "06:10 失败",
-  },
-];
-
-const youtubeKeywords = [
-  {
-    keyword: "AI agent",
-    locale: "en-US",
-    maxResults: 25,
-    status: { label: "启用", tone: "success" as const },
-    lastMatched: "18 条候选",
-  },
-  {
-    keyword: "large language model",
-    locale: "en-US",
-    maxResults: 20,
-    status: { label: "启用", tone: "success" as const },
-    lastMatched: "11 条候选",
-  },
-  {
-    keyword: "国产大模型",
-    locale: "zh-CN",
-    maxResults: 15,
-    status: { label: "停用", tone: "muted" as const },
-    lastMatched: "待重新启用",
-  },
-];
-
-const fallbackJobRows = [
-  {
-    id: "fallback-rss-collect",
-    name: "RSS / 官方博客采集",
-    result: { label: "成功", tone: "success" as const },
-    finishedAt: "07:42",
-    output: "128 条候选",
-    summary: "5 个来源完成，0 条重复 URL 已跳过",
-  },
-  {
-    id: "fallback-youtube-collect",
-    name: "YouTube 关键词采集",
-    result: { label: "运行中", tone: "accent" as const },
-    finishedAt: "进行中",
-    output: "29 条候选",
-    summary: "等待最后一个关键词分页返回",
-  },
-  {
-    id: "fallback-daily-digest",
-    name: "每日精选生成",
-    result: { label: "失败", tone: "danger" as const },
-    finishedAt: "08:01",
-    output: "未发布",
-    summary: "LLM 输出缺少 candidateId，已保留上次成功结果",
-  },
-  {
-    id: "fallback-wecom-alert",
-    name: "企业微信提醒",
-    result: { label: "停用", tone: "muted" as const },
-    finishedAt: "未配置",
-    output: "0 条",
-    summary: "MVP 阶段预留 webhook，不自动发送",
-  },
-];
-
-const fallbackUsers = [
-  {
-    id: "fallback-admin",
-    email: "admin@xone.example",
-    role: "管理员",
-    status: { label: "启用", tone: "success" as const },
-    lastActive: "今天 07:55",
-  },
-  {
-    id: "fallback-editor",
-    email: "editor@xone.example",
-    role: "管理员",
-    status: { label: "启用", tone: "success" as const },
-    lastActive: "昨天 18:30",
-  },
-  {
-    id: "fallback-reader",
-    email: "reader@xone.example",
-    role: "只读成员",
-    status: { label: "启用", tone: "success" as const },
-    lastActive: "今天 08:10",
-  },
-  {
-    id: "fallback-contractor",
-    email: "contractor@xone.example",
-    role: "只读成员",
-    status: { label: "停用", tone: "muted" as const },
-    lastActive: "2026-07-02",
-  },
-];
-
-const fallbackSummary: AdminDashboardData["summary"] = {
-  enabledSources: 4,
-  totalSources: 5,
-  todayCandidates: 176,
+const emptySummary: AdminDashboardData["summary"] = {
+  enabledSources: 0,
+  totalSources: 0,
+  todayCandidates: 0,
   dailySchedule: "08:00",
-  pendingErrors: 1,
+  pendingErrors: 0,
 };
 
 const inputClass =
@@ -281,6 +138,19 @@ function TableCell({
   );
 }
 
+function EmptyTableRow({ children, colSpan }: { children: React.ReactNode; colSpan: number }) {
+  return (
+    <tr>
+      <td
+        className="border-b border-[var(--line-soft)] px-3.5 py-6 text-center text-sm text-[var(--muted)]"
+        colSpan={colSpan}
+      >
+        {children}
+      </td>
+    </tr>
+  );
+}
+
 function Field({
   label,
   children,
@@ -305,10 +175,10 @@ type AdminDashboardProps = Partial<AdminDashboardData> & {
 
 export function AdminDashboard({
   digestDate = currentDigestDate(),
-  jobs = fallbackJobRows,
-  sources = fallbackDataSources,
-  summary = fallbackSummary,
-  users = fallbackUsers,
+  jobs = [],
+  sources = [],
+  summary = emptySummary,
+  users = [],
 }: AdminDashboardProps = {}) {
   return (
     <main className="min-h-[100dvh] bg-[linear-gradient(180deg,#f7f8fb_0%,#ffffff_42%,#f7f8fb_100%)] px-4 py-6 sm:px-6 lg:px-8">
@@ -319,7 +189,7 @@ export function AdminDashboard({
             <p className="text-sm font-medium text-[var(--accent-strong)]">管理后台</p>
             <h1 className="text-2xl font-semibold tracking-normal sm:text-3xl">MVP 维护控制台</h1>
             <p className="max-w-3xl text-sm leading-6 text-[var(--muted)]">
-              维护采集来源、关键词、手动候选、任务结果和成员权限，列表优先读取数据库，暂无数据时显示静态占位。
+              维护采集来源、关键词、手动候选、任务结果和成员权限。页面只展示数据库记录，暂无数据时显示空状态。
             </p>
           </div>
 
@@ -374,7 +244,7 @@ export function AdminDashboard({
         <div className="mb-4 flex flex-col gap-3 rounded-[16px] border border-[var(--line-soft)] bg-white/60 p-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2 text-sm text-[var(--muted)]">
             <CheckCircle size={16} className="text-[var(--success)]" weight="bold" />
-            最近一次来源巡检完成于 07:42
+            来源状态来自数据库，最近结果见下方列表
           </div>
           <button
             aria-label="新增数据来源"
@@ -399,21 +269,25 @@ export function AdminDashboard({
               </tr>
             </thead>
             <tbody>
-              {sources.map((source) => (
-                <tr className="transition hover:bg-[var(--surface-soft)] last:[&_td]:border-b-0" key={source.id}>
-                  <TableCell className="font-medium text-[var(--foreground)]">{source.name}</TableCell>
-                  <TableCell>{source.type}</TableCell>
-                  <TableCell className="max-w-[270px] truncate font-mono text-xs text-[var(--muted-strong)]">
-                    {source.url}
-                  </TableCell>
-                  <TableCell>{source.interval}</TableCell>
-                  <TableCell>{source.owner}</TableCell>
-                  <TableCell>
-                    <StatusBadge label={source.status.label} tone={source.status.tone} />
-                  </TableCell>
-                  <TableCell>{source.lastRun}</TableCell>
-                </tr>
-              ))}
+              {sources.length > 0 ? (
+                sources.map((source) => (
+                  <tr className="transition hover:bg-[var(--surface-soft)] last:[&_td]:border-b-0" key={source.id}>
+                    <TableCell className="font-medium text-[var(--foreground)]">{source.name}</TableCell>
+                    <TableCell>{source.type}</TableCell>
+                    <TableCell className="max-w-[270px] truncate font-mono text-xs text-[var(--muted-strong)]">
+                      {source.url}
+                    </TableCell>
+                    <TableCell>{source.interval}</TableCell>
+                    <TableCell>{source.owner}</TableCell>
+                    <TableCell>
+                      <StatusBadge label={source.status.label} tone={source.status.tone} />
+                    </TableCell>
+                    <TableCell>{source.lastRun}</TableCell>
+                  </tr>
+                ))
+              ) : (
+                <EmptyTableRow colSpan={7}>暂无数据源记录。请先执行 pnpm seed:sources 或在后续管理功能中新增来源。</EmptyTableRow>
+              )}
             </tbody>
           </table>
         </TableFrame>
@@ -437,20 +311,9 @@ export function AdminDashboard({
               </tr>
             </thead>
             <tbody>
-              {youtubeKeywords.map((keyword) => (
-                <tr
-                  className="transition hover:bg-[var(--surface-soft)] last:[&_td]:border-b-0"
-                  key={`${keyword.keyword}-${keyword.locale}`}
-                >
-                  <TableCell className="font-medium text-[var(--foreground)]">{keyword.keyword}</TableCell>
-                  <TableCell>{keyword.locale}</TableCell>
-                  <TableCell>{keyword.maxResults}</TableCell>
-                  <TableCell>
-                    <StatusBadge label={keyword.status.label} tone={keyword.status.tone} />
-                  </TableCell>
-                  <TableCell>{keyword.lastMatched}</TableCell>
-                </tr>
-              ))}
+              <EmptyTableRow colSpan={5}>
+                暂无独立关键词表。当前 YouTube 采集词以数据源配置为准，后续再接入可编辑关键词管理。
+              </EmptyTableRow>
             </tbody>
           </table>
         </TableFrame>
@@ -483,28 +346,32 @@ export function AdminDashboard({
               </tr>
             </thead>
             <tbody>
-              {jobs.map((job) => (
-                <tr className="transition hover:bg-[var(--surface-soft)] last:[&_td]:border-b-0" key={job.id}>
-                  <TableCell className="font-medium text-[var(--foreground)]">{job.name}</TableCell>
-                  <TableCell>
-                    <StatusBadge label={job.result.label} tone={job.result.tone} />
-                  </TableCell>
-                  <TableCell>{job.finishedAt}</TableCell>
-                  <TableCell>{job.output}</TableCell>
-                  <TableCell className="min-w-[280px]">
-                    <span className="inline-flex items-start gap-2">
-                      {job.result.label === "失败" ? (
-                        <WarningCircle
-                          className="mt-0.5 shrink-0 text-[var(--danger)]"
-                          size={16}
-                          weight="bold"
-                        />
-                      ) : null}
-                      <span>{job.summary}</span>
-                    </span>
-                  </TableCell>
-                </tr>
-              ))}
+              {jobs.length > 0 ? (
+                jobs.map((job) => (
+                  <tr className="transition hover:bg-[var(--surface-soft)] last:[&_td]:border-b-0" key={job.id}>
+                    <TableCell className="font-medium text-[var(--foreground)]">{job.name}</TableCell>
+                    <TableCell>
+                      <StatusBadge label={job.result.label} tone={job.result.tone} />
+                    </TableCell>
+                    <TableCell>{job.finishedAt}</TableCell>
+                    <TableCell>{job.output}</TableCell>
+                    <TableCell className="min-w-[280px]">
+                      <span className="inline-flex items-start gap-2">
+                        {job.result.label === "失败" ? (
+                          <WarningCircle
+                            className="mt-0.5 shrink-0 text-[var(--danger)]"
+                            size={16}
+                            weight="bold"
+                          />
+                        ) : null}
+                        <span>{job.summary}</span>
+                      </span>
+                    </TableCell>
+                  </tr>
+                ))
+              ) : (
+                <EmptyTableRow colSpan={5}>暂无任务运行记录。执行采集或每日精选后会写入 JobRun。</EmptyTableRow>
+              )}
             </tbody>
           </table>
         </TableFrame>
@@ -546,24 +413,28 @@ export function AdminDashboard({
               </tr>
             </thead>
             <tbody>
-              {users.map((user) => (
-                <tr className="transition hover:bg-[var(--surface-soft)] last:[&_td]:border-b-0" key={user.id}>
-                  <TableCell className="font-medium text-[var(--foreground)]">{user.email}</TableCell>
-                  <TableCell>
-                    <span className="inline-flex items-center gap-2">
-                      <ShieldCheck size={15} className="text-[var(--accent)]" weight="bold" />
-                      {user.role}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <StatusBadge label={user.status.label} tone={user.status.tone} />
-                  </TableCell>
-                  <TableCell>{user.lastActive}</TableCell>
-                  <TableCell>
-                    {user.role === "管理员" ? "可维护来源和任务" : "仅可查看每日精选和历史"}
-                  </TableCell>
-                </tr>
-              ))}
+              {users.length > 0 ? (
+                users.map((user) => (
+                  <tr className="transition hover:bg-[var(--surface-soft)] last:[&_td]:border-b-0" key={user.id}>
+                    <TableCell className="font-medium text-[var(--foreground)]">{user.email}</TableCell>
+                    <TableCell>
+                      <span className="inline-flex items-center gap-2">
+                        <ShieldCheck size={15} className="text-[var(--accent)]" weight="bold" />
+                        {user.role}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <StatusBadge label={user.status.label} tone={user.status.tone} />
+                    </TableCell>
+                    <TableCell>{user.lastActive}</TableCell>
+                    <TableCell>
+                      {user.role === "管理员" ? "可维护来源和任务" : "仅可查看每日精选和历史"}
+                    </TableCell>
+                  </tr>
+                ))
+              ) : (
+                <EmptyTableRow colSpan={5}>暂无用户记录。当前开放预览已取消登录拦截。</EmptyTableRow>
+              )}
             </tbody>
           </table>
         </TableFrame>

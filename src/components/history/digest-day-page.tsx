@@ -7,20 +7,16 @@ import {
   FileText,
   WarningCircle,
 } from "@phosphor-icons/react/dist/ssr";
-import {
-  getDigestByDate as getMockDigestByDate,
-  type DailyDigest,
-  type DigestStatus,
-} from "./mock-digests";
+import type { DailyDigestData, DigestStatusView } from "@/server/digests/queries";
 
-const statusStyles: Record<DigestStatus, string> = {
+const statusStyles: Record<DigestStatusView, string> = {
   success: "border-[var(--success)] bg-[var(--success-soft)] text-[var(--success)]",
   running: "border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent-strong)]",
   failed: "border-[var(--danger)] bg-[var(--danger-soft)] text-[var(--danger)]",
   empty: "border-[var(--line)] bg-[var(--surface-soft)] text-[var(--muted-strong)]",
 };
 
-function StatusBadge({ status, label }: { status: DigestStatus; label: string }) {
+function StatusBadge({ status, label }: { status: DigestStatusView; label: string }) {
   const Icon = status === "failed" ? WarningCircle : status === "success" ? CheckCircle : Clock;
 
   return (
@@ -33,7 +29,7 @@ function StatusBadge({ status, label }: { status: DigestStatus; label: string })
   );
 }
 
-function createEmptyDigest(date: string): DailyDigest {
+function createEmptyDigest(date: string): DailyDigestData {
   return {
     date,
     weekday: "",
@@ -54,11 +50,9 @@ export function DigestDayPage({
   digest: databaseDigest,
 }: {
   date: string;
-  digest?: DailyDigest | null;
+  digest?: DailyDigestData | null;
 }) {
-  const mockDigest = getMockDigestByDate(date);
-  const digest = databaseDigest ?? mockDigest ?? createEmptyDigest(date);
-  const isFallback = !databaseDigest && Boolean(mockDigest);
+  const digest = databaseDigest ?? createEmptyDigest(date);
 
   return (
     <main className="mx-auto grid w-full max-w-[1160px] gap-6 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
@@ -74,9 +68,6 @@ export function DigestDayPage({
           <div className="grid gap-2">
             <div className="flex flex-wrap items-center gap-2">
               <StatusBadge label={digest.statusLabel} status={digest.status} />
-              {isFallback ? (
-                <span className="text-xs text-[var(--muted)]">数据库暂无该日期记录，展示本地 fallback 数据</span>
-              ) : null}
             </div>
             <h1 className="text-3xl font-semibold tracking-normal sm:text-4xl">
               {digest.date} 每日精选

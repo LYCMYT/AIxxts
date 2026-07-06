@@ -201,7 +201,7 @@ async function writeSuccessfulDigest(input: {
             interpretation: item.interpretation,
             score: item.score,
             signals: {
-              method: input.provider,
+              method: input.provider === "deterministic-fallback" ? "确定性规则排序" : "LLM 评分",
               sourceType: candidate.source.type,
               publishedAt: candidate.publishedAt.toISOString(),
               hotScore: candidate.hotScore,

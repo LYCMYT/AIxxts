@@ -169,7 +169,7 @@ export function ManualCandidateForm() {
             disabled={running}
             id={urlId}
             onChange={(event) => setUrl(event.target.value)}
-            placeholder="https://example.com/news"
+            placeholder="https://来源页面链接"
             required
             type="url"
             value={url}
