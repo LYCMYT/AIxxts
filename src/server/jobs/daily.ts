@@ -2,7 +2,12 @@ import { CandidateStatus, DigestStatus, Prisma } from "@/generated/prisma/client
 import { rankCandidatesWithLlm } from "@/server/llm/client";
 import { prisma } from "@/server/db/prisma";
 import { env } from "@/server/env";
+import { runCandidateTranslationJob } from "@/server/jobs/translate-candidates";
 import { rankCandidatesWithFallback } from "@/server/ranking/fallback";
+import type {
+  CandidateTranslationJobResult,
+  RunCandidateTranslationJobOptions,
+} from "@/server/jobs/translate-candidates";
 import type {
   DigestRankingResult,
   RankingCandidate,
@@ -19,7 +24,7 @@ type RunDailyDigestOptions = {
   now?: Date;
 };
 
-type DailyDigestJobResult = {
+export type DailyDigestJobResult = {
   digestDate: string;
   status: "written" | "published_preserved" | "failed";
   provider: "openai-compatible" | "deterministic-fallback";
@@ -28,7 +33,12 @@ type DailyDigestJobResult = {
   digestId?: string;
   llmRunId: string;
   message: string;
+  translation?: CandidateTranslationJobResult;
 };
+
+type CandidateTranslationRunner = (
+  options?: RunCandidateTranslationJobOptions,
+) => Promise<CandidateTranslationJobResult>;
 
 export async function runDailyDigestJob(
   options: RunDailyDigestOptions = {},
@@ -46,7 +56,7 @@ export async function runDailyDigestJob(
     if (provider === "deterministic-fallback") {
       const ranking = rankCandidatesWithFallback(candidates, digestDate, dailyRankingLimits, windowEnd);
 
-      return await writeSuccessfulDigest({
+      const result = await writeSuccessfulDigest({
         digestDate,
         candidates,
         provider,
@@ -57,11 +67,13 @@ export async function runDailyDigestJob(
           ranking,
         },
       });
+
+      return await attachCandidateTranslationsToDailyResult(result);
     }
 
     const llmResult = await rankCandidatesWithLlm(candidates, digestDate, dailyRankingLimits);
 
-    return await writeSuccessfulDigest({
+    const result = await writeSuccessfulDigest({
       digestDate,
       candidates,
       provider,
@@ -72,6 +84,8 @@ export async function runDailyDigestJob(
       inputTokens: llmResult.inputTokens,
       outputTokens: llmResult.outputTokens,
     });
+
+    return await attachCandidateTranslationsToDailyResult(result);
   } catch (error) {
     return await writeFailedDigest({
       digestDate,
@@ -80,6 +94,39 @@ export async function runDailyDigestJob(
       model: env.LLM_MODEL,
       error,
     });
+  }
+}
+
+export async function attachCandidateTranslationsToDailyResult(
+  result: DailyDigestJobResult,
+  translateCandidates: CandidateTranslationRunner = runCandidateTranslationJob,
+): Promise<DailyDigestJobResult> {
+  if (result.status === "failed") {
+    return result;
+  }
+
+  try {
+    const translation = await translateCandidates({
+      digestDate: result.digestDate,
+      selectedOnly: true,
+    });
+
+    return {
+      ...result,
+      translation,
+    };
+  } catch (error) {
+    return {
+      ...result,
+      translation: {
+        status: "failed",
+        provider: "openai-compatible",
+        scannedCount: 0,
+        translatedCount: 0,
+        failedCount: 0,
+        message: `每日精选已生成，但中文翻译自动补齐失败：${getErrorMessage(error)}`,
+      },
+    };
   }
 }
 

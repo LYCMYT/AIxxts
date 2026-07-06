@@ -6,12 +6,13 @@ import { translateCandidateWithLlm } from "@/server/llm/client";
 const DEFAULT_TRANSLATION_LIMIT = 20;
 const MAX_TRANSLATION_LIMIT = 50;
 
-type RunCandidateTranslationJobOptions = {
+export type RunCandidateTranslationJobOptions = {
+  digestDate?: string;
   limit?: number;
   selectedOnly?: boolean;
 };
 
-type CandidateTranslationJobResult = {
+export type CandidateTranslationJobResult = {
   status: "translated" | "skipped" | "partial" | "failed";
   provider: "openai-compatible" | "unconfigured";
   scannedCount: number;
@@ -26,6 +27,7 @@ export async function runCandidateTranslationJob(
 ): Promise<CandidateTranslationJobResult> {
   const limit = normalizeLimit(options.limit);
   const selectedOnly = options.selectedOnly ?? true;
+  const digestDate = options.digestDate?.trim();
 
   if (!env.LLM_API_KEY?.trim()) {
     return {
@@ -56,7 +58,14 @@ export async function runCandidateTranslationJob(
             digestItems: {
               some: {
                 digest: {
-                  status: DigestStatus.PUBLISHED,
+                  ...(digestDate
+                    ? {
+                        digestDate,
+                      }
+                    : {}),
+                  status: {
+                    in: [DigestStatus.DRAFT, DigestStatus.PUBLISHED],
+                  },
                 },
               },
             },
@@ -129,6 +138,7 @@ export async function runCandidateTranslationJob(
       outputTokens: outputTokens > 0 ? outputTokens : undefined,
       responseJson: {
         selectedOnly,
+        digestDate: digestDate || null,
         limit,
         translatedIds,
         failedItems,
