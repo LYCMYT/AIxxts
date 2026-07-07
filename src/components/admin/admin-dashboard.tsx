@@ -9,6 +9,7 @@ import {
   YoutubeLogo,
 } from "@phosphor-icons/react/dist/ssr";
 import type { AdminDashboardData } from "@/server/admin/queries";
+import { AdminSectionNav } from "./admin-section-nav";
 import { DigestPublishButton } from "./digest-publish-button";
 import { JobActionButtons } from "./job-action-buttons";
 import { ManualCandidateForm } from "./manual-candidate-form";
@@ -29,15 +30,6 @@ const badgeToneClass: Record<BadgeTone, string> = {
   muted: "border-[var(--line-soft)] bg-[var(--surface)] text-[var(--muted-strong)]",
   accent: "border-transparent bg-[var(--accent-soft)] text-[var(--accent-strong)]",
 };
-
-const sectionLinks = [
-  { href: "#source-health", label: "健康概览" },
-  { href: "#sources", label: "数据源" },
-  { href: "#youtube", label: "YouTube 关键词" },
-  { href: "#manual", label: "手动候选" },
-  { href: "#jobs", label: "任务状态" },
-  { href: "#users", label: "用户角色" },
-];
 
 const emptySummary: AdminDashboardData["summary"] = {
   enabledSources: 0,
@@ -420,17 +412,7 @@ export function AdminDashboard({
           </div>
         </div>
 
-        <nav className="flex gap-2 overflow-x-auto border-t border-[var(--line-soft)] pt-4" aria-label="管理区块">
-          {sectionLinks.map((item) => (
-            <a
-              className="focus-ring shrink-0 rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface-soft)] px-3.5 py-2 text-sm font-medium text-[var(--muted-strong)] transition hover:border-[var(--accent)] hover:bg-[var(--accent-soft)] hover:text-[var(--accent-strong)]"
-              href={item.href}
-              key={item.href}
-            >
-              {item.label}
-            </a>
-          ))}
-        </nav>
+        <AdminSectionNav />
       </header>
 
       <SectionHeading
