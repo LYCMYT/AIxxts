@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { formatJobMetadataText, mapJobMetadataDetails } from "./queries";
+import {
+  formatJobMetadataText,
+  mapJobMetadataDetails,
+  normalizeAdminJobFilters,
+} from "./queries";
 
 test("mapJobMetadataDetails exposes YouTube RSS diagnostics", () => {
   const details = mapJobMetadataDetails({
@@ -40,5 +44,38 @@ test("formatJobMetadataText pretty prints object metadata and ignores empty valu
       rssAttemptCount: 1,
     }) ?? "",
     /"rssAttemptCount": 1/,
+  );
+});
+
+test("normalizeAdminJobFilters keeps valid filters and resets invalid page values", () => {
+  assert.deepEqual(
+    normalizeAdminJobFilters({
+      jobType: "collect:YOUTUBE",
+      page: "3",
+      sourceId: "source-1",
+      status: "FAILED",
+    }),
+    {
+      jobType: "collect:YOUTUBE",
+      page: 3,
+      pageSize: 10,
+      sourceId: "source-1",
+      status: "FAILED",
+    },
+  );
+  assert.deepEqual(
+    normalizeAdminJobFilters({
+      jobType: " ".repeat(120),
+      page: "0",
+      sourceId: "",
+      status: "BROKEN",
+    }),
+    {
+      jobType: "",
+      page: 1,
+      pageSize: 10,
+      sourceId: "",
+      status: "",
+    },
   );
 });

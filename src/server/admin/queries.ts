@@ -55,6 +55,26 @@ export type AdminUserRow = {
 };
 
 export type AdminDashboardData = {
+  jobFilterOptions: {
+    jobTypes: string[];
+    sources: Array<{
+      id: string;
+      name: string;
+    }>;
+    statuses: Array<{
+      label: string;
+      value: string;
+    }>;
+  };
+  jobFilters: AdminJobFilters;
+  jobPagination: {
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+    page: number;
+    pageSize: number;
+    totalCount: number;
+    totalPages: number;
+  };
   summary: {
     enabledSources: number;
     totalSources: number;
@@ -65,6 +85,21 @@ export type AdminDashboardData = {
   sources: AdminSourceRow[];
   jobs: AdminJobRow[];
   users: AdminUserRow[];
+};
+
+export type AdminJobFilterInput = {
+  jobType?: unknown;
+  page?: unknown;
+  sourceId?: unknown;
+  status?: unknown;
+};
+
+export type AdminJobFilters = {
+  jobType: string;
+  page: number;
+  pageSize: number;
+  sourceId: string;
+  status: string;
 };
 
 type RawSourceRow = {
@@ -98,7 +133,14 @@ type RawCountRow = {
   count: number | bigint;
 };
 
+type RawOptionRow = {
+  value: string | null;
+};
+
 const APP_TIME_ZONE = "America/New_York";
+const JOB_PAGE_SIZE = 10;
+const MAX_FILTER_LENGTH = 100;
+const VALID_JOB_STATUSES = ["RUNNING", "SUCCESS", "FAILED", "SKIPPED"] as const;
 
 const sourceTypeLabels: Record<string, string> = {
   RSS: "RSS",
@@ -213,6 +255,84 @@ function jobLabel(status: string) {
   };
 
   return labels[status] ?? status;
+}
+
+function firstFilterValue(value: unknown) {
+  if (Array.isArray(value)) {
+    return firstFilterValue(value[0]);
+  }
+
+  if (typeof value === "string") {
+    return value.trim();
+  }
+
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return String(value);
+  }
+
+  return "";
+}
+
+function shortFilterValue(value: unknown) {
+  const trimmed = firstFilterValue(value);
+
+  return trimmed.length <= MAX_FILTER_LENGTH ? trimmed : "";
+}
+
+function parseJobPage(value: unknown) {
+  const numeric = Number(firstFilterValue(value));
+
+  if (!Number.isFinite(numeric)) {
+    return 1;
+  }
+
+  return Math.max(1, Math.floor(numeric));
+}
+
+export function normalizeAdminJobFilters(input: AdminJobFilterInput = {}): AdminJobFilters {
+  const status = shortFilterValue(input.status).toUpperCase();
+
+  return {
+    jobType: shortFilterValue(input.jobType),
+    page: parseJobPage(input.page),
+    pageSize: JOB_PAGE_SIZE,
+    sourceId: shortFilterValue(input.sourceId),
+    status: VALID_JOB_STATUSES.includes(status as (typeof VALID_JOB_STATUSES)[number])
+      ? status
+      : "",
+  };
+}
+
+function jobStatusOptions() {
+  return VALID_JOB_STATUSES.map((status) => ({
+    label: jobLabel(status),
+    value: status,
+  }));
+}
+
+function buildJobWhere(filters: AdminJobFilters) {
+  const clauses = ['"JobRun"."id" IS NOT NULL'];
+  const args: Array<string> = [];
+
+  if (filters.status) {
+    clauses.push('"JobRun"."status" = ?');
+    args.push(filters.status);
+  }
+
+  if (filters.jobType) {
+    clauses.push('"JobRun"."jobType" = ?');
+    args.push(filters.jobType);
+  }
+
+  if (filters.sourceId) {
+    clauses.push('"JobRun"."sourceId" = ?');
+    args.push(filters.sourceId);
+  }
+
+  return {
+    args,
+    sql: `WHERE ${clauses.join(" AND ")}`,
+  };
 }
 
 function configString(value: unknown, keys: string[], fallback: string) {
@@ -433,7 +553,9 @@ function mapUser(user: {
   };
 }
 
-export async function getAdminDashboardData(): Promise<AdminDashboardData | null> {
+export async function getAdminDashboardData(
+  options: { jobs?: AdminJobFilterInput } = {},
+): Promise<AdminDashboardData | null> {
   const prisma = await getPrisma();
 
   if (!prisma) {
@@ -442,7 +564,19 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData | null
 
   try {
     const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const [sources, jobs, users, todayCandidates, pendingErrorRows] = await Promise.all([
+    const jobFilters = normalizeAdminJobFilters(options.jobs);
+    const jobWhere = buildJobWhere(jobFilters);
+    const jobOffset = (jobFilters.page - 1) * jobFilters.pageSize;
+    const [
+      sources,
+      jobs,
+      latestJobs,
+      jobTypes,
+      users,
+      todayCandidates,
+      pendingErrorRows,
+      filteredJobCountRows,
+    ] = await Promise.all([
       prisma.$queryRaw<RawSourceRow[]>`
         SELECT
           "id",
@@ -457,6 +591,31 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData | null
         FROM "Source"
         ORDER BY "name" ASC
       `,
+      prisma.$queryRawUnsafe<RawJobRunRow[]>(
+        `
+        SELECT
+          "JobRun"."id",
+          "JobRun"."jobType",
+          "JobRun"."sourceId",
+          "Source"."name" AS "sourceName",
+          "JobRun"."status",
+          "JobRun"."startedAt",
+          "JobRun"."finishedAt",
+          "JobRun"."scannedCount",
+          "JobRun"."createdCount",
+          "JobRun"."skippedCount",
+          "JobRun"."errorMessage",
+          "JobRun"."metadata"
+        FROM "JobRun"
+        LEFT JOIN "Source" ON "Source"."id" = "JobRun"."sourceId"
+        ${jobWhere.sql}
+        ORDER BY "JobRun"."startedAt" DESC
+        LIMIT ? OFFSET ?
+        `,
+        ...jobWhere.args,
+        jobFilters.pageSize,
+        jobOffset,
+      ),
       prisma.$queryRaw<RawJobRunRow[]>`
         SELECT
           "JobRun"."id",
@@ -473,8 +632,14 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData | null
           "JobRun"."metadata"
         FROM "JobRun"
         LEFT JOIN "Source" ON "Source"."id" = "JobRun"."sourceId"
+        WHERE "JobRun"."sourceId" IS NOT NULL
         ORDER BY "JobRun"."startedAt" DESC
-        LIMIT 10
+        LIMIT 100
+      `,
+      prisma.$queryRaw<RawOptionRow[]>`
+        SELECT DISTINCT "jobType" AS "value"
+        FROM "JobRun"
+        ORDER BY "jobType" ASC
       `,
       prisma.user.findMany({
         orderBy: {
@@ -494,16 +659,45 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData | null
         FROM "JobRun"
         WHERE "status" = 'FAILED'
       `,
+      prisma.$queryRawUnsafe<RawCountRow[]>(
+        `
+        SELECT COUNT(*) AS "count"
+        FROM "JobRun"
+        ${jobWhere.sql}
+        `,
+        ...jobWhere.args,
+      ),
     ]);
     const latestJobsBySource = new Map<string, RawJobRunRow>();
+    const totalJobCount = rawNumber(filteredJobCountRows[0]?.count ?? 0);
+    const totalJobPages = Math.max(1, Math.ceil(totalJobCount / jobFilters.pageSize));
 
-    for (const job of jobs) {
+    for (const job of latestJobs) {
       if (job.sourceId && !latestJobsBySource.has(job.sourceId)) {
         latestJobsBySource.set(job.sourceId, job);
       }
     }
 
     return {
+      jobFilterOptions: {
+        jobTypes: jobTypes
+          .map((item) => item.value)
+          .filter((value): value is string => typeof value === "string" && Boolean(value)),
+        sources: sources.map((source) => ({
+          id: source.id,
+          name: source.name,
+        })),
+        statuses: jobStatusOptions(),
+      },
+      jobFilters,
+      jobPagination: {
+        hasNextPage: jobFilters.page < totalJobPages,
+        hasPreviousPage: jobFilters.page > 1,
+        page: jobFilters.page,
+        pageSize: jobFilters.pageSize,
+        totalCount: totalJobCount,
+        totalPages: totalJobPages,
+      },
       summary: {
         enabledSources: sources.filter((source) => rawBoolean(source.enabled)).length,
         totalSources: sources.length,
@@ -529,10 +723,24 @@ export async function getAdminSources() {
   };
 }
 
-export async function getAdminJobs() {
-  const data = await getAdminDashboardData();
+export async function getAdminJobs(options: { jobs?: AdminJobFilterInput } = {}) {
+  const data = await getAdminDashboardData(options);
 
   return {
+    filters: data?.jobFilters ?? normalizeAdminJobFilters(),
+    options: data?.jobFilterOptions ?? {
+      jobTypes: [],
+      sources: [],
+      statuses: jobStatusOptions(),
+    },
+    pagination: data?.jobPagination ?? {
+      hasNextPage: false,
+      hasPreviousPage: false,
+      page: 1,
+      pageSize: JOB_PAGE_SIZE,
+      totalCount: 0,
+      totalPages: 1,
+    },
     summary: data?.summary ?? null,
     jobs: data?.jobs ?? [],
   };

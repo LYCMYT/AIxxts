@@ -45,6 +45,26 @@ const emptySummary: AdminDashboardData["summary"] = {
   dailySchedule: "08:00",
   pendingErrors: 0,
 };
+const emptyJobFilters: AdminDashboardData["jobFilters"] = {
+  jobType: "",
+  page: 1,
+  pageSize: 10,
+  sourceId: "",
+  status: "",
+};
+const emptyJobFilterOptions: AdminDashboardData["jobFilterOptions"] = {
+  jobTypes: [],
+  sources: [],
+  statuses: [],
+};
+const emptyJobPagination: AdminDashboardData["jobPagination"] = {
+  hasNextPage: false,
+  hasPreviousPage: false,
+  page: 1,
+  pageSize: 10,
+  totalCount: 0,
+  totalPages: 1,
+};
 
 const inputClass =
   "w-full rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)] px-3.5 py-2.5 text-sm text-[var(--foreground)] transition placeholder:text-[var(--muted)] focus:border-[var(--accent)] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--accent-soft)]";
@@ -175,6 +195,123 @@ type AdminDashboardProps = Partial<AdminDashboardData> & {
 };
 
 type AdminJob = AdminDashboardData["jobs"][number];
+type AdminJobFilters = AdminDashboardData["jobFilters"];
+
+function jobListHref(filters: AdminJobFilters, page: number) {
+  const params = new URLSearchParams();
+
+  if (filters.status) {
+    params.set("status", filters.status);
+  }
+
+  if (filters.jobType) {
+    params.set("jobType", filters.jobType);
+  }
+
+  if (filters.sourceId) {
+    params.set("sourceId", filters.sourceId);
+  }
+
+  if (page > 1) {
+    params.set("page", String(page));
+  }
+
+  const query = params.toString();
+
+  return query ? `/admin?${query}#jobs` : "/admin#jobs";
+}
+
+function PaginationLink({
+  children,
+  disabled,
+  href,
+}: {
+  children: React.ReactNode;
+  disabled: boolean;
+  href: string;
+}) {
+  return (
+    <a
+      aria-disabled={disabled}
+      className={`focus-ring inline-flex min-h-9 items-center justify-center rounded-[var(--radius)] border px-3 text-sm font-semibold transition ${
+        disabled
+          ? "pointer-events-none border-[var(--line-soft)] bg-[var(--surface-soft)] text-[var(--muted)]"
+          : "border-[var(--line-soft)] bg-[var(--surface)] text-[var(--muted-strong)] hover:border-[var(--accent)] hover:bg-[var(--accent-soft)] hover:text-[var(--accent-strong)]"
+      }`}
+      href={href}
+    >
+      {children}
+    </a>
+  );
+}
+
+function JobFilterPanel({
+  filters,
+  options,
+  pagination,
+}: {
+  filters: AdminDashboardData["jobFilters"];
+  options: AdminDashboardData["jobFilterOptions"];
+  pagination: AdminDashboardData["jobPagination"];
+}) {
+  return (
+    <form
+      action="/admin#jobs"
+      className="mb-4 grid gap-3 rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface-soft)] p-3 lg:grid-cols-[1fr_1fr_1fr_auto_auto]"
+      method="get"
+    >
+      <Field label="任务状态">
+        <select className={inputClass} defaultValue={filters.status} name="status">
+          <option value="">全部状态</option>
+          {options.statuses.map((status) => (
+            <option key={status.value} value={status.value}>
+              {status.label}
+            </option>
+          ))}
+        </select>
+      </Field>
+      <Field label="任务类型">
+        <select className={inputClass} defaultValue={filters.jobType} name="jobType">
+          <option value="">全部类型</option>
+          {options.jobTypes.map((jobType) => (
+            <option key={jobType} value={jobType}>
+              {jobType}
+            </option>
+          ))}
+        </select>
+      </Field>
+      <Field label="来源">
+        <select className={inputClass} defaultValue={filters.sourceId} name="sourceId">
+          <option value="">全部来源</option>
+          {options.sources.map((source) => (
+            <option key={source.id} value={source.id}>
+              {source.name}
+            </option>
+          ))}
+        </select>
+      </Field>
+      <div className="flex items-end">
+        <button
+          className="focus-ring inline-flex min-h-10 w-full items-center justify-center rounded-[var(--radius)] bg-[var(--accent)] px-3.5 py-2 text-sm font-semibold text-white shadow-[var(--shadow-subtle)] transition hover:bg-[var(--accent-strong)] active:translate-y-px"
+          type="submit"
+        >
+          筛选
+        </button>
+      </div>
+      <div className="flex items-end">
+        <a
+          className="focus-ring inline-flex min-h-10 w-full items-center justify-center rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)] px-3.5 py-2 text-sm font-semibold text-[var(--muted-strong)] shadow-[var(--shadow-subtle)] transition hover:border-[var(--accent)] hover:bg-[var(--accent-soft)] hover:text-[var(--accent-strong)]"
+          href="/admin#jobs"
+        >
+          清除
+        </a>
+      </div>
+      <p className="text-xs leading-5 text-[var(--muted)] lg:col-span-5">
+        共 {pagination.totalCount} 条任务记录，当前第 {pagination.page} / {pagination.totalPages} 页，每页 {pagination.pageSize} 条。
+      </p>
+    </form>
+  );
+}
 
 function JobSummaryCell({ job }: { job: AdminJob }) {
   const hasDetails = job.details.length > 0 || Boolean(job.rawMetadataText);
@@ -222,6 +359,9 @@ function JobSummaryCell({ job }: { job: AdminJob }) {
 
 export function AdminDashboard({
   digestDate = currentDigestDate(),
+  jobFilterOptions = emptyJobFilterOptions,
+  jobFilters = emptyJobFilters,
+  jobPagination = emptyJobPagination,
   jobs = [],
   sources = [],
   summary = emptySummary,
@@ -384,6 +524,11 @@ export function AdminDashboard({
         id="jobs"
         title="任务状态"
       >
+        <JobFilterPanel
+          filters={jobFilters}
+          options={jobFilterOptions}
+          pagination={jobPagination}
+        />
         <TableFrame>
           <table className="min-w-[820px] w-full border-collapse text-left">
             <thead>
@@ -411,11 +556,33 @@ export function AdminDashboard({
                   </tr>
                 ))
               ) : (
-                <EmptyTableRow colSpan={5}>暂无任务运行记录。执行采集或每日精选后会写入 JobRun。</EmptyTableRow>
+                <EmptyTableRow colSpan={5}>暂无符合条件的任务记录。请放宽筛选条件或执行新任务。</EmptyTableRow>
               )}
             </tbody>
           </table>
         </TableFrame>
+        <nav
+          aria-label="任务记录分页"
+          className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
+        >
+          <p className="text-xs text-[var(--muted)]">
+            显示 {jobs.length} 条，共 {jobPagination.totalCount} 条
+          </p>
+          <div className="flex gap-2">
+            <PaginationLink
+              disabled={!jobPagination.hasPreviousPage}
+              href={jobListHref(jobFilters, Math.max(1, jobPagination.page - 1))}
+            >
+              上一页
+            </PaginationLink>
+            <PaginationLink
+              disabled={!jobPagination.hasNextPage}
+              href={jobListHref(jobFilters, jobPagination.page + 1)}
+            >
+              下一页
+            </PaginationLink>
+          </div>
+        </nav>
       </SectionHeading>
 
       <SectionHeading
