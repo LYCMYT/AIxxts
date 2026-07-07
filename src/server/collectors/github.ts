@@ -1,8 +1,17 @@
 import { env } from "@/server/env";
 
+import { requestErrorDiagnostics } from "./request-diagnostics";
 import type { AdapterFetchResult, CandidateInput, SourceRow } from "./types";
 
 type Fetcher = typeof fetch;
+type GitHubCollectorOptions = {
+  fetcher?: Fetcher;
+  requestTimeoutMs?: number;
+};
+type GitHubRequestDeps = {
+  fetcher: Fetcher;
+  requestTimeoutMs: number;
+};
 
 type GitHubConfig = {
   mode: "search" | "releases";
@@ -61,6 +70,7 @@ type GitHubRelease = {
 
 const GITHUB_API_BASE = "https://api.github.com";
 const GITHUB_API_VERSION = "2026-03-10";
+const GITHUB_REQUEST_TIMEOUT_MS = 20000;
 
 function configObject(value: unknown) {
   if (value && typeof value === "object" && !Array.isArray(value)) {
@@ -189,10 +199,50 @@ function rateLimitMessage(response: Response) {
   return "";
 }
 
-async function githubRequest<T>(path: string, fetcher: Fetcher): Promise<T> {
-  const response = await fetcher(`${GITHUB_API_BASE}${path}`, {
-    headers: githubHeaders(),
-  });
+function resolveGitHubCollectorOptions(options: Fetcher | GitHubCollectorOptions): GitHubRequestDeps {
+  if (typeof options === "function") {
+    return {
+      fetcher: options,
+      requestTimeoutMs: GITHUB_REQUEST_TIMEOUT_MS,
+    };
+  }
+
+  const requestTimeoutMs =
+    typeof options.requestTimeoutMs === "number" && Number.isFinite(options.requestTimeoutMs)
+      ? Math.max(1, Math.trunc(options.requestTimeoutMs))
+      : GITHUB_REQUEST_TIMEOUT_MS;
+
+  return {
+    fetcher: options.fetcher ?? fetch,
+    requestTimeoutMs,
+  };
+}
+
+async function githubRequest<T>(path: string, deps: GitHubRequestDeps): Promise<T> {
+  const controller = new AbortController();
+  let timedOut = false;
+  const timeout = setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, deps.requestTimeoutMs);
+  let response: Response;
+
+  try {
+    response = await deps.fetcher(`${GITHUB_API_BASE}${path}`, {
+      headers: githubHeaders(),
+      signal: controller.signal,
+    });
+  } catch (error) {
+    if (timedOut) {
+      throw new Error(`GitHub API request timed out after ${deps.requestTimeoutMs}ms.`);
+    }
+
+    const diagnostics = requestErrorDiagnostics(error);
+    throw new Error(`GitHub API request failed: ${diagnostics.message} (${diagnostics.category}).`);
+  } finally {
+    clearTimeout(timeout);
+  }
+
   const body = await parseJsonResponse(response);
 
   if (!response.ok) {
@@ -280,7 +330,7 @@ function repoCandidate(source: SourceRow, repo: GitHubRepo, query: string): Cand
 async function collectRepositorySearch(
   source: SourceRow,
   config: GitHubConfig,
-  fetcher: Fetcher,
+  deps: GitHubRequestDeps,
 ): Promise<AdapterFetchResult> {
   const queries = config.queries.length > 0 ? config.queries : [source.name];
   const items: CandidateInput[] = [];
@@ -301,7 +351,7 @@ async function collectRepositorySearch(
     });
     const result = await githubRequest<GitHubSearchResponse>(
       `/search/repositories?${params.toString()}`,
-      fetcher,
+      deps,
     );
 
     metadataQueries.push({
@@ -373,7 +423,7 @@ function releaseCandidate(source: SourceRow, repo: GitHubRepo, release: GitHubRe
 async function collectRepositoryReleases(
   source: SourceRow,
   config: GitHubConfig,
-  fetcher: Fetcher,
+  deps: GitHubRequestDeps,
 ): Promise<AdapterFetchResult> {
   if (config.repositories.length === 0) {
     return {
@@ -398,11 +448,11 @@ async function collectRepositoryReleases(
     const [owner, repoName] = repository.split("/");
     const repo = await githubRequest<GitHubRepo>(
       `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repoName)}`,
-      fetcher,
+      deps,
     );
     const releases = await githubRequest<GitHubRelease[]>(
       `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repoName)}/releases?per_page=${config.maxReleasesPerRepo}`,
-      fetcher,
+      deps,
     );
     const visibleReleases = releases
       .filter((release) => !release.draft)
@@ -429,13 +479,14 @@ async function collectRepositoryReleases(
 
 export async function collectGitHubSource(
   source: SourceRow,
-  fetcher: Fetcher = fetch,
+  options: Fetcher | GitHubCollectorOptions = fetch,
 ): Promise<AdapterFetchResult> {
   const config = parseGitHubConfig(source);
+  const deps = resolveGitHubCollectorOptions(options);
 
   if (config.mode === "releases") {
-    return collectRepositoryReleases(source, config, fetcher);
+    return collectRepositoryReleases(source, config, deps);
   }
 
-  return collectRepositorySearch(source, config, fetcher);
+  return collectRepositorySearch(source, config, deps);
 }

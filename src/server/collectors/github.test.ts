@@ -162,3 +162,36 @@ test("collectGitHubSource skips release mode without repositories", async () => 
   assert.equal(result.status, "SKIPPED");
   assert.equal(result.errorMessage, "GitHub releases source requires repositories or a GitHub repository URL.");
 });
+
+test("collectGitHubSource aborts slow GitHub requests with a timeout diagnostic", async () => {
+  let signalSeen = false;
+  const fetcher = (async (_input: RequestInfo | URL, init?: RequestInit) => {
+    assert.ok(init?.signal);
+    signalSeen = true;
+
+    await new Promise<void>((resolve) => {
+      init.signal?.addEventListener("abort", () => resolve(), { once: true });
+    });
+
+    throw new DOMException("The operation was aborted.", "AbortError");
+  }) as typeof fetch;
+
+  await assert.rejects(
+    () =>
+      collectGitHubSource(
+        {
+          ...baseSource,
+          config: {
+            mode: "search",
+            queries: ["topic:llm"],
+          },
+        },
+        {
+          fetcher,
+          requestTimeoutMs: 1,
+        },
+      ),
+    /GitHub API request timed out after 1ms/,
+  );
+  assert.equal(signalSeen, true);
+});

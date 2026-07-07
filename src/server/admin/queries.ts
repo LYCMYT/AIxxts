@@ -1,4 +1,5 @@
 import { COLLECTABLE_SOURCE_TYPES } from "@/server/collectors/types";
+import { classifyRequestError } from "@/server/collectors/request-diagnostics";
 
 type PrismaClientLike = Awaited<typeof import("@/server/db/prisma")>["prisma"];
 
@@ -447,6 +448,7 @@ export function mapJobMetadataDetails(value: unknown): AdminJobDetailRow[] {
   const feedTitle = metadataString(metadata, "feedTitle");
   const rssAttemptCount = metadataNumber(metadata, "rssAttemptCount");
   const rssLastError = metadataString(metadata, "rssLastError");
+  const rssLastErrorCategory = metadataString(metadata, "rssLastErrorCategory");
   const rawItemCount = metadataNumber(metadata, "rawItemCount");
   const filteredItemCount = metadataNumber(metadata, "filteredItemCount");
   const matchedItemCount = metadataNumber(metadata, "matchedItemCount");
@@ -467,6 +469,10 @@ export function mapJobMetadataDetails(value: unknown): AdminJobDetailRow[] {
 
   if (rssLastError) {
     details.push({ label: "上次 RSS 错误", value: rssLastError });
+  }
+
+  if (rssLastErrorCategory) {
+    details.push({ label: "上次 RSS 错误归类", value: rssLastErrorCategory });
   }
 
   if (matchedItemCount !== null && filteredItemCount !== null && rawItemCount !== null) {
@@ -563,40 +569,6 @@ function jobRunTime(job: AdminSourceHealthInput["jobs"][number]) {
   return job.finishedAt ?? job.startedAt;
 }
 
-function classifySourceError(errorMessage: string) {
-  const normalized = errorMessage.toLowerCase();
-
-  if (!normalized) {
-    return "暂无错误";
-  }
-
-  if (/(timed out|timeout|etimedout)/.test(normalized)) {
-    return "网络超时";
-  }
-
-  if (/(429|too many requests|rate limit)/.test(normalized)) {
-    return "上游限流";
-  }
-
-  if (/(tls|ssl|certificate|cert)/.test(normalized)) {
-    return "TLS/证书错误";
-  }
-
-  if (/(http\s*5\d\d|\b5\d\d\b|bad gateway|service unavailable)/.test(normalized)) {
-    return "上游服务错误";
-  }
-
-  if (/(http\s*4\d\d|\b4\d\d\b|forbidden|unauthorized)/.test(normalized)) {
-    return "上游拒绝访问";
-  }
-
-  if (/(fetch failed|network|econnreset|econnrefused|enotfound|socket)/.test(normalized)) {
-    return "网络连接失败";
-  }
-
-  return "其他错误";
-}
-
 export function mapSourceHealth(input: AdminSourceHealthInput): AdminSourceHealthRow {
   const jobs = [...input.jobs].sort(
     (left, right) => dateTimeMillis(right.startedAt) - dateTimeMillis(left.startedAt),
@@ -631,7 +603,7 @@ export function mapSourceHealth(input: AdminSourceHealthInput): AdminSourceHealt
 
   return {
     consecutiveFailures,
-    errorCategory: classifySourceError(lastError),
+    errorCategory: classifyRequestError(lastError),
     id: input.sourceId,
     lastError: lastError || "暂无错误",
     latestFailure: latestFailure ? formatDateTime(jobRunTime(latestFailure)) : sourceError ? "未记录" : "暂无失败",

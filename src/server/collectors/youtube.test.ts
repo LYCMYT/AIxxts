@@ -55,5 +55,6 @@ test("collectYouTubeSource retries transient RSS feed failures", async () => {
     assert.equal(result.items[0].externalId, "video123");
     assert.equal(result.metadata?.rssAttemptCount, 2);
     assert.equal(result.metadata?.rssLastError, "Request timed out after 20000ms");
+    assert.equal(result.metadata?.rssLastErrorCategory, "网络超时");
   }
 });

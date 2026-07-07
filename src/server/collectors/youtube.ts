@@ -4,6 +4,7 @@ import type { youtube_v3 } from "googleapis";
 
 import { env } from "@/server/env";
 
+import { requestErrorDiagnostics } from "./request-diagnostics";
 import type { AdapterFetchResult, CandidateInput, SourceRow } from "./types";
 
 type YouTubeConfig = {
@@ -234,7 +235,7 @@ async function collectYouTubeFeedSource(
     };
   }
 
-  const { attemptCount, feed, lastError } = await parseRssFeedWithRetry(feedUrl, deps);
+  const { attemptCount, feed, lastError, lastErrorCategory } = await parseRssFeedWithRetry(feedUrl, deps);
   const rawItems = feed.items.slice(0, config.maxResults);
   const items = rawItems
     .filter((item) => keywordMatches(item, config))
@@ -250,6 +251,7 @@ async function collectYouTubeFeedSource(
       feedUrl,
       rssAttemptCount: attemptCount,
       ...(lastError ? { rssLastError: lastError } : {}),
+      ...(lastErrorCategory ? { rssLastErrorCategory: lastErrorCategory } : {}),
       rawItemCount: feed.items.length,
       filteredItemCount: rawItems.length,
       matchedItemCount: items.length,
@@ -318,6 +320,7 @@ async function parseRssFeedWithRetry(feedUrl: string, deps: YouTubeCollectorDeps
   const parseRssFeed =
     deps.parseRssFeed ?? ((url: string) => youtubeFeedParser.parseURL(url));
   let lastError: string | undefined;
+  let lastErrorCategory: string | undefined;
 
   for (let attempt = 1; attempt <= YOUTUBE_RSS_MAX_ATTEMPTS; attempt += 1) {
     try {
@@ -327,9 +330,12 @@ async function parseRssFeedWithRetry(feedUrl: string, deps: YouTubeCollectorDeps
         attemptCount: attempt,
         feed,
         lastError,
+        lastErrorCategory,
       };
     } catch (error) {
-      lastError = getErrorMessage(error);
+      const diagnostics = requestErrorDiagnostics(error);
+      lastError = diagnostics.message;
+      lastErrorCategory = diagnostics.category;
 
       if (attempt === YOUTUBE_RSS_MAX_ATTEMPTS) {
         throw error;
@@ -338,12 +344,4 @@ async function parseRssFeedWithRetry(feedUrl: string, deps: YouTubeCollectorDeps
   }
 
   throw new Error(lastError ?? "YouTube RSS feed request failed.");
-}
-
-function getErrorMessage(error: unknown) {
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  return String(error);
 }
