@@ -149,6 +149,23 @@ function EvidencePanel({ item }: { item: ItemDetailData }) {
           </p>
         </div>
 
+        {item.topicTags.length > 0 ? (
+          <div className="mt-4 rounded-[var(--radius-sm)] border border-[var(--line-soft)] bg-[var(--surface-soft)] p-3">
+            <p className="text-xs font-semibold text-[var(--foreground)]">主题证据</p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {item.topicTags.map((topic) => (
+                <Link
+                  className="focus-ring rounded-full border border-[var(--line-soft)] bg-[var(--surface)] px-2.5 py-1 text-xs font-medium text-[var(--accent-strong)] hover:border-[var(--accent)] hover:bg-[var(--accent-soft)]"
+                  href={`/digests?topic=${encodeURIComponent(topic)}`}
+                  key={topic}
+                >
+                  {topic}
+                </Link>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
         <div className="mt-4 flex flex-wrap gap-2">
           {item.llmSignals.map((signal) => (
             <span
@@ -284,6 +301,19 @@ export function ItemDetailPage({
               <span>{item.source}</span>
               <span>{item.author}</span>
             </div>
+            {item.topicTags.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {item.topicTags.map((topic) => (
+                  <Link
+                    className="focus-ring rounded-full border border-[var(--line-soft)] bg-[var(--surface-soft)] px-2.5 py-1 text-xs font-medium text-[var(--accent-strong)] hover:border-[var(--accent)] hover:bg-[var(--accent-soft)]"
+                    href={`/digests?topic=${encodeURIComponent(topic)}`}
+                    key={topic}
+                  >
+                    {topic}
+                  </Link>
+                ))}
+              </div>
+            ) : null}
             <h1 className="break-words text-3xl font-semibold leading-tight tracking-normal sm:text-4xl">
               {item.title}
             </h1>

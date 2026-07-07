@@ -31,6 +31,7 @@ export type DigestItem = {
   publishedAt: string;
   signals: string;
   interpretation: string;
+  topicTags: string[];
   url: string;
 };
 
@@ -57,15 +58,21 @@ const sourceTypeLabel: Record<DigestItem["sourceType"], string> = {
   Manual: "人工录入",
 };
 
-function sourceBreakdown(items: DigestItem[]) {
-  const counts = new Map<DigestItem["sourceType"], number>();
+function topicBreakdown(items: DigestItem[]) {
+  const counts = new Map<string, number>();
 
   for (const item of items) {
-    counts.set(item.sourceType, (counts.get(item.sourceType) ?? 0) + 1);
+    for (const topic of item.topicTags) {
+      counts.set(topic, (counts.get(topic) ?? 0) + 1);
+    }
   }
 
   return Array.from(counts.entries())
-    .map(([type, count]) => ({ count, label: sourceTypeLabel[type], type }))
+    .map(([label, count]) => ({
+      count,
+      label,
+      percent: items.length > 0 ? Math.round((count / items.length) * 100) : 0,
+    }))
     .sort((left, right) => right.count - left.count || left.label.localeCompare(right.label));
 }
 
@@ -98,7 +105,7 @@ export function DigestHome({
   selectedCount,
   taskStatus,
 }: DigestHomeProps) {
-  const sources = sourceBreakdown(items);
+  const topics = topicBreakdown(items).slice(0, 8);
   const signals = signalHighlights(items);
   const topFiveCount = items.filter((item) => item.rank <= 5).length;
 
@@ -200,24 +207,33 @@ export function DigestHome({
 
         <div className="grid gap-3 rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)] p-4 shadow-[var(--shadow-subtle)]">
           <div>
-            <h2 className="text-base font-semibold text-[var(--foreground)]">来源构成</h2>
-            <p className="mt-1 text-sm leading-6 text-[var(--muted)]">来自今日精选条目的真实来源类型统计。</p>
+            <h2 className="text-base font-semibold text-[var(--foreground)]">主题雷达</h2>
+            <p className="mt-1 text-sm leading-6 text-[var(--muted)]">来自今日精选条目的真实主题标签统计。</p>
           </div>
-          {sources.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
-              {sources.map((source) => (
-                <span
-                  className="inline-flex items-center gap-2 rounded-full border border-[var(--line-soft)] bg-[var(--surface-soft)] px-3 py-1.5 text-xs font-medium text-[var(--muted-strong)]"
-                  key={source.type}
+          {topics.length > 0 ? (
+            <div className="grid gap-2">
+              {topics.map((topic) => (
+                <Link
+                  className="focus-ring grid gap-1 rounded-[var(--radius-sm)] border border-[var(--line-soft)] bg-[var(--surface-soft)] px-3 py-2 transition hover:border-[var(--accent)] hover:bg-[var(--accent-soft)]"
+                  href={`/digests?topic=${encodeURIComponent(topic.label)}`}
+                  key={topic.label}
                 >
-                  {source.label}
-                  <span className="font-semibold text-[var(--foreground)]">{source.count}</span>
-                </span>
+                  <span className="flex items-center justify-between gap-3 text-xs font-medium">
+                    <span className="text-[var(--foreground)]">{topic.label}</span>
+                    <span className="text-[var(--muted-strong)]">{topic.count} 条</span>
+                  </span>
+                  <span className="h-1.5 overflow-hidden rounded-full bg-white">
+                    <span
+                      className="block h-full rounded-full bg-[var(--accent)]"
+                      style={{ width: `${topic.percent}%` }}
+                    />
+                  </span>
+                </Link>
               ))}
             </div>
           ) : (
             <p className="rounded-[var(--radius-sm)] border border-dashed border-[var(--line)] bg-[var(--surface-soft)] px-3 py-2 text-sm leading-6 text-[var(--muted)]">
-              暂无来源构成，生成每日精选后自动统计。
+              暂无主题标签，生成带主题的每日精选后自动统计。
             </p>
           )}
         </div>
@@ -370,6 +386,19 @@ function DigestListItem({ item }: { item: DigestItem }) {
       </div>
 
       <div className="grid content-start gap-3 rounded-[var(--radius-sm)] border border-[var(--line-soft)] bg-[var(--surface-soft)] p-3 md:border-0 md:bg-transparent md:p-0">
+        {item.topicTags.length > 0 ? (
+          <div className="flex flex-wrap gap-1.5">
+            {item.topicTags.slice(0, 4).map((topic) => (
+              <Link
+                className="focus-ring rounded-full border border-[var(--accent-soft)] bg-[var(--accent-soft)] px-2 py-1 text-xs font-medium text-[var(--accent-strong)] hover:border-[var(--accent)]"
+                href={`/digests?topic=${encodeURIComponent(topic)}`}
+                key={`${item.id}-${topic}`}
+              >
+                {topic}
+              </Link>
+            ))}
+          </div>
+        ) : null}
         <div className="flex flex-wrap gap-1.5">
           {signals.length > 0 ? (
             signals.map((signal) => (

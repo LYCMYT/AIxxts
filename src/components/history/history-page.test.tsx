@@ -9,6 +9,7 @@ test("HistoryPage renders GET filters and a clear entry for active archive filte
       filters={{
         q: "agent memory",
         status: "failed",
+        topic: "AI Agent",
       }}
     />,
   );
@@ -19,6 +20,8 @@ test("HistoryPage renders GET filters and a clear entry for active archive filte
   assert.match(html, /value="agent memory"/);
   assert.match(html, /name="status"/);
   assert.match(html, /value="failed"/);
+  assert.match(html, /name="topic"/);
+  assert.match(html, /value="AI Agent"/);
   assert.match(html, /href="\/digests"/);
   assert.match(html, /清除筛选/);
 });

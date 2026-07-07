@@ -5,6 +5,7 @@ import type {
   RankingCandidate,
   RankingLimits,
 } from "@/server/ranking/types";
+import { inferCandidateTopicTags } from "@/server/ranking/topics";
 
 const sourceTypePriority: Record<SourceType, number> = {
   OFFICIAL_BLOG: 9,
@@ -36,6 +37,7 @@ export function rankCandidatesWithFallback(
       interpretation: buildFallbackInterpretation(candidate),
       impactReason: "未配置 LLM_API_KEY，未生成影响力解读。",
       heatReason: "按 hotScore、influenceScore、发布时间和来源类型进行确定性排序。",
+      topicTags: inferCandidateTopicTags(candidate),
     }));
 
   return {

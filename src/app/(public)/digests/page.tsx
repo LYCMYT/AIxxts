@@ -9,6 +9,7 @@ export default async function DigestsPage({
   searchParams: Promise<{
     q?: string | string[];
     status?: string | string[];
+    topic?: string | string[];
   }>;
 }) {
   const params = await searchParams;

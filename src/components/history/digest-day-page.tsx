@@ -41,6 +41,7 @@ function createEmptyDigest(date: string): DailyDigestData {
     candidateCount: 0,
     failedCount: 0,
     summary: "当前日期没有可展示的日报数据。",
+    topicTags: [],
     items: [],
   };
 }
@@ -73,6 +74,19 @@ export function DigestDayPage({
               {digest.date} 每日精选
             </h1>
             <p className="max-w-2xl text-sm leading-6 text-[var(--muted)]">{digest.summary}</p>
+            {digest.topicTags.length > 0 ? (
+              <div className="flex flex-wrap gap-2 pt-1">
+                {digest.topicTags.map((topic) => (
+                  <Link
+                    className="focus-ring rounded-full border border-[var(--line-soft)] bg-[var(--surface-soft)] px-2.5 py-1 text-xs font-medium text-[var(--accent-strong)] hover:border-[var(--accent)] hover:bg-[var(--accent-soft)]"
+                    href={`/digests?topic=${encodeURIComponent(topic)}`}
+                    key={topic}
+                  >
+                    {topic}
+                  </Link>
+                ))}
+              </div>
+            ) : null}
           </div>
 
           <dl className="grid grid-cols-3 gap-2 text-sm sm:w-[360px]">
@@ -109,6 +123,19 @@ export function DigestDayPage({
                   <span>{item.sourceType}</span>
                   <span>{item.publishedAt}</span>
                 </div>
+                {item.topicTags.length > 0 ? (
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {item.topicTags.map((topic) => (
+                      <Link
+                        className="focus-ring rounded-full border border-[var(--line-soft)] bg-[var(--surface-soft)] px-2 py-1 text-xs font-medium text-[var(--accent-strong)] hover:border-[var(--accent)] hover:bg-[var(--accent-soft)]"
+                        href={`/digests?topic=${encodeURIComponent(topic)}`}
+                        key={`${item.id}-${topic}`}
+                      >
+                        {topic}
+                      </Link>
+                    ))}
+                  </div>
+                ) : null}
                 <h2 className="mt-2 text-lg font-semibold leading-7">
                   <Link
                     className="focus-ring rounded-[var(--radius-sm)] transition hover:text-[var(--accent-strong)]"

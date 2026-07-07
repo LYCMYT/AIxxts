@@ -5,6 +5,11 @@ import { env } from "@/server/env";
 import { runArticleEnrichmentJob } from "@/server/jobs/enrich-articles";
 import { runCandidateTranslationJob } from "@/server/jobs/translate-candidates";
 import { rankCandidatesWithFallback } from "@/server/ranking/fallback";
+import {
+  inferCandidateTopicTags,
+  normalizeTopicTags,
+  topicSlug,
+} from "@/server/ranking/topics";
 import type {
   ArticleEnrichmentJobResult,
   RunArticleEnrichmentJobOptions,
@@ -286,9 +291,17 @@ async function writeSuccessfulDigest(input: {
               influenceScore: candidate.influenceScore,
               impactReason: item.impactReason ?? null,
               heatReason: item.heatReason ?? null,
+              topicTags: item.topicTags ?? [],
             },
           };
         }),
+      });
+
+      await writeCandidateTopicTags({
+        candidatesById,
+        items: input.ranking.items,
+        provider: input.provider,
+        tx,
       });
     }
 
@@ -303,6 +316,73 @@ async function writeSuccessfulDigest(input: {
       message: "每日精选已生成草稿。",
     };
   });
+}
+
+async function writeCandidateTopicTags(input: {
+  candidatesById: Map<string, RankingCandidate>;
+  items: DigestRankingResult["items"];
+  provider: DailyDigestJobResult["provider"];
+  tx: Prisma.TransactionClient;
+}) {
+  const candidateIds = input.items.map((item) => item.candidateId);
+  const source = input.provider === "deterministic-fallback" ? "rule" : "llm";
+
+  await input.tx.candidateTopic.deleteMany({
+    where: {
+      candidateId: {
+        in: candidateIds,
+      },
+      source: {
+        in: ["ranking", "rule", "llm"],
+      },
+    },
+  });
+
+  for (const item of input.items) {
+    const candidate = input.candidatesById.get(item.candidateId);
+
+    if (!candidate) {
+      continue;
+    }
+
+    const topicTags = normalizeTopicTags(
+      item.topicTags && item.topicTags.length > 0
+        ? item.topicTags
+        : inferCandidateTopicTags(candidate),
+    );
+
+    for (const label of topicTags) {
+      const topic = await input.tx.topicTag.upsert({
+        where: {
+          slug: topicSlug(label),
+        },
+        create: {
+          label,
+          slug: topicSlug(label),
+        },
+        update: {
+          label,
+        },
+      });
+
+      await input.tx.candidateTopic.upsert({
+        where: {
+          candidateId_topicId: {
+            candidateId: candidate.id,
+            topicId: topic.id,
+          },
+        },
+        create: {
+          candidateId: candidate.id,
+          topicId: topic.id,
+          source,
+        },
+        update: {
+          source,
+        },
+      });
+    }
+  }
 }
 
 async function writeFailedDigest(input: {

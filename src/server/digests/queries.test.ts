@@ -46,10 +46,12 @@ test("digest archive filters normalize GET params for keyword and status", () =>
     normalizeDigestArchiveFilters({
       q: "  agent   memory  ",
       status: "success",
+      topic: "  AI Agent  ",
     }),
     {
       q: "agent memory",
       status: "success",
+      topic: "AI Agent",
     },
   );
 
@@ -61,6 +63,7 @@ test("digest archive filters normalize GET params for keyword and status", () =>
     {
       q: "first",
       status: "",
+      topic: "",
     },
   );
 });
@@ -99,6 +102,24 @@ test("digest archive where searches digest and item text with status", () => {
     ],
     status: {
       in: ["PUBLISHED"],
+    },
+  });
+});
+
+test("digest archive where filters by topic tag", () => {
+  assert.deepEqual(buildDigestArchiveWhere({ topic: "AI Agent" }), {
+    items: {
+      some: {
+        candidate: {
+          topicTags: {
+            some: {
+              topic: {
+                label: "AI Agent",
+              },
+            },
+          },
+        },
+      },
     },
   });
 });

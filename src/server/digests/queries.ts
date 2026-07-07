@@ -24,6 +24,7 @@ export type HomeDigestItem = {
   publishedAt: string;
   signals: string;
   interpretation: string;
+  topicTags: string[];
   url: string;
 };
 
@@ -52,6 +53,7 @@ export type DigestItemPreviewData = {
   publishedAt: string;
   interpretation: string;
   signals: string;
+  topicTags: string[];
   originalUrl: string;
 };
 
@@ -66,6 +68,7 @@ export type DailyDigestData = {
   candidateCount: number;
   failedCount: number;
   summary: string;
+  topicTags: string[];
   error?: string;
   items: DigestItemPreviewData[];
 };
@@ -77,11 +80,13 @@ export type DigestArchiveStatusFilter = (typeof digestArchiveStatusFilters)[numb
 export type DigestArchiveFilterInput = {
   q?: string | string[];
   status?: string | string[];
+  topic?: string | string[];
 };
 
 export type DigestArchiveFilters = {
   q: string;
   status: DigestArchiveStatusFilter;
+  topic: string;
 };
 
 const digestArchiveStatusWhere: Record<Exclude<DigestArchiveStatusFilter, "">, DigestStatus[]> = {
@@ -126,6 +131,7 @@ export type ItemDetailData = {
   selectionReason: string;
   aiInterpretation: string;
   llmSignals: string[];
+  topicTags: string[];
   interactions: {
     label: string;
     value: string;
@@ -327,10 +333,12 @@ export function normalizeDigestArchiveFilters(
 ): DigestArchiveFilters {
   const q = firstSearchParam(input.q).replace(/\s+/g, " ").trim();
   const rawStatus = firstSearchParam(input.status).trim();
+  const topic = firstSearchParam(input.topic).replace(/\s+/g, " ").trim();
 
   return {
     q,
     status: isDigestArchiveStatusFilter(rawStatus) ? rawStatus : "",
+    topic,
   };
 }
 
@@ -376,6 +384,22 @@ export function buildDigestArchiveWhere(
   if (filters.status) {
     where.status = {
       in: digestArchiveStatusWhere[filters.status],
+    };
+  }
+
+  if (filters.topic) {
+    where.items = {
+      some: {
+        candidate: {
+          topicTags: {
+            some: {
+              topic: {
+                label: filters.topic,
+              },
+            },
+          },
+        },
+      },
     };
   }
 
@@ -517,6 +541,18 @@ function signalTags(value: unknown) {
   return tags.length > 0 ? tags : ["暂无结构化信号"];
 }
 
+function topicLabels(candidate: {
+  topicTags?: Array<{
+    topic: {
+      label: string;
+    };
+  }>;
+}) {
+  return (candidate.topicTags ?? [])
+    .map((item) => item.topic.label)
+    .filter((label, index, labels) => label && labels.indexOf(label) === index);
+}
+
 function digestItemToPreview(item: {
   rank: number;
   titleSnapshot: string;
@@ -530,6 +566,11 @@ function digestItemToPreview(item: {
     source: {
       type: string;
     };
+    topicTags?: Array<{
+      topic: {
+        label: string;
+      };
+    }>;
   };
 }): DigestItemPreviewData {
   return {
@@ -541,6 +582,7 @@ function digestItemToPreview(item: {
     publishedAt: formatDateTime(item.candidate.publishedAt),
     interpretation: item.interpretation,
     signals: signalsText(item.signals),
+    topicTags: topicLabels(item.candidate),
     originalUrl: item.urlSnapshot,
   };
 }
@@ -558,6 +600,11 @@ export function digestItemToHome(item: {
     source: {
       type: string;
     };
+    topicTags?: Array<{
+      topic: {
+        label: string;
+      };
+    }>;
   };
 }): HomeDigestItem {
   return {
@@ -569,6 +616,7 @@ export function digestItemToHome(item: {
     publishedAt: formatTime(item.candidate.publishedAt),
     signals: signalsText(item.signals),
     interpretation: item.interpretation,
+    topicTags: topicLabels(item.candidate),
     url: item.urlSnapshot,
   };
 }
@@ -594,10 +642,18 @@ function digestToView(digest: {
       source: {
         type: string;
       };
+      topicTags?: Array<{
+        topic: {
+          label: string;
+        };
+      }>;
     };
   }>;
 }): DailyDigestData {
   const viewStatus = statusView(digest.status);
+  const topicTags = Array.from(
+    new Set(digest.items.flatMap((item) => topicLabels(item.candidate))),
+  ).slice(0, 8);
 
   return {
     date: digest.digestDate,
@@ -610,6 +666,7 @@ function digestToView(digest: {
     candidateCount: digest.items.length,
     failedCount: viewStatus === "failed" ? 1 : 0,
     summary: digest.summary ?? digest.title,
+    topicTags,
     error: viewStatus === "failed" ? digest.summary ?? "日报生成失败，请查看任务日志。" : undefined,
     items: digest.items.map(digestItemToPreview),
   };
@@ -685,6 +742,11 @@ export async function getTodayPublishedDigestHome(): Promise<HomeDigestData | nu
             candidate: {
               include: {
                 source: true,
+                topicTags: {
+                  include: {
+                    topic: true,
+                  },
+                },
               },
             },
           },
@@ -765,6 +827,11 @@ export async function getDigestArchive(
               candidate: {
                 include: {
                   source: true,
+                  topicTags: {
+                    include: {
+                      topic: true,
+                    },
+                  },
                 },
               },
             },
@@ -820,6 +887,11 @@ export async function getDigestByDate(date: string): Promise<DailyDigestData | n
             candidate: {
               include: {
                 source: true,
+                topicTags: {
+                  include: {
+                    topic: true,
+                  },
+                },
               },
             },
           },
@@ -877,6 +949,11 @@ export async function getItemDetailById(id: string): Promise<ItemDetailData | nu
       },
       include: {
         source: true,
+        topicTags: {
+          include: {
+            topic: true,
+          },
+        },
         duplicateOf: {
           include: {
             source: true,
@@ -908,6 +985,7 @@ export async function getItemDetailById(id: string): Promise<ItemDetailData | nu
       null;
     const rawEngagement = jsonToRecord(item.rawEngagement);
     const digestSignals = publishedDigestItem ? signalTags(publishedDigestItem.signals) : [];
+    const itemTopicTags = topicLabels(item);
     const duplicateSources = [
       ...(item.duplicateOf ? [relatedSourceFromCandidate(item.duplicateOf)] : []),
       ...item.duplicates.map(relatedSourceFromCandidate),
@@ -944,6 +1022,7 @@ export async function getItemDetailById(id: string): Promise<ItemDetailData | nu
         publishedDigestItem?.interpretation ?? detailText.chineseSummary ?? "该候选内容尚未进入已发布日报。",
       aiInterpretation: detailText.chineseSummary,
       llmSignals: digestSignals.length > 0 ? digestSignals : ["暂无日报信号"],
+      topicTags: itemTopicTags,
       interactions: [
         {
           label: "热度分",

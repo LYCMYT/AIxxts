@@ -21,6 +21,7 @@ export type DigestRankingItem = {
   interpretation: string;
   impactReason?: string;
   heatReason?: string;
+  topicTags?: string[];
 };
 
 export type DigestRankingResult = {

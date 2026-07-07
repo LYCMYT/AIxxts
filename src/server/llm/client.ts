@@ -8,6 +8,7 @@ import type {
   RankingCandidate,
   RankingLimits,
 } from "@/server/ranking/types";
+import { inferCandidateTopicTags, normalizeTopicTags } from "@/server/ranking/topics";
 import { buildCandidateTranslationPrompt } from "@/server/translation/candidate-text";
 import type { CandidateTranslationPromptInput } from "@/server/translation/candidate-text";
 
@@ -23,6 +24,7 @@ const llmRankingSchema = z.object({
         interpretation: z.string().min(1).max(500),
         impactReason: z.string().min(1).max(300).optional(),
         heatReason: z.string().min(1).max(300).optional(),
+        topicTags: z.array(z.string().min(1).max(40)).max(4).optional(),
       }),
     )
     .max(20),
@@ -172,6 +174,7 @@ function buildDailyRankingPrompt(
           "rank 从 1 开始连续递增，不得重复。",
           "interpretation 必须只解释输入材料中标题和摘要可支持的内容，不得胡编。",
           "score 使用 0 到 100 数字，越重要越高。",
+          "topicTags 输出 1 到 4 个短标签，只能基于标题、摘要、来源和平台类型，不得臆测。",
         ],
         outputSchema: {
           digestTitle: "string",
@@ -184,6 +187,7 @@ function buildDailyRankingPrompt(
               interpretation: "string",
               impactReason: "string",
               heatReason: "string",
+              topicTags: ["string"],
             },
           ],
         },
@@ -202,6 +206,7 @@ function validateLlmRanking(
 ): DigestRankingResult {
   const parsed = llmRankingSchema.parse(value);
   const candidateIds = new Set(candidates.map((candidate) => candidate.id));
+  const candidatesById = new Map(candidates.map((candidate) => [candidate.id, candidate]));
   const seenIds = new Set<string>();
   const minItems = Math.min(limits.minItems, candidates.length);
 
@@ -230,7 +235,16 @@ function validateLlmRanking(
   return {
     digestTitle: parsed.digestTitle,
     digestSummary: parsed.digestSummary,
-    items: sortedItems,
+    items: sortedItems.map((item) => {
+      const candidate = candidatesById.get(item.candidateId);
+      const topicTags = normalizeTopicTags(item.topicTags ?? []);
+
+      return {
+        ...item,
+        topicTags:
+          topicTags.length > 0 || !candidate ? topicTags : inferCandidateTopicTags(candidate),
+      };
+    }),
   };
 }
 

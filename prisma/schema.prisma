@@ -99,10 +99,32 @@ model CandidateItem {
   duplicateOf       CandidateItem?  @relation("DuplicateItems", fields: [duplicateOfId], references: [id])
   duplicates        CandidateItem[] @relation("DuplicateItems")
   digestItems       DigestItem[]
+  topicTags         CandidateTopic[]
 
   @@index([publishedAt])
   @@index([sourceId, publishedAt])
   @@index([status, publishedAt])
+}
+
+model TopicTag {
+  id         String           @id @default(cuid())
+  label      String           @unique
+  slug       String           @unique
+  createdAt  DateTime         @default(now())
+  candidates CandidateTopic[]
+}
+
+model CandidateTopic {
+  candidateId String
+  topicId     String
+  confidence  Float?
+  source      String        @default("ranking")
+  createdAt   DateTime      @default(now())
+  candidate   CandidateItem @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  topic       TopicTag      @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@id([candidateId, topicId])
+  @@index([topicId])
 }
 
 model DailyDigest {

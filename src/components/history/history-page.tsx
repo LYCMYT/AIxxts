@@ -34,6 +34,7 @@ const statusIcons = {
 const emptyFilters: DigestArchiveFilters = {
   q: "",
   status: "",
+  topic: "",
 };
 
 const archiveStatusLabels: Record<Exclude<DigestArchiveFilters["status"], "">, string> = {
@@ -56,11 +57,11 @@ function StatusBadge({ status, label }: { status: DigestStatusView; label: strin
 }
 
 function HistoryFilters({ filters }: { filters: DigestArchiveFilters }) {
-  const hasActiveFilters = Boolean(filters.q || filters.status);
+  const hasActiveFilters = Boolean(filters.q || filters.status || filters.topic);
 
   return (
     <form action="/digests" className="grid gap-3 border-t border-[var(--line-soft)] pt-4" method="get">
-      <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_220px]">
+      <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_220px_220px]">
         <label className="grid gap-2 text-sm font-medium text-[var(--muted-strong)]">
           <span>关键词</span>
           <span className="relative">
@@ -77,6 +78,17 @@ function HistoryFilters({ filters }: { filters: DigestArchiveFilters }) {
               type="search"
             />
           </span>
+        </label>
+
+        <label className="grid gap-2 text-sm font-medium text-[var(--muted-strong)]">
+          <span>主题</span>
+          <input
+            className="focus-ring min-h-11 w-full rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)] px-3.5 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted)]"
+            defaultValue={filters.topic}
+            name="topic"
+            placeholder="例如 AI Agent"
+            type="search"
+          />
         </label>
 
         <label className="grid gap-2 text-sm font-medium text-[var(--muted-strong)]">
@@ -248,6 +260,19 @@ export function HistoryPage({ digests = [], filters = emptyFilters, jobRuns = []
                 <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted)]">
                   {latest.summary}
                 </p>
+                {latest.topicTags.length > 0 ? (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {latest.topicTags.map((tag) => (
+                      <Link
+                        className="focus-ring rounded-full border border-[var(--line-soft)] bg-[var(--surface-soft)] px-2.5 py-1 text-xs font-medium text-[var(--accent-strong)] hover:border-[var(--accent)] hover:bg-[var(--accent-soft)]"
+                        href={`/digests?topic=${encodeURIComponent(tag)}`}
+                        key={tag}
+                      >
+                        {tag}
+                      </Link>
+                    ))}
+                  </div>
+                ) : null}
               </div>
               <Link
                 aria-label={`查看 ${latest.date} 完整日报`}
@@ -274,6 +299,19 @@ export function HistoryPage({ digests = [], filters = emptyFilters, jobRuns = []
                       <span>{item.sourceType}</span>
                       <span>{item.publishedAt}</span>
                     </div>
+                    {item.topicTags.length > 0 ? (
+                      <div className="mt-2 flex flex-wrap gap-1.5">
+                        {item.topicTags.map((tag) => (
+                          <Link
+                            className="focus-ring rounded-full border border-[var(--line-soft)] bg-[var(--surface)] px-2 py-1 text-xs font-medium text-[var(--accent-strong)] hover:border-[var(--accent)] hover:bg-[var(--accent-soft)]"
+                            href={`/digests?topic=${encodeURIComponent(tag)}`}
+                            key={`${item.id}-${tag}`}
+                          >
+                            {tag}
+                          </Link>
+                        ))}
+                      </div>
+                    ) : null}
                     <h3 className="mt-2 text-base font-semibold leading-6">{item.title}</h3>
                     <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
                       {item.interpretation}
