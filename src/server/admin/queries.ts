@@ -25,6 +25,7 @@ export type AdminSourceRow = {
 };
 
 export type AdminJobRow = {
+  details: AdminJobDetailRow[];
   id: string;
   name: string;
   result: {
@@ -33,7 +34,13 @@ export type AdminJobRow = {
   };
   finishedAt: string;
   output: string;
+  rawMetadataText: string | null;
   summary: string;
+};
+
+export type AdminJobDetailRow = {
+  label: string;
+  value: string;
 };
 
 export type AdminUserRow = {
@@ -84,6 +91,7 @@ type RawJobRunRow = {
   createdCount: number | bigint;
   skippedCount: number | bigint;
   errorMessage: string | null;
+  metadata: unknown;
 };
 
 type RawCountRow = {
@@ -253,6 +261,107 @@ function configText(value: unknown) {
   return config ? JSON.stringify(config, null, 2) : "";
 }
 
+function metadataNumber(config: Record<string, unknown> | null, key: string) {
+  const value = config?.[key];
+
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+function metadataString(config: Record<string, unknown> | null, key: string) {
+  const value = config?.[key];
+
+  return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
+function metadataStringList(config: Record<string, unknown> | null, key: string) {
+  const value = config?.[key];
+
+  return Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === "string" && Boolean(item.trim()))
+    : [];
+}
+
+export function mapJobMetadataDetails(value: unknown): AdminJobDetailRow[] {
+  const metadata = normalizedConfig(value);
+
+  if (!metadata) {
+    return [];
+  }
+
+  const details: AdminJobDetailRow[] = [];
+  const method = metadataString(metadata, "method");
+  const feedTitle = metadataString(metadata, "feedTitle");
+  const rssAttemptCount = metadataNumber(metadata, "rssAttemptCount");
+  const rssLastError = metadataString(metadata, "rssLastError");
+  const rawItemCount = metadataNumber(metadata, "rawItemCount");
+  const filteredItemCount = metadataNumber(metadata, "filteredItemCount");
+  const matchedItemCount = metadataNumber(metadata, "matchedItemCount");
+  const keywords = metadataStringList(metadata, "keywords");
+  const articleExtraction = normalizedConfig(metadata.articleExtraction);
+
+  if (method) {
+    details.push({ label: "采集方式", value: method });
+  }
+
+  if (feedTitle) {
+    details.push({ label: "Feed 标题", value: feedTitle });
+  }
+
+  if (rssAttemptCount !== null) {
+    details.push({ label: "RSS 尝试", value: `${rssAttemptCount} 次` });
+  }
+
+  if (rssLastError) {
+    details.push({ label: "上次 RSS 错误", value: rssLastError });
+  }
+
+  if (matchedItemCount !== null && filteredItemCount !== null && rawItemCount !== null) {
+    details.push({
+      label: "匹配结果",
+      value: `${matchedItemCount} / ${filteredItemCount} / ${rawItemCount}`,
+    });
+  }
+
+  if (keywords.length > 0) {
+    details.push({ label: "关键词", value: keywords.join(", ") });
+  }
+
+  if (articleExtraction) {
+    const attempted = metadataNumber(articleExtraction, "attemptedCount") ?? 0;
+    const enriched = metadataNumber(articleExtraction, "enrichedCount") ?? 0;
+    const failed = metadataNumber(articleExtraction, "failedCount") ?? 0;
+
+    details.push({
+      label: "正文抓取",
+      value: `尝试 ${attempted}，成功 ${enriched}，失败 ${failed}`,
+    });
+  }
+
+  return details;
+}
+
+export function formatJobMetadataText(value: unknown) {
+  if (value === null || value === undefined) {
+    return null;
+  }
+
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+
+    if (!trimmed) {
+      return null;
+    }
+
+    try {
+      return JSON.stringify(JSON.parse(trimmed), null, 2);
+    } catch {
+      return trimmed;
+    }
+  }
+
+  return JSON.stringify(value, null, 2);
+}
+
 function mapSource(source: RawSourceRow, latestJob: RawJobRunRow | null): AdminSourceRow {
   const failed = Boolean(source.lastError ?? latestJob?.errorMessage);
   const running = latestJob?.status === "RUNNING";
@@ -289,6 +398,7 @@ function mapJob(job: RawJobRunRow): AdminJobRow {
   const sourceName = job.sourceName ? `，${job.sourceName}` : "";
 
   return {
+    details: mapJobMetadataDetails(job.metadata),
     id: job.id,
     name: `${job.jobType}${sourceName}`,
     result: {
@@ -299,6 +409,7 @@ function mapJob(job: RawJobRunRow): AdminJobRow {
     output: `${rawNumber(job.createdCount)} 条新增，${rawNumber(
       job.scannedCount,
     )} 条扫描，${rawNumber(job.skippedCount)} 条跳过`,
+    rawMetadataText: formatJobMetadataText(job.metadata),
     summary: job.errorMessage ?? "任务已写入运行记录。",
   };
 }
@@ -358,7 +469,8 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData | null
           "JobRun"."scannedCount",
           "JobRun"."createdCount",
           "JobRun"."skippedCount",
-          "JobRun"."errorMessage"
+          "JobRun"."errorMessage",
+          "JobRun"."metadata"
         FROM "JobRun"
         LEFT JOIN "Source" ON "Source"."id" = "JobRun"."sourceId"
         ORDER BY "JobRun"."startedAt" DESC

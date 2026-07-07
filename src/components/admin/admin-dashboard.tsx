@@ -174,6 +174,52 @@ type AdminDashboardProps = Partial<AdminDashboardData> & {
   digestDate?: string | null;
 };
 
+type AdminJob = AdminDashboardData["jobs"][number];
+
+function JobSummaryCell({ job }: { job: AdminJob }) {
+  const hasDetails = job.details.length > 0 || Boolean(job.rawMetadataText);
+
+  return (
+    <div className="grid gap-2">
+      <span className="inline-flex items-start gap-2">
+        {job.result.label === "失败" ? (
+          <WarningCircle
+            className="mt-0.5 shrink-0 text-[var(--danger)]"
+            size={16}
+            weight="bold"
+          />
+        ) : null}
+        <span>{job.summary}</span>
+      </span>
+
+      {hasDetails ? (
+        <details className="group rounded-[var(--radius-sm)] border border-[var(--line-soft)] bg-[var(--surface-soft)]">
+          <summary className="focus-ring cursor-pointer select-none px-3 py-2 text-xs font-semibold text-[var(--accent-strong)] transition hover:text-[var(--accent)]">
+            查看运行详情
+          </summary>
+          <div className="grid gap-3 border-t border-[var(--line-soft)] px-3 py-3">
+            {job.details.length > 0 ? (
+              <dl className="grid gap-2 text-xs sm:grid-cols-2">
+                {job.details.map((detail) => (
+                  <div className="grid gap-1" key={`${job.id}-${detail.label}`}>
+                    <dt className="font-semibold text-[var(--muted)]">{detail.label}</dt>
+                    <dd className="break-words text-[var(--foreground)]">{detail.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            ) : null}
+            {job.rawMetadataText ? (
+              <pre className="max-h-48 overflow-auto whitespace-pre-wrap rounded-[var(--radius-sm)] border border-[var(--line-soft)] bg-[var(--surface)] p-3 font-mono text-[11px] leading-5 text-[var(--muted-strong)]">
+                {job.rawMetadataText}
+              </pre>
+            ) : null}
+          </div>
+        </details>
+      ) : null}
+    </div>
+  );
+}
+
 export function AdminDashboard({
   digestDate = currentDigestDate(),
   jobs = [],
@@ -360,16 +406,7 @@ export function AdminDashboard({
                     <TableCell>{job.finishedAt}</TableCell>
                     <TableCell>{job.output}</TableCell>
                     <TableCell className="min-w-[280px]">
-                      <span className="inline-flex items-start gap-2">
-                        {job.result.label === "失败" ? (
-                          <WarningCircle
-                            className="mt-0.5 shrink-0 text-[var(--danger)]"
-                            size={16}
-                            weight="bold"
-                          />
-                        ) : null}
-                        <span>{job.summary}</span>
-                      </span>
+                      <JobSummaryCell job={job} />
                     </TableCell>
                   </tr>
                 ))
