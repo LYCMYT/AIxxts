@@ -1,33 +1,31 @@
 "use client";
 
-import { useEffect, useState } from "react";
+export const adminSectionLinks = [
+  { id: "source-health", href: "#source-health", label: "健康概览" },
+  { id: "sources", href: "#sources", label: "数据源" },
+  { id: "youtube", href: "#youtube", label: "YouTube 关键词" },
+  { id: "manual", href: "#manual", label: "手动候选" },
+  { id: "jobs", href: "#jobs", label: "任务状态" },
+  { id: "users", href: "#users", label: "用户角色" },
+] as const;
 
-const sectionLinks = [
-  { href: "#source-health", label: "健康概览" },
-  { href: "#sources", label: "数据源" },
-  { href: "#youtube", label: "YouTube 关键词" },
-  { href: "#manual", label: "手动候选" },
-  { href: "#jobs", label: "任务状态" },
-  { href: "#users", label: "用户角色" },
-];
+export type AdminSectionId = (typeof adminSectionLinks)[number]["id"];
 
-export function AdminSectionNav() {
-  const [activeHref, setActiveHref] = useState("#source-health");
+export const defaultAdminSectionId: AdminSectionId = "source-health";
 
-  useEffect(() => {
-    const syncActiveHref = () => {
-      const nextHref = window.location.hash;
+export function adminSectionIdFromHash(hash: string): AdminSectionId | null {
+  const nextId = hash.replace(/^#/, "");
 
-      if (sectionLinks.some((item) => item.href === nextHref)) {
-        setActiveHref(nextHref);
-      }
-    };
+  return adminSectionLinks.some((item) => item.id === nextId) ? (nextId as AdminSectionId) : null;
+}
 
-    syncActiveHref();
-    window.addEventListener("hashchange", syncActiveHref);
-
-    return () => window.removeEventListener("hashchange", syncActiveHref);
-  }, []);
+export function AdminSectionNav({
+  activeSectionId,
+  onSectionChange,
+}: {
+  activeSectionId: AdminSectionId;
+  onSectionChange: (sectionId: AdminSectionId) => void;
+}) {
 
   return (
     <aside className="lg:sticky lg:top-6" data-testid="admin-section-nav">
@@ -46,15 +44,13 @@ export function AdminSectionNav() {
             className="focus-ring min-h-10 w-full rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface-soft)] px-3.5 py-2 text-sm font-semibold text-[var(--muted-strong)] transition hover:border-[var(--accent)] hover:bg-[var(--accent-soft)] hover:text-[var(--accent-strong)]"
             data-testid="admin-section-nav-select"
             id="admin-section-nav-select"
-            value={activeHref}
+            value={activeSectionId}
             onChange={(event) => {
-              const nextHref = event.currentTarget.value;
-              setActiveHref(nextHref);
-              window.location.hash = nextHref;
+              onSectionChange(event.currentTarget.value as AdminSectionId);
             }}
           >
-            {sectionLinks.map((item) => (
-              <option key={item.href} value={item.href}>
+            {adminSectionLinks.map((item) => (
+              <option key={item.id} value={item.id}>
                 {item.label}
               </option>
             ))}
@@ -62,11 +58,20 @@ export function AdminSectionNav() {
         </div>
 
         <div className="hidden gap-1 p-2 lg:grid" data-testid="admin-section-nav-links">
-          {sectionLinks.map((item) => {
-            const isActive = activeHref === item.href;
+          {adminSectionLinks.map((item) => {
+            const isActive = activeSectionId === item.id;
 
             return (
-              <a aria-current={isActive ? "page" : undefined} className={`focus-ring flex min-h-10 items-center rounded-[var(--radius-sm)] px-3 text-sm font-semibold transition ${isActive ? "bg-[var(--accent-soft)] text-[var(--accent-strong)]" : "text-[var(--muted-strong)] hover:bg-[var(--surface-soft)] hover:text-[var(--foreground)]"}`} href={item.href} key={item.href} onClick={() => setActiveHref(item.href)}>
+              <a
+                aria-current={isActive ? "page" : undefined}
+                className={`focus-ring flex min-h-10 items-center rounded-[var(--radius-sm)] px-3 text-sm font-semibold transition ${isActive ? "bg-[var(--accent-soft)] text-[var(--accent-strong)]" : "text-[var(--muted-strong)] hover:bg-[var(--surface-soft)] hover:text-[var(--foreground)]"}`}
+                href={item.href}
+                key={item.id}
+                onClick={(event) => {
+                  event.preventDefault();
+                  onSectionChange(item.id);
+                }}
+              >
                 {item.label}
               </a>
             );

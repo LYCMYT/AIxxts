@@ -1,6 +1,6 @@
 import { Database, ListChecks, MagnifyingGlass, Plus, ShieldCheck, UserGear, WarningCircle, YoutubeLogo } from "@phosphor-icons/react/dist/ssr";
 import type { AdminDashboardData } from "@/server/admin/queries";
-import { AdminSectionNav } from "./admin-section-nav";
+import { AdminSectionLayout, AdminSectionPanel } from "./admin-section-layout";
 import { DigestPublishButton } from "./digest-publish-button";
 import { JobActionButtons } from "./job-action-buttons";
 import { ManualCandidateForm } from "./manual-candidate-form";
@@ -290,9 +290,8 @@ export function AdminDashboard({ digestDate = currentDigestDate(), jobFilterOpti
           </div>
         </header>
 
-        <div className="grid gap-5 lg:grid-cols-[220px_minmax(0,1fr)] lg:items-start">
-          <AdminSectionNav />
-          <div className="flex min-w-0 flex-col gap-5">
+        <AdminSectionLayout>
+          <AdminSectionPanel sectionId="source-health">
             <SectionHeading description="按来源汇总最近成功、最近失败、连续失败和错误摘要，先暴露需要处理的数据源。" icon={WarningCircle} id="source-health" title="数据源健康">
               <div className="mb-4 flex flex-wrap gap-2">
                 {sourceErrorCategories.length > 0 ? (
@@ -343,7 +342,9 @@ export function AdminDashboard({ digestDate = currentDigestDate(), jobFilterOpti
                 </table>
               </TableFrame>
             </SectionHeading>
+          </AdminSectionPanel>
 
+          <AdminSectionPanel sectionId="sources">
             <SectionHeading description="维护 RSS、官方博客、HN、Reddit、YouTube 和 GitHub 等候选来源，控制抓取间隔和启用状态。" icon={Database} id="sources" title="数据源管理">
               <SourceEditor sources={sources} />
               <TableFrame>
@@ -385,7 +386,9 @@ export function AdminDashboard({ digestDate = currentDigestDate(), jobFilterOpti
                 </table>
               </TableFrame>
             </SectionHeading>
+          </AdminSectionPanel>
 
+          <AdminSectionPanel sectionId="youtube">
             <SectionHeading description="管理 YouTube 搜索词、语言地区和单次最大结果数，供视频候选采集使用。" icon={YoutubeLogo} id="youtube" title="YouTube 关键词">
               <TableFrame>
                 <table className="min-w-[720px] w-full border-collapse text-left">
@@ -404,11 +407,15 @@ export function AdminDashboard({ digestDate = currentDigestDate(), jobFilterOpti
                 </table>
               </TableFrame>
             </SectionHeading>
+          </AdminSectionPanel>
 
+          <AdminSectionPanel sectionId="manual">
             <SectionHeading description="用于补充抖音、小红书或临时来源中的重要候选内容，提交后进入统一候选池。" icon={Plus} id="manual" title="手动候选录入">
               <ManualCandidateForm />
             </SectionHeading>
+          </AdminSectionPanel>
 
+          <AdminSectionPanel sectionId="jobs">
             <SectionHeading description="跟踪最近采集、每日生成和提醒任务，优先暴露失败原因和可恢复状态。" icon={ListChecks} id="jobs" title="任务状态">
               <JobFilterPanel filters={jobFilters} options={jobFilterOptions} pagination={jobPagination} />
               <TableFrame>
@@ -457,7 +464,9 @@ export function AdminDashboard({ digestDate = currentDigestDate(), jobFilterOpti
                 </div>
               </nav>
             </SectionHeading>
+          </AdminSectionPanel>
 
+          <AdminSectionPanel sectionId="users">
             <SectionHeading description="管理内部成员的管理员和只读角色，停用后不允许访问内部页面。" icon={UserGear} id="users" title="用户角色管理">
               <div className="mb-4 grid gap-4 rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface-soft)] p-3 lg:grid-cols-[1fr_220px]">
                 <Field label="搜索成员">
@@ -510,8 +519,8 @@ export function AdminDashboard({ digestDate = currentDigestDate(), jobFilterOpti
                 </table>
               </TableFrame>
             </SectionHeading>
-          </div>
-        </div>
+          </AdminSectionPanel>
+        </AdminSectionLayout>
       </div>
     </main>
   );
