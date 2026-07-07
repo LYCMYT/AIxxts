@@ -73,3 +73,4 @@ http://127.0.0.1:3000/admin
 - [采集任务闭环](docs/09-collection-job.md)
 - [每日精选 LLM 方案](docs/09-daily-ranking-llm.md)
 - [原文正文抓取与清洗](docs/12-article-extraction.md)
+- [市场竞品调研与产品优化方案](docs/13-market-product-optimization-plan.md)
