@@ -7,8 +7,15 @@ import {
   Clock,
   MagnifyingGlass,
   WarningCircle,
+  XCircle,
 } from "@phosphor-icons/react/dist/ssr";
-import type { DailyDigestData, DigestJobSummary, DigestStatusView } from "@/server/digests/queries";
+import { digestArchiveStatusFilters } from "@/server/digests/queries";
+import type {
+  DailyDigestData,
+  DigestArchiveFilters,
+  DigestJobSummary,
+  DigestStatusView,
+} from "@/server/digests/queries";
 
 const statusStyles: Record<DigestStatusView, string> = {
   success: "border-[var(--success)] bg-[var(--success-soft)] text-[var(--success)]",
@@ -24,6 +31,17 @@ const statusIcons = {
   empty: Clock,
 };
 
+const emptyFilters: DigestArchiveFilters = {
+  q: "",
+  status: "",
+};
+
+const archiveStatusLabels: Record<Exclude<DigestArchiveFilters["status"], "">, string> = {
+  success: "生成成功",
+  failed: "生成失败",
+  empty: "暂无日报",
+};
+
 function StatusBadge({ status, label }: { status: DigestStatusView; label: string }) {
   const Icon = statusIcons[status];
 
@@ -34,6 +52,69 @@ function StatusBadge({ status, label }: { status: DigestStatusView; label: strin
       <Icon size={14} />
       {label}
     </span>
+  );
+}
+
+function HistoryFilters({ filters }: { filters: DigestArchiveFilters }) {
+  const hasActiveFilters = Boolean(filters.q || filters.status);
+
+  return (
+    <form action="/digests" className="grid gap-3 border-t border-[var(--line-soft)] pt-4" method="get">
+      <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_220px]">
+        <label className="grid gap-2 text-sm font-medium text-[var(--muted-strong)]">
+          <span>关键词</span>
+          <span className="relative">
+            <MagnifyingGlass
+              aria-hidden="true"
+              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted)]"
+              size={16}
+            />
+            <input
+              className="focus-ring min-h-11 w-full rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)] py-2 pl-9 pr-3.5 text-sm text-[var(--foreground)] placeholder:text-[var(--muted)]"
+              defaultValue={filters.q}
+              name="q"
+              placeholder="标题、摘要、条目标题或解读"
+              type="search"
+            />
+          </span>
+        </label>
+
+        <label className="grid gap-2 text-sm font-medium text-[var(--muted-strong)]">
+          <span>状态</span>
+          <select
+            className="focus-ring min-h-11 w-full rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)] px-3.5 py-2 text-sm text-[var(--foreground)]"
+            defaultValue={filters.status}
+            name="status"
+          >
+            <option value="">全部状态</option>
+            {digestArchiveStatusFilters.map((status) => (
+              <option key={status} value={status}>
+                {archiveStatusLabels[status]}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2">
+        <button
+          className="focus-ring inline-flex min-h-10 items-center justify-center gap-2 rounded-full bg-[var(--accent)] px-4 py-2 text-sm font-medium text-white transition hover:bg-[var(--accent-strong)]"
+          type="submit"
+        >
+          <MagnifyingGlass size={16} />
+          筛选
+        </button>
+        {hasActiveFilters ? (
+          <Link
+            className="focus-ring inline-flex min-h-10 items-center justify-center gap-2 rounded-full border border-[var(--line-soft)] bg-[var(--surface)] px-4 py-2 text-sm font-medium text-[var(--muted-strong)] transition hover:border-[var(--accent)] hover:bg-[var(--accent-soft)] hover:text-[var(--accent-strong)]"
+            href="/digests"
+          >
+            <XCircle size={16} />
+            清除筛选
+          </Link>
+        ) : null}
+      </div>
+    </form>
   );
 }
 
@@ -49,10 +130,11 @@ function MetricCard({ label, value, note }: { label: string; value: string; note
 
 type HistoryPageProps = {
   digests?: DailyDigestData[];
+  filters?: DigestArchiveFilters;
   jobRuns?: DigestJobSummary[];
 };
 
-export function HistoryPage({ digests = [], jobRuns = [] }: HistoryPageProps = {}) {
+export function HistoryPage({ digests = [], filters = emptyFilters, jobRuns = [] }: HistoryPageProps = {}) {
   const sourceDigests = digests;
   const latest = sourceDigests.find((digest) => digest.status === "success") ?? null;
   const successCount = sourceDigests.filter((digest) => digest.status === "success").length;
@@ -69,14 +151,9 @@ export function HistoryPage({ digests = [], jobRuns = [] }: HistoryPageProps = {
               按日期查看每日精选生成结果，快速定位成功、失败和等待生成的日报。
             </p>
           </div>
-          <div
-            aria-label="检索能力待接入"
-            className="flex w-fit max-w-full items-center gap-2 rounded-full border border-[var(--line-soft)] bg-[var(--surface-soft)] px-3.5 py-2 text-sm text-[var(--muted)] shadow-[var(--shadow-subtle)]"
-          >
-            <MagnifyingGlass size={16} className="text-[var(--accent)]" />
-            <span>检索入口待接入</span>
-          </div>
         </div>
+
+        <HistoryFilters filters={filters} />
 
         <section className="grid gap-3 sm:grid-cols-3">
           <MetricCard

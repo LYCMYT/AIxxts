@@ -120,6 +120,110 @@ function MetadataPanel({ item }: { item: ItemDetailData }) {
   );
 }
 
+function EvidencePanel({ item }: { item: ItemDetailData }) {
+  return (
+    <aside className="grid gap-4 self-start lg:sticky lg:top-6">
+      <section className="rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)] p-4 shadow-[var(--shadow-subtle)]">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h2 className="text-base font-semibold">证据与来源</h2>
+            <p className="mt-1 text-xs leading-5 text-[var(--muted)]">
+              用于核验这条内容为什么入选，以及正文是否已经完成中文化。
+            </p>
+          </div>
+          <span
+            className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+              item.translationStatus === "ready"
+                ? "bg-[var(--success-soft)] text-[var(--success)]"
+                : "bg-[var(--warning-soft)] text-[var(--warning)]"
+            }`}
+          >
+            {item.translationStatus === "ready" ? "翻译已缓存" : "待完整翻译"}
+          </span>
+        </div>
+
+        <div className="mt-4 rounded-[var(--radius-sm)] border border-[var(--line-soft)] bg-[var(--surface-soft)] p-3">
+          <p className="text-xs font-semibold text-[var(--foreground)]">入选原因</p>
+          <p className="mt-2 break-words text-sm leading-6 text-[var(--muted-strong)] [overflow-wrap:anywhere]">
+            {item.selectionReason}
+          </p>
+        </div>
+
+        <div className="mt-4 flex flex-wrap gap-2">
+          {item.llmSignals.map((signal) => (
+            <span
+              className="rounded-full border border-[var(--line-soft)] bg-[var(--surface-soft)] px-2.5 py-1 text-xs text-[var(--muted-strong)]"
+              key={signal}
+            >
+              {signal}
+            </span>
+          ))}
+        </div>
+      </section>
+
+      <section className="rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)] p-4 shadow-[var(--shadow-subtle)]">
+        <h2 className="text-base font-semibold">评分信号</h2>
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          {item.interactions.map((metric) => (
+            <DetailMetric
+              key={metric.label}
+              label={metric.label}
+              note={metric.note}
+              value={metric.value}
+            />
+          ))}
+        </div>
+      </section>
+
+      <MetadataPanel item={item} />
+
+      <section className="rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)] p-4 shadow-[var(--shadow-subtle)]">
+        <h2 className="text-base font-semibold">原文与核验</h2>
+        <div className="mt-4 grid gap-2">
+          <a
+            aria-label={`打开原文：${item.title}`}
+            className="focus-ring inline-flex items-center justify-center gap-2 rounded-full bg-[var(--accent)] px-3 py-2 text-sm font-medium text-white shadow-[var(--shadow-subtle)] transition hover:bg-[var(--accent-strong)]"
+            href={item.originalUrl}
+            rel="noreferrer"
+            target="_blank"
+          >
+            打开原文
+            <ArrowSquareOut size={15} />
+          </a>
+          <a
+            aria-label={`打开来源主页：${item.source}`}
+            className="focus-ring inline-flex items-center justify-center gap-2 rounded-full border border-[var(--line-soft)] bg-[var(--surface)] px-3 py-2 text-sm font-medium text-[var(--muted-strong)] transition hover:border-[var(--accent)] hover:bg-[var(--accent-soft)] hover:text-[var(--accent-strong)]"
+            href={item.sourceUrl}
+            rel="noreferrer"
+            target="_blank"
+          >
+            打开来源主页
+            <LinkSimple size={15} />
+          </a>
+        </div>
+      </section>
+
+      <section
+        className={`rounded-[var(--radius)] border p-4 shadow-[var(--shadow-subtle)] ${
+          item.rawStatus === "ready"
+            ? "border-[var(--success-soft)] bg-[var(--surface)]"
+            : "border-[var(--danger-soft)] bg-[var(--surface)]"
+        }`}
+      >
+        {item.rawStatus === "ready" ? (
+          <CheckCircle size={20} className="text-[var(--success)]" />
+        ) : (
+          <WarningCircle size={20} className="text-[var(--danger)]" />
+        )}
+        <h2 className="mt-2 text-base font-semibold">
+          {item.rawStatus === "ready" ? "原文采集成功" : "原文解析失败"}
+        </h2>
+        <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{item.rawStatusNote}</p>
+      </section>
+    </aside>
+  );
+}
+
 export function ItemDetailPage({
   itemId,
   item,
@@ -222,25 +326,22 @@ export function ItemDetailPage({
               <CheckCircle size={18} className="text-[var(--accent)]" />
               中文详情
             </h2>
+            <p className="mt-2 text-xs leading-5 text-[var(--muted)]">
+              优先展示逐句中文摘要和正文；原文核验入口集中在右侧证据栏。
+            </p>
             <p className="mt-3 break-words text-sm leading-7 text-[var(--muted-strong)] [overflow-wrap:anywhere]">
               {item.translatedSummary}
             </p>
-            <div className="mt-4 rounded-[var(--radius-sm)] border border-[var(--line-soft)] bg-[var(--surface-soft)] p-3">
-              <p className="text-xs font-semibold text-[var(--foreground)]">入选原因</p>
-              <p className="mt-2 break-words text-sm leading-6 text-[var(--muted-strong)] [overflow-wrap:anywhere]">
-                {item.selectionReason}
-              </p>
-            </div>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {item.llmSignals.map((signal) => (
-                <span
-                  className="rounded-full border border-[var(--line-soft)] bg-[var(--surface-soft)] px-2.5 py-1 text-xs text-[var(--muted-strong)]"
-                  key={signal}
-                >
-                  {signal}
-                </span>
-              ))}
-            </div>
+            {item.originalSummary ? (
+              <details className="mt-4 rounded-[var(--radius-sm)] border border-[var(--line-soft)] bg-[var(--surface-soft)]">
+                <summary className="focus-ring cursor-pointer select-none px-3 py-2 text-xs font-semibold text-[var(--accent-strong)] transition hover:text-[var(--accent)]">
+                  查看原文摘要
+                </summary>
+                <p className="border-t border-[var(--line-soft)] px-3 py-3 text-sm leading-6 text-[var(--muted-strong)]">
+                  {item.originalSummary}
+                </p>
+              </details>
+            ) : null}
           </section>
 
           {item.translatedContent ? (
@@ -273,67 +374,7 @@ export function ItemDetailPage({
           </section>
         </div>
 
-        <aside className="grid gap-5 self-start">
-          <MetadataPanel item={item} />
-
-          <section className="rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)] p-4 shadow-[var(--shadow-subtle)]">
-            <h2 className="text-base font-semibold">互动数据</h2>
-            <div className="mt-4 grid grid-cols-2 gap-2">
-              {item.interactions.map((metric) => (
-                <DetailMetric
-                  key={metric.label}
-                  label={metric.label}
-                  note={metric.note}
-                  value={metric.value}
-                />
-              ))}
-            </div>
-          </section>
-
-          <section className="rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)] p-4 shadow-[var(--shadow-subtle)]">
-            <h2 className="text-base font-semibold">原文操作</h2>
-            <div className="mt-4 grid gap-2">
-              <a
-                aria-label={`打开原文：${item.title}`}
-                className="focus-ring inline-flex items-center justify-center gap-2 rounded-full bg-[var(--accent)] px-3 py-2 text-sm font-medium text-white shadow-[var(--shadow-subtle)] transition hover:bg-[var(--accent-strong)]"
-                href={item.originalUrl}
-                rel="noreferrer"
-                target="_blank"
-              >
-                打开原文
-                <ArrowSquareOut size={15} />
-              </a>
-              <a
-                aria-label={`打开来源主页：${item.source}`}
-                className="focus-ring inline-flex items-center justify-center gap-2 rounded-full border border-[var(--line-soft)] bg-[var(--surface)] px-3 py-2 text-sm font-medium text-[var(--muted-strong)] transition hover:border-[var(--accent)] hover:bg-[var(--accent-soft)] hover:text-[var(--accent-strong)]"
-                href={item.sourceUrl}
-                rel="noreferrer"
-                target="_blank"
-              >
-                打开来源主页
-                <LinkSimple size={15} />
-              </a>
-            </div>
-          </section>
-
-          <section
-            className={`rounded-[var(--radius)] border p-4 shadow-[var(--shadow-subtle)] ${
-              item.rawStatus === "ready"
-                ? "border-[var(--success-soft)] bg-[var(--surface)]"
-                : "border-[var(--danger-soft)] bg-[var(--surface)]"
-            }`}
-          >
-            {item.rawStatus === "ready" ? (
-              <CheckCircle size={20} className="text-[var(--success)]" />
-            ) : (
-              <WarningCircle size={20} className="text-[var(--danger)]" />
-            )}
-            <h2 className="mt-2 text-base font-semibold">
-              {item.rawStatus === "ready" ? "原文采集成功" : "原文解析失败"}
-            </h2>
-            <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{item.rawStatusNote}</p>
-          </section>
-        </aside>
+        <EvidencePanel item={item} />
       </section>
 
     </main>

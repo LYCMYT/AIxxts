@@ -1,4 +1,5 @@
 import { resolveCandidateDetailText } from "@/server/translation/candidate-text";
+import type { DigestStatus, Prisma } from "@/generated/prisma/client";
 
 type PrismaClientLike = Awaited<typeof import("@/server/db/prisma")>["prisma"];
 
@@ -69,6 +70,26 @@ export type DailyDigestData = {
   items: DigestItemPreviewData[];
 };
 
+export const digestArchiveStatusFilters = ["success", "failed", "empty"] as const;
+
+export type DigestArchiveStatusFilter = (typeof digestArchiveStatusFilters)[number] | "";
+
+export type DigestArchiveFilterInput = {
+  q?: string | string[];
+  status?: string | string[];
+};
+
+export type DigestArchiveFilters = {
+  q: string;
+  status: DigestArchiveStatusFilter;
+};
+
+const digestArchiveStatusWhere: Record<Exclude<DigestArchiveStatusFilter, "">, DigestStatus[]> = {
+  success: ["PUBLISHED"],
+  failed: ["FAILED"],
+  empty: ["DRAFT"],
+};
+
 export type DigestJobSummary = {
   id: string;
   name: string;
@@ -81,6 +102,7 @@ export type DigestJobSummary = {
 
 export type DigestArchiveData = {
   digests: DailyDigestData[];
+  filters: DigestArchiveFilters;
   jobRuns: DigestJobSummary[];
 };
 
@@ -286,6 +308,78 @@ function statusLabel(status: DigestStatusView) {
   };
 
   return labels[status];
+}
+
+function firstSearchParam(value: string | string[] | undefined) {
+  if (Array.isArray(value)) {
+    return value[0] ?? "";
+  }
+
+  return value ?? "";
+}
+
+function isDigestArchiveStatusFilter(value: string): value is Exclude<DigestArchiveStatusFilter, ""> {
+  return digestArchiveStatusFilters.some((status) => status === value);
+}
+
+export function normalizeDigestArchiveFilters(
+  input: DigestArchiveFilterInput = {},
+): DigestArchiveFilters {
+  const q = firstSearchParam(input.q).replace(/\s+/g, " ").trim();
+  const rawStatus = firstSearchParam(input.status).trim();
+
+  return {
+    q,
+    status: isDigestArchiveStatusFilter(rawStatus) ? rawStatus : "",
+  };
+}
+
+export function buildDigestArchiveWhere(
+  input: DigestArchiveFilterInput = {},
+): Prisma.DailyDigestWhereInput {
+  const filters = normalizeDigestArchiveFilters(input);
+  const where: Prisma.DailyDigestWhereInput = {};
+
+  if (filters.q) {
+    where.OR = [
+      {
+        title: {
+          contains: filters.q,
+        },
+      },
+      {
+        summary: {
+          contains: filters.q,
+        },
+      },
+      {
+        items: {
+          some: {
+            OR: [
+              {
+                titleSnapshot: {
+                  contains: filters.q,
+                },
+              },
+              {
+                interpretation: {
+                  contains: filters.q,
+                },
+              },
+            ],
+          },
+        },
+      },
+    ];
+  }
+
+  if (filters.status) {
+    where.status = {
+      in: digestArchiveStatusWhere[filters.status],
+    };
+  }
+
+  return where;
 }
 
 export function getHomeDigestTaskStatus(status: HomeDigestPreviewStatus) {
@@ -638,9 +732,13 @@ export async function getTodayPublishedDigestHome(): Promise<HomeDigestData | nu
   }
 }
 
-export async function getDigestArchive(): Promise<DigestArchiveData> {
+export async function getDigestArchive(
+  input: DigestArchiveFilterInput = {},
+): Promise<DigestArchiveData> {
+  const filters = normalizeDigestArchiveFilters(input);
   const empty: DigestArchiveData = {
     digests: [],
+    filters,
     jobRuns: [],
   };
   const prisma = await getPrisma();
@@ -650,8 +748,10 @@ export async function getDigestArchive(): Promise<DigestArchiveData> {
   }
 
   try {
+    const where = buildDigestArchiveWhere(filters);
     const [digests, jobRuns] = await Promise.all([
       prisma.dailyDigest.findMany({
+        where,
         orderBy: {
           digestDate: "desc",
         },
@@ -691,6 +791,7 @@ export async function getDigestArchive(): Promise<DigestArchiveData> {
 
     return {
       digests: digests.map(digestToView),
+      filters,
       jobRuns: jobRuns.map(rawJobToSummary),
     };
   } catch {

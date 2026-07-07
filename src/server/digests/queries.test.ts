@@ -1,6 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { digestItemToHome, getHomeDigestTaskStatus, homeDigestPreviewStatuses } from "./queries";
+import {
+  buildDigestArchiveWhere,
+  digestItemToHome,
+  getHomeDigestTaskStatus,
+  homeDigestPreviewStatuses,
+  normalizeDigestArchiveFilters,
+} from "./queries";
 
 test("home digest preview statuses prefer published and then draft", () => {
   assert.deepEqual(homeDigestPreviewStatuses, ["PUBLISHED", "DRAFT"]);
@@ -33,4 +39,66 @@ test("home digest items expose the candidate id for internal detail links", () =
 
   assert.equal(item.id, "candidate-123");
   assert.equal(item.url, "https://example.com/original");
+});
+
+test("digest archive filters normalize GET params for keyword and status", () => {
+  assert.deepEqual(
+    normalizeDigestArchiveFilters({
+      q: "  agent   memory  ",
+      status: "success",
+    }),
+    {
+      q: "agent memory",
+      status: "success",
+    },
+  );
+
+  assert.deepEqual(
+    normalizeDigestArchiveFilters({
+      q: ["first", "second"],
+      status: "unknown",
+    }),
+    {
+      q: "first",
+      status: "",
+    },
+  );
+});
+
+test("digest archive where searches digest and item text with status", () => {
+  assert.deepEqual(buildDigestArchiveWhere({ q: "agent memory", status: "success" }), {
+    OR: [
+      {
+        title: {
+          contains: "agent memory",
+        },
+      },
+      {
+        summary: {
+          contains: "agent memory",
+        },
+      },
+      {
+        items: {
+          some: {
+            OR: [
+              {
+                titleSnapshot: {
+                  contains: "agent memory",
+                },
+              },
+              {
+                interpretation: {
+                  contains: "agent memory",
+                },
+              },
+            ],
+          },
+        },
+      },
+    ],
+    status: {
+      in: ["PUBLISHED"],
+    },
+  });
 });

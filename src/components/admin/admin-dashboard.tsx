@@ -245,6 +245,159 @@ function JobSummaryCell({ job }: { job: AdminJob }) {
   );
 }
 
+function OverviewMetricCard({
+  label,
+  note,
+  tone = "muted",
+  value,
+}: {
+  label: string;
+  note: string;
+  tone?: BadgeTone;
+  value: string;
+}) {
+  const toneClass: Record<BadgeTone, string> = {
+    accent: "text-[var(--accent-strong)]",
+    danger: "text-[var(--danger)]",
+    muted: "text-[var(--foreground)]",
+    success: "text-[var(--success)]",
+    warning: "text-[var(--warning)]",
+  };
+
+  return (
+    <div className="rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface-soft)] p-4">
+      <p className="text-xs text-[var(--muted)]">{label}</p>
+      <p className={`mt-2 text-2xl font-semibold leading-none ${toneClass[tone]}`}>{value}</p>
+      <p className="mt-2 text-xs leading-5 text-[var(--muted)]">{note}</p>
+    </div>
+  );
+}
+
+function AdminOverview({
+  jobs,
+  sourceHealth,
+  summary,
+}: {
+  jobs: AdminDashboardData["jobs"];
+  sourceHealth: AdminDashboardData["sourceHealth"];
+  summary: AdminDashboardData["summary"];
+}) {
+  const unhealthySources = sourceHealth
+    .filter((source) => source.status.tone === "danger" || source.status.tone === "warning")
+    .slice(0, 5);
+  const failedJobs = jobs.filter((job) => job.result.tone === "danger").slice(0, 3);
+  const enabledRatio =
+    summary.totalSources > 0
+      ? `${Math.round((summary.enabledSources / summary.totalSources) * 100)}%`
+      : "0%";
+  const operationTone: BadgeTone =
+    summary.pendingErrors > 0 || unhealthySources.length > 0 ? "warning" : "success";
+
+  return (
+    <SectionHeading
+      description="把采集、生成、来源健康和错误状态放在一个入口，先判断今天是否需要人工处理。"
+      icon={ListChecks}
+      id="overview"
+      title="运行总览"
+    >
+      <div className="grid gap-4">
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <OverviewMetricCard
+            label="运行状态"
+            note={operationTone === "success" ? "当前没有来源错误需要优先处理" : "建议先查看健康概览和任务状态"}
+            tone={operationTone}
+            value={operationTone === "success" ? "正常" : "需处理"}
+          />
+          <OverviewMetricCard
+            label="来源启用率"
+            note={`${summary.enabledSources} / ${summary.totalSources} 个来源启用`}
+            value={enabledRatio}
+          />
+          <OverviewMetricCard
+            label="今日候选池"
+            note="过去 24 小时采集进入候选池"
+            value={`${summary.todayCandidates} 条`}
+          />
+          <OverviewMetricCard
+            label="待处理错误"
+            note="来自 JobRun 失败记录"
+            tone={summary.pendingErrors > 0 ? "danger" : "success"}
+            value={`${summary.pendingErrors} 条`}
+          />
+        </div>
+
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+          <div className="rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)] p-4">
+            <div className="flex items-center justify-between gap-3">
+              <h3 className="text-sm font-semibold">优先处理来源</h3>
+              <a
+                className="focus-ring rounded-full px-2.5 py-1 text-xs font-semibold text-[var(--accent-strong)] hover:bg-[var(--accent-soft)]"
+                href="#source-health"
+              >
+                查看健康概览
+              </a>
+            </div>
+            <div className="mt-3 grid gap-2">
+              {unhealthySources.length > 0 ? (
+                unhealthySources.map((source) => (
+                  <div
+                    className="grid gap-2 rounded-[var(--radius-sm)] border border-[var(--line-soft)] bg-[var(--surface-soft)] p-3 sm:grid-cols-[minmax(0,1fr)_auto]"
+                    key={source.id}
+                  >
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-[var(--foreground)]">{source.name}</p>
+                      <p className="mt-1 truncate text-xs text-[var(--muted)]">{source.lastError}</p>
+                    </div>
+                    <StatusBadge label={source.status.label} tone={source.status.tone} />
+                  </div>
+                ))
+              ) : (
+                <p className="rounded-[var(--radius-sm)] border border-dashed border-[var(--line)] bg-[var(--surface-soft)] p-3 text-sm leading-6 text-[var(--muted)]">
+                  暂无需要优先处理的来源。
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)] p-4">
+            <div className="flex items-center justify-between gap-3">
+              <h3 className="text-sm font-semibold">最近失败任务</h3>
+              <a
+                className="focus-ring rounded-full px-2.5 py-1 text-xs font-semibold text-[var(--accent-strong)] hover:bg-[var(--accent-soft)]"
+                href="#jobs"
+              >
+                查看任务状态
+              </a>
+            </div>
+            <div className="mt-3 grid gap-2">
+              {failedJobs.length > 0 ? (
+                failedJobs.map((job) => (
+                  <div
+                    className="grid gap-2 rounded-[var(--radius-sm)] border border-[var(--line-soft)] bg-[var(--surface-soft)] p-3"
+                    key={job.id}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <p className="min-w-0 break-words text-sm font-semibold text-[var(--foreground)]">
+                        {job.name}
+                      </p>
+                      <StatusBadge label={job.result.label} tone={job.result.tone} />
+                    </div>
+                    <p className="break-words text-xs leading-5 text-[var(--muted)]">{job.summary}</p>
+                  </div>
+                ))
+              ) : (
+                <p className="rounded-[var(--radius-sm)] border border-dashed border-[var(--line)] bg-[var(--surface-soft)] p-3 text-sm leading-6 text-[var(--muted)]">
+                  当前任务列表中没有失败项。
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </SectionHeading>
+  );
+}
+
 export function AdminDashboard({ digestDate = currentDigestDate(), jobFilterOptions = emptyJobFilterOptions, jobFilters = emptyJobFilters, jobPagination = emptyJobPagination, jobs = [], sourceErrorCategories = [], sourceHealth = [], sources = [], summary = emptySummary, users = [] }: AdminDashboardProps = {}) {
   return (
     <main className="min-h-[100dvh] bg-[var(--background)] px-4 py-6 sm:px-6 lg:px-8">
@@ -291,6 +444,10 @@ export function AdminDashboard({ digestDate = currentDigestDate(), jobFilterOpti
         </header>
 
         <AdminSectionLayout>
+          <AdminSectionPanel sectionId="overview">
+            <AdminOverview jobs={jobs} sourceHealth={sourceHealth} summary={summary} />
+          </AdminSectionPanel>
+
           <AdminSectionPanel sectionId="source-health">
             <SectionHeading description="按来源汇总最近成功、最近失败、连续失败和错误摘要，先暴露需要处理的数据源。" icon={WarningCircle} id="source-health" title="数据源健康">
               <div className="mb-4 flex flex-wrap gap-2">

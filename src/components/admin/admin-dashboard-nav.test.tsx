@@ -13,12 +13,16 @@ test("AdminDashboard renders a dedicated admin navigation with desktop links and
   assert.match(html, /data-testid="admin-section-nav"/);
   assert.match(html, /data-testid="admin-section-nav-links"/);
   assert.match(html, /data-testid="admin-section-nav-select"/);
+  assert.match(html, /href="#overview"/);
   assert.match(html, /href="#source-health"/);
 });
 
 test("AdminSectionLayout only renders the active admin section", () => {
   const html = renderToStaticMarkup(
     <AdminSectionLayout>
+      <AdminSectionPanel sectionId="overview">
+        <div>运行总览内容</div>
+      </AdminSectionPanel>
       <AdminSectionPanel sectionId="source-health">
         <div>健康概览内容</div>
       </AdminSectionPanel>
@@ -29,7 +33,8 @@ test("AdminSectionLayout only renders the active admin section", () => {
   );
 
   assert.match(html, /data-testid="admin-section-content"/);
-  assert.match(html, /data-section-id="source-health"/);
-  assert.match(html, /健康概览内容/);
+  assert.match(html, /data-section-id="overview"/);
+  assert.match(html, /运行总览内容/);
+  assert.doesNotMatch(html, /健康概览内容/);
   assert.doesNotMatch(html, /数据源内容/);
 });

@@ -1,11 +1,13 @@
 import Link from "next/link";
 import {
   ArrowRight,
+  CalendarBlank,
   CheckCircle,
   Clock,
   Database,
   Lightning,
   ListChecks,
+  MagnifyingGlass,
   Newspaper,
   TrendUp,
 } from "@phosphor-icons/react/dist/ssr";
@@ -55,6 +57,38 @@ const sourceTypeLabel: Record<DigestItem["sourceType"], string> = {
   Manual: "人工录入",
 };
 
+function sourceBreakdown(items: DigestItem[]) {
+  const counts = new Map<DigestItem["sourceType"], number>();
+
+  for (const item of items) {
+    counts.set(item.sourceType, (counts.get(item.sourceType) ?? 0) + 1);
+  }
+
+  return Array.from(counts.entries())
+    .map(([type, count]) => ({ count, label: sourceTypeLabel[type], type }))
+    .sort((left, right) => right.count - left.count || left.label.localeCompare(right.label));
+}
+
+function signalHighlights(items: DigestItem[]) {
+  const counts = new Map<string, number>();
+
+  for (const item of items) {
+    const signals = item.signals
+      .split(/[，,、;；]/)
+      .map((signal) => signal.trim())
+      .filter(Boolean);
+
+    for (const signal of signals) {
+      counts.set(signal, (counts.get(signal) ?? 0) + 1);
+    }
+  }
+
+  return Array.from(counts.entries())
+    .map(([label, count]) => ({ count, label }))
+    .sort((left, right) => right.count - left.count || left.label.localeCompare(right.label))
+    .slice(0, 6);
+}
+
 export function DigestHome({
   candidateCount,
   dateLabel,
@@ -64,6 +98,10 @@ export function DigestHome({
   selectedCount,
   taskStatus,
 }: DigestHomeProps) {
+  const sources = sourceBreakdown(items);
+  const signals = signalHighlights(items);
+  const topFiveCount = items.filter((item) => item.rank <= 5).length;
+
   return (
     <main className="mx-auto w-full max-w-[1160px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
       <section className="rounded-[var(--radius-lg)] border border-[var(--line-soft)] bg-[var(--surface)] p-5 shadow-[var(--shadow-subtle)] sm:p-6">
@@ -123,6 +161,68 @@ export function DigestHome({
         />
       </section>
 
+      <section className="mb-5 grid gap-3 lg:grid-cols-[minmax(0,1.35fr)_minmax(280px,0.65fr)]">
+        <div className="grid gap-3 rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)] p-4 shadow-[var(--shadow-subtle)]">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <h2 className="text-base font-semibold text-[var(--foreground)]">今日阅读路径</h2>
+              <p className="mt-1 text-sm leading-6 text-[var(--muted)]">
+                先扫 Top 5，再进入站内中文详情核验证据，最后按日期回看遗漏项。
+              </p>
+            </div>
+            <Link
+              className="focus-ring inline-flex w-fit items-center gap-2 rounded-full border border-[var(--line-soft)] bg-[var(--surface)] px-3 py-2 text-sm font-medium text-[var(--accent-strong)] transition hover:border-[var(--accent)] hover:bg-[var(--accent-soft)]"
+              href="/digests"
+            >
+              历史回看
+              <CalendarBlank size={15} weight="bold" />
+            </Link>
+          </div>
+
+          <div className="grid gap-2 sm:grid-cols-3">
+            <WorkflowStep
+              icon={<TrendUp size={17} weight="bold" />}
+              label="优先阅读"
+              note={`${topFiveCount} 条 Top 5 内容`}
+            />
+            <WorkflowStep
+              icon={<Newspaper size={17} weight="bold" />}
+              label="站内详情"
+              note="中文正文与原文入口分离"
+            />
+            <WorkflowStep
+              icon={<MagnifyingGlass size={17} weight="bold" />}
+              label="证据核验"
+              note="来源、分数、重复报道集中展示"
+            />
+          </div>
+        </div>
+
+        <div className="grid gap-3 rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)] p-4 shadow-[var(--shadow-subtle)]">
+          <div>
+            <h2 className="text-base font-semibold text-[var(--foreground)]">来源构成</h2>
+            <p className="mt-1 text-sm leading-6 text-[var(--muted)]">来自今日精选条目的真实来源类型统计。</p>
+          </div>
+          {sources.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {sources.map((source) => (
+                <span
+                  className="inline-flex items-center gap-2 rounded-full border border-[var(--line-soft)] bg-[var(--surface-soft)] px-3 py-1.5 text-xs font-medium text-[var(--muted-strong)]"
+                  key={source.type}
+                >
+                  {source.label}
+                  <span className="font-semibold text-[var(--foreground)]">{source.count}</span>
+                </span>
+              ))}
+            </div>
+          ) : (
+            <p className="rounded-[var(--radius-sm)] border border-dashed border-[var(--line)] bg-[var(--surface-soft)] px-3 py-2 text-sm leading-6 text-[var(--muted)]">
+              暂无来源构成，生成每日精选后自动统计。
+            </p>
+          )}
+        </div>
+      </section>
+
       <section className="grid gap-4">
         <div className="grid gap-3">
           <div className="flex flex-col gap-2 rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)] px-4 py-3 shadow-[var(--shadow-subtle)] sm:flex-row sm:items-end sm:justify-between">
@@ -132,9 +232,21 @@ export function DigestHome({
                 统一排序，不按来源分组。每条先进入站内中文详情，原文入口保留在详情页用于核验。
               </p>
             </div>
-            <span className="text-xs font-medium text-[var(--muted-strong)]">
-              最近成功生成：{lastSuccessDate}
-            </span>
+            <div className="flex flex-wrap items-center gap-2">
+              {signals.length > 0 ? (
+                signals.slice(0, 3).map((signal) => (
+                  <span
+                    className="rounded-full border border-[var(--line-soft)] bg-[var(--surface-soft)] px-2.5 py-1 text-xs font-medium text-[var(--muted-strong)]"
+                    key={signal.label}
+                  >
+                    {signal.label}
+                  </span>
+                ))
+              ) : null}
+              <span className="text-xs font-medium text-[var(--muted-strong)]">
+                最近成功生成：{lastSuccessDate}
+              </span>
+            </div>
           </div>
 
           {items.length > 0 ? (
@@ -151,6 +263,28 @@ export function DigestHome({
         </div>
       </section>
     </main>
+  );
+}
+
+function WorkflowStep({
+  icon,
+  label,
+  note,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  note: string;
+}) {
+  return (
+    <div className="flex min-h-[74px] items-start gap-3 rounded-[var(--radius-sm)] border border-[var(--line-soft)] bg-[var(--surface-soft)] p-3">
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[var(--radius-sm)] bg-white text-[var(--accent-strong)] shadow-[var(--shadow-subtle)]">
+        {icon}
+      </span>
+      <span>
+        <span className="block text-sm font-semibold text-[var(--foreground)]">{label}</span>
+        <span className="mt-1 block text-xs leading-5 text-[var(--muted)]">{note}</span>
+      </span>
+    </div>
   );
 }
 
@@ -191,6 +325,12 @@ function MetricCard({
 }
 
 function DigestListItem({ item }: { item: DigestItem }) {
+  const signals = item.signals
+    .split(/[，,、;；]/)
+    .map((signal) => signal.trim())
+    .filter(Boolean)
+    .slice(0, 4);
+
   return (
     <article className="grid gap-4 rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)] p-4 shadow-[var(--shadow-subtle)] transition hover:border-[var(--line)] hover:shadow-[var(--shadow-soft)] md:grid-cols-[42px_minmax(0,1fr)_minmax(180px,220px)]">
       <div className="flex md:block">
@@ -211,6 +351,9 @@ function DigestListItem({ item }: { item: DigestItem }) {
           <span className="rounded-full border border-[var(--line-soft)] px-2.5 py-1">
             {item.publishedAt}
           </span>
+          <span className="rounded-full border border-[var(--accent-soft)] bg-[var(--accent-soft)] px-2.5 py-1 font-medium text-[var(--accent-strong)]">
+            站内详情
+          </span>
         </div>
         <h3 className="mt-3 break-words text-base font-semibold leading-6 text-[var(--foreground)]">
           <Link
@@ -227,10 +370,21 @@ function DigestListItem({ item }: { item: DigestItem }) {
       </div>
 
       <div className="grid content-start gap-3 rounded-[var(--radius-sm)] border border-[var(--line-soft)] bg-[var(--surface-soft)] p-3 md:border-0 md:bg-transparent md:p-0">
-        <p className="flex items-start gap-2 break-words text-xs leading-5 text-[var(--muted-strong)] [overflow-wrap:anywhere]">
-          <TrendUp size={15} weight="bold" className="mt-0.5 shrink-0 text-[var(--accent)]" />
-          <span>{item.signals}</span>
-        </p>
+        <div className="flex flex-wrap gap-1.5">
+          {signals.length > 0 ? (
+            signals.map((signal) => (
+              <span
+                className="inline-flex items-center gap-1 rounded-full border border-[var(--line-soft)] bg-[var(--surface)] px-2 py-1 text-xs text-[var(--muted-strong)]"
+                key={`${item.id}-${signal}`}
+              >
+                <TrendUp size={13} weight="bold" className="text-[var(--accent)]" />
+                {signal}
+              </span>
+            ))
+          ) : (
+            <span className="text-xs leading-5 text-[var(--muted)]">暂无结构化信号</span>
+          )}
+        </div>
         <Link
           aria-label={`查看站内详情：${item.title}`}
           className="focus-ring inline-flex w-fit items-center gap-2 rounded-full border border-[var(--line-soft)] bg-[var(--surface)] px-3 py-2 text-sm font-medium text-[var(--accent-strong)] transition hover:border-[var(--accent)] hover:bg-[var(--accent-soft)]"

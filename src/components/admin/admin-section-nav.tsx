@@ -1,17 +1,20 @@
 "use client";
 
 export const adminSectionLinks = [
-  { id: "source-health", href: "#source-health", label: "健康概览" },
-  { id: "sources", href: "#sources", label: "数据源" },
-  { id: "youtube", href: "#youtube", label: "YouTube 关键词" },
-  { id: "manual", href: "#manual", label: "手动候选" },
-  { id: "jobs", href: "#jobs", label: "任务状态" },
-  { id: "users", href: "#users", label: "用户角色" },
+  { id: "overview", href: "#overview", label: "运行总览", group: "运行" },
+  { id: "source-health", href: "#source-health", label: "健康概览", group: "运行" },
+  { id: "jobs", href: "#jobs", label: "任务状态", group: "运行" },
+  { id: "sources", href: "#sources", label: "数据源", group: "内容" },
+  { id: "youtube", href: "#youtube", label: "监听规则", group: "内容" },
+  { id: "manual", href: "#manual", label: "手动候选", group: "内容" },
+  { id: "users", href: "#users", label: "用户角色", group: "系统" },
 ] as const;
 
 export type AdminSectionId = (typeof adminSectionLinks)[number]["id"];
 
-export const defaultAdminSectionId: AdminSectionId = "source-health";
+export const defaultAdminSectionId: AdminSectionId = "overview";
+
+const adminSectionGroups = Array.from(new Set(adminSectionLinks.map((item) => item.group)));
 
 export function adminSectionIdFromHash(hash: string): AdminSectionId | null {
   const nextId = hash.replace(/^#/, "");
@@ -57,25 +60,37 @@ export function AdminSectionNav({
           </select>
         </div>
 
-        <div className="hidden gap-1 p-2 lg:grid" data-testid="admin-section-nav-links">
-          {adminSectionLinks.map((item) => {
-            const isActive = activeSectionId === item.id;
+        <div className="hidden gap-3 p-2 lg:grid" data-testid="admin-section-nav-links">
+          {adminSectionGroups.map((group) => (
+            <div className="grid gap-1" key={group}>
+              <p className="px-3 pt-1 text-[11px] font-semibold uppercase tracking-normal text-[var(--muted)]">
+                {group}
+              </p>
+              {adminSectionLinks
+                .filter((item) => item.group === group)
+                .map((item) => {
+                  const isActive = activeSectionId === item.id;
 
-            return (
-              <a
-                aria-current={isActive ? "page" : undefined}
-                className={`focus-ring flex min-h-10 items-center rounded-[var(--radius-sm)] px-3 text-sm font-semibold transition ${isActive ? "bg-[var(--accent-soft)] text-[var(--accent-strong)]" : "text-[var(--muted-strong)] hover:bg-[var(--surface-soft)] hover:text-[var(--foreground)]"}`}
-                href={item.href}
-                key={item.id}
-                onClick={(event) => {
-                  event.preventDefault();
-                  onSectionChange(item.id);
-                }}
-              >
-                {item.label}
-              </a>
-            );
-          })}
+                  return (
+                    <a
+                      aria-current={isActive ? "page" : undefined}
+                      className={`focus-ring flex min-h-10 items-center justify-between rounded-[var(--radius-sm)] px-3 text-sm font-semibold transition ${isActive ? "bg-[var(--accent-soft)] text-[var(--accent-strong)]" : "text-[var(--muted-strong)] hover:bg-[var(--surface-soft)] hover:text-[var(--foreground)]"}`}
+                      href={item.href}
+                      key={item.id}
+                      onClick={(event) => {
+                        event.preventDefault();
+                        onSectionChange(item.id);
+                      }}
+                    >
+                      {item.label}
+                      {isActive ? (
+                        <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
+                      ) : null}
+                    </a>
+                  );
+                })}
+            </div>
+          ))}
         </div>
       </nav>
     </aside>
