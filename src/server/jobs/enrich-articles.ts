@@ -5,6 +5,10 @@ import {
   isUsefulArticleText,
   summarizeArticleText,
 } from "@/server/article-extraction/extractor";
+import {
+  type JobRunResultSummary,
+  runWithJobRun,
+} from "@/server/jobs/job-run-recorder";
 
 const DEFAULT_ENRICH_LIMIT = 20;
 const MAX_ENRICH_LIMIT = 50;
@@ -25,6 +29,37 @@ export type ArticleEnrichmentJobResult = {
 };
 
 export async function runArticleEnrichmentJob(
+  options: RunArticleEnrichmentJobOptions = {},
+): Promise<ArticleEnrichmentJobResult> {
+  return await runWithJobRun({
+    jobType: "article:enrich",
+    metadata: normalizeJobMetadata(options),
+    execute: () => runArticleEnrichmentJobCore(options),
+    mapResult: mapArticleEnrichmentJobRunResult,
+  });
+}
+
+export function mapArticleEnrichmentJobRunResult(
+  result: ArticleEnrichmentJobResult,
+): JobRunResultSummary {
+  const status =
+    result.attemptedCount === 0
+      ? "SKIPPED"
+      : result.failedCount > 0 && result.enrichedCount === 0
+        ? "FAILED"
+        : "SUCCESS";
+
+  return {
+    status,
+    scannedCount: result.scannedCount,
+    createdCount: result.enrichedCount,
+    skippedCount: result.skippedCount + result.failedCount,
+    errorMessage: status === "FAILED" ? result.message : undefined,
+    metadata: result,
+  };
+}
+
+async function runArticleEnrichmentJobCore(
   options: RunArticleEnrichmentJobOptions = {},
 ): Promise<ArticleEnrichmentJobResult> {
   const limit = normalizeLimit(options.limit);
@@ -108,4 +143,12 @@ function normalizeLimit(value: number | undefined) {
   }
 
   return Math.max(1, Math.min(MAX_ENRICH_LIMIT, Math.floor(value)));
+}
+
+function normalizeJobMetadata(options: RunArticleEnrichmentJobOptions) {
+  return {
+    digestDate: options.digestDate?.trim() || null,
+    limit: normalizeLimit(options.limit),
+    selectedOnly: options.selectedOnly ?? true,
+  };
 }

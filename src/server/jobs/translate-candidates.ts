@@ -1,6 +1,10 @@
 import { DigestStatus, Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/server/db/prisma";
 import { env } from "@/server/env";
+import {
+  type JobRunResultSummary,
+  runWithJobRun,
+} from "@/server/jobs/job-run-recorder";
 import { translateCandidateWithLlm } from "@/server/llm/client";
 
 const DEFAULT_TRANSLATION_LIMIT = 20;
@@ -23,6 +27,37 @@ export type CandidateTranslationJobResult = {
 };
 
 export async function runCandidateTranslationJob(
+  options: RunCandidateTranslationJobOptions = {},
+): Promise<CandidateTranslationJobResult> {
+  return await runWithJobRun({
+    jobType: "candidate:translate",
+    metadata: normalizeJobMetadata(options),
+    execute: () => runCandidateTranslationJobCore(options),
+    mapResult: mapCandidateTranslationJobRunResult,
+  });
+}
+
+export function mapCandidateTranslationJobRunResult(
+  result: CandidateTranslationJobResult,
+): JobRunResultSummary {
+  const status =
+    result.status === "translated"
+      ? "SUCCESS"
+      : result.status === "skipped"
+        ? "SKIPPED"
+        : "FAILED";
+
+  return {
+    status,
+    scannedCount: result.scannedCount,
+    createdCount: result.translatedCount,
+    skippedCount: result.failedCount,
+    errorMessage: status === "FAILED" ? result.message : undefined,
+    metadata: result,
+  };
+}
+
+async function runCandidateTranslationJobCore(
   options: RunCandidateTranslationJobOptions = {},
 ): Promise<CandidateTranslationJobResult> {
   const limit = normalizeLimit(options.limit);
@@ -174,6 +209,14 @@ function normalizeLimit(value: number | undefined) {
   }
 
   return Math.max(1, Math.min(MAX_TRANSLATION_LIMIT, Math.floor(value)));
+}
+
+function normalizeJobMetadata(options: RunCandidateTranslationJobOptions) {
+  return {
+    digestDate: options.digestDate?.trim() || null,
+    limit: normalizeLimit(options.limit),
+    selectedOnly: options.selectedOnly ?? true,
+  };
 }
 
 function getErrorMessage(error: unknown) {

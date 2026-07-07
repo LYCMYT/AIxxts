@@ -176,7 +176,7 @@ export async function updateSourceRecord(sourceId: string, input: SourceSaveReco
   return updatedCount > 0;
 }
 
-export async function createJobRun(sourceId: string, jobType: string, metadata?: unknown) {
+export async function createJobRun(sourceId: string | null, jobType: string, metadata?: unknown) {
   const id = createId();
   const now = nowIso();
 
