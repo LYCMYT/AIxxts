@@ -24,6 +24,32 @@ export type AdminSourceRow = {
   lastRun: string;
 };
 
+export type AdminSourceHealthRow = {
+  consecutiveFailures: number;
+  id: string;
+  lastError: string;
+  latestFailure: string;
+  latestSuccess: string;
+  name: string;
+  status: {
+    label: string;
+    tone: BadgeTone;
+  };
+};
+
+export type AdminSourceHealthInput = {
+  enabled: boolean;
+  jobs: Array<{
+    errorMessage: string | null;
+    finishedAt: Date | string | null;
+    startedAt: Date | string;
+    status: string;
+  }>;
+  lastError: string | null;
+  sourceId: string;
+  sourceName: string;
+};
+
 export type AdminJobRow = {
   details: AdminJobDetailRow[];
   id: string;
@@ -83,6 +109,7 @@ export type AdminDashboardData = {
     pendingErrors: number;
   };
   sources: AdminSourceRow[];
+  sourceHealth: AdminSourceHealthRow[];
   jobs: AdminJobRow[];
   users: AdminUserRow[];
 };
@@ -514,6 +541,63 @@ function mapSource(source: RawSourceRow, latestJob: RawJobRunRow | null): AdminS
   };
 }
 
+function dateTimeMillis(date: Date | string | null | undefined) {
+  if (!date) {
+    return 0;
+  }
+
+  const dateValue = typeof date === "string" ? new Date(date) : date;
+  const timestamp = dateValue.getTime();
+
+  return Number.isNaN(timestamp) ? 0 : timestamp;
+}
+
+function jobRunTime(job: AdminSourceHealthInput["jobs"][number]) {
+  return job.finishedAt ?? job.startedAt;
+}
+
+export function mapSourceHealth(input: AdminSourceHealthInput): AdminSourceHealthRow {
+  const jobs = [...input.jobs].sort(
+    (left, right) => dateTimeMillis(right.startedAt) - dateTimeMillis(left.startedAt),
+  );
+  const latestJob = jobs[0] ?? null;
+  const latestSuccess = jobs.find((job) => job.status === "SUCCESS") ?? null;
+  const latestFailure = jobs.find((job) => job.status === "FAILED") ?? null;
+  const sourceError = input.lastError?.trim() ?? "";
+  let consecutiveFailures = 0;
+
+  for (const job of jobs) {
+    if (job.status !== "FAILED") {
+      break;
+    }
+
+    consecutiveFailures += 1;
+  }
+
+  const status =
+    !input.enabled
+      ? ({ label: "停用", tone: "muted" } as const)
+      : latestJob?.status === "RUNNING"
+        ? ({ label: "运行中", tone: "accent" } as const)
+        : consecutiveFailures >= 3
+          ? ({ label: "连续失败", tone: "danger" } as const)
+          : consecutiveFailures > 0 || sourceError
+            ? ({ label: "需处理", tone: "warning" } as const)
+            : latestSuccess
+              ? ({ label: "正常", tone: "success" } as const)
+              : ({ label: "暂无运行", tone: "muted" } as const);
+
+  return {
+    consecutiveFailures,
+    id: input.sourceId,
+    lastError: latestFailure?.errorMessage?.trim() || sourceError || "暂无错误",
+    latestFailure: latestFailure ? formatDateTime(jobRunTime(latestFailure)) : sourceError ? "未记录" : "暂无失败",
+    latestSuccess: latestSuccess ? formatDateTime(jobRunTime(latestSuccess)) : "暂无成功",
+    name: input.sourceName,
+    status,
+  };
+}
+
 function mapJob(job: RawJobRunRow): AdminJobRow {
   const sourceName = job.sourceName ? `，${job.sourceName}` : "";
 
@@ -634,7 +718,7 @@ export async function getAdminDashboardData(
         LEFT JOIN "Source" ON "Source"."id" = "JobRun"."sourceId"
         WHERE "JobRun"."sourceId" IS NOT NULL
         ORDER BY "JobRun"."startedAt" DESC
-        LIMIT 100
+        LIMIT 500
       `,
       prisma.$queryRaw<RawOptionRow[]>`
         SELECT DISTINCT "jobType" AS "value"
@@ -669,13 +753,22 @@ export async function getAdminDashboardData(
       ),
     ]);
     const latestJobsBySource = new Map<string, RawJobRunRow>();
+    const healthJobsBySource = new Map<string, RawJobRunRow[]>();
     const totalJobCount = rawNumber(filteredJobCountRows[0]?.count ?? 0);
     const totalJobPages = Math.max(1, Math.ceil(totalJobCount / jobFilters.pageSize));
 
     for (const job of latestJobs) {
-      if (job.sourceId && !latestJobsBySource.has(job.sourceId)) {
+      if (!job.sourceId) {
+        continue;
+      }
+
+      if (!latestJobsBySource.has(job.sourceId)) {
         latestJobsBySource.set(job.sourceId, job);
       }
+
+      const healthJobs = healthJobsBySource.get(job.sourceId) ?? [];
+      healthJobs.push(job);
+      healthJobsBySource.set(job.sourceId, healthJobs);
     }
 
     return {
@@ -705,6 +798,15 @@ export async function getAdminDashboardData(
         dailySchedule: "08:00",
         pendingErrors: rawNumber(pendingErrorRows[0]?.count ?? 0),
       },
+      sourceHealth: sources.map((source) =>
+        mapSourceHealth({
+          enabled: rawBoolean(source.enabled),
+          jobs: healthJobsBySource.get(source.id) ?? [],
+          lastError: source.lastError,
+          sourceId: source.id,
+          sourceName: source.name,
+        }),
+      ),
       sources: sources.map((source) => mapSource(source, latestJobsBySource.get(source.id) ?? null)),
       jobs: jobs.map(mapJob),
       users: users.map(mapUser),

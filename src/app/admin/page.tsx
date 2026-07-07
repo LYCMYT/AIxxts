@@ -30,6 +30,7 @@ export default async function AdminPage({
       jobFilters={data?.jobFilters}
       jobPagination={data?.jobPagination}
       jobs={data?.jobs ?? []}
+      sourceHealth={data?.sourceHealth ?? []}
       sources={data?.sources ?? []}
       summary={
         data?.summary ?? {

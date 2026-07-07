@@ -31,6 +31,7 @@ const badgeToneClass: Record<BadgeTone, string> = {
 };
 
 const sectionLinks = [
+  { href: "#source-health", label: "健康概览" },
   { href: "#sources", label: "数据源" },
   { href: "#youtube", label: "YouTube 关键词" },
   { href: "#manual", label: "手动候选" },
@@ -363,6 +364,7 @@ export function AdminDashboard({
   jobFilters = emptyJobFilters,
   jobPagination = emptyJobPagination,
   jobs = [],
+  sourceHealth = [],
   sources = [],
   summary = emptySummary,
   users = [],
@@ -429,6 +431,54 @@ export function AdminDashboard({
           ))}
         </nav>
       </header>
+
+      <SectionHeading
+        description="按来源汇总最近成功、最近失败、连续失败和错误摘要，先暴露需要处理的数据源。"
+        icon={WarningCircle}
+        id="source-health"
+        title="数据源健康"
+      >
+        <TableFrame>
+          <table className="min-w-[940px] w-full border-collapse text-left">
+            <thead>
+              <tr>
+                <TableHead>来源</TableHead>
+                <TableHead>健康状态</TableHead>
+                <TableHead>连续失败</TableHead>
+                <TableHead>最近成功</TableHead>
+                <TableHead>最近失败</TableHead>
+                <TableHead>最近错误</TableHead>
+              </tr>
+            </thead>
+            <tbody>
+              {sourceHealth.length > 0 ? (
+                sourceHealth.map((source) => (
+                  <tr className="transition hover:bg-[var(--surface-soft)] last:[&_td]:border-b-0" key={source.id}>
+                    <TableCell className="font-medium text-[var(--foreground)]">{source.name}</TableCell>
+                    <TableCell>
+                      <StatusBadge label={source.status.label} tone={source.status.tone} />
+                    </TableCell>
+                    <TableCell
+                      className={
+                        source.consecutiveFailures > 0
+                          ? "font-semibold text-[var(--danger)]"
+                          : "text-[var(--muted-strong)]"
+                      }
+                    >
+                      {source.consecutiveFailures} 次
+                    </TableCell>
+                    <TableCell>{source.latestSuccess}</TableCell>
+                    <TableCell>{source.latestFailure}</TableCell>
+                    <TableCell className="max-w-[320px] break-words">{source.lastError}</TableCell>
+                  </tr>
+                ))
+              ) : (
+                <EmptyTableRow colSpan={6}>暂无数据源健康记录。</EmptyTableRow>
+              )}
+            </tbody>
+          </table>
+        </TableFrame>
+      </SectionHeading>
 
       <SectionHeading
         description="维护 RSS、官方博客、HN、Reddit、YouTube 和 GitHub 等候选来源，控制抓取间隔和启用状态。"
