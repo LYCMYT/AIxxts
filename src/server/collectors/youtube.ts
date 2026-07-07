@@ -18,10 +18,19 @@ type YouTubeConfig = {
 };
 
 type YouTubeRssItem = Parser.Item & Record<string, unknown>;
+type YouTubeRssFeed = {
+  title?: string;
+  items: YouTubeRssItem[];
+};
+
+type YouTubeCollectorDeps = {
+  parseRssFeed?: (feedUrl: string) => Promise<YouTubeRssFeed>;
+};
 
 const youtubeFeedParser = new Parser<Record<string, unknown>, YouTubeRssItem>({
   timeout: 20000,
 });
+const YOUTUBE_RSS_MAX_ATTEMPTS = 2;
 
 function configObject(value: unknown) {
   if (value && typeof value === "object" && !Array.isArray(value)) {
@@ -208,6 +217,7 @@ function mapRssItem(
 async function collectYouTubeFeedSource(
   source: SourceRow,
   config: YouTubeConfig,
+  deps: YouTubeCollectorDeps,
 ): Promise<AdapterFetchResult> {
   const feedUrl = youtubeFeedUrl(source, config);
 
@@ -224,7 +234,7 @@ async function collectYouTubeFeedSource(
     };
   }
 
-  const feed = await youtubeFeedParser.parseURL(feedUrl);
+  const { attemptCount, feed, lastError } = await parseRssFeedWithRetry(feedUrl, deps);
   const rawItems = feed.items.slice(0, config.maxResults);
   const items = rawItems
     .filter((item) => keywordMatches(item, config))
@@ -238,6 +248,8 @@ async function collectYouTubeFeedSource(
       method: "youtube_channel_rss",
       feedTitle: feed.title,
       feedUrl,
+      rssAttemptCount: attemptCount,
+      ...(lastError ? { rssLastError: lastError } : {}),
       rawItemCount: feed.items.length,
       filteredItemCount: rawItems.length,
       matchedItemCount: items.length,
@@ -247,7 +259,10 @@ async function collectYouTubeFeedSource(
   };
 }
 
-export async function collectYouTubeSource(source: SourceRow): Promise<AdapterFetchResult> {
+export async function collectYouTubeSource(
+  source: SourceRow,
+  deps: YouTubeCollectorDeps = {},
+): Promise<AdapterFetchResult> {
   const apiKey = env.YOUTUBE_API_KEY?.trim();
   const config = parseYouTubeConfig(source);
 
@@ -265,7 +280,7 @@ export async function collectYouTubeSource(source: SourceRow): Promise<AdapterFe
   }
 
   if (!apiKey) {
-    return collectYouTubeFeedSource(source, config);
+    return collectYouTubeFeedSource(source, config, deps);
   }
 
   const youtube = google.youtube("v3");
@@ -297,4 +312,38 @@ export async function collectYouTubeSource(source: SourceRow): Promise<AdapterFe
       rawItemCount: rawItems.length,
     },
   };
+}
+
+async function parseRssFeedWithRetry(feedUrl: string, deps: YouTubeCollectorDeps) {
+  const parseRssFeed =
+    deps.parseRssFeed ?? ((url: string) => youtubeFeedParser.parseURL(url));
+  let lastError: string | undefined;
+
+  for (let attempt = 1; attempt <= YOUTUBE_RSS_MAX_ATTEMPTS; attempt += 1) {
+    try {
+      const feed = await parseRssFeed(feedUrl);
+
+      return {
+        attemptCount: attempt,
+        feed,
+        lastError,
+      };
+    } catch (error) {
+      lastError = getErrorMessage(error);
+
+      if (attempt === YOUTUBE_RSS_MAX_ATTEMPTS) {
+        throw error;
+      }
+    }
+  }
+
+  throw new Error(lastError ?? "YouTube RSS feed request failed.");
+}
+
+function getErrorMessage(error: unknown) {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return String(error);
 }
