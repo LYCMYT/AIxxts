@@ -26,6 +26,7 @@ export type AdminSourceRow = {
 
 export type AdminSourceHealthRow = {
   consecutiveFailures: number;
+  errorCategory: string;
   id: string;
   lastError: string;
   latestFailure: string;
@@ -35,6 +36,11 @@ export type AdminSourceHealthRow = {
     label: string;
     tone: BadgeTone;
   };
+};
+
+export type AdminSourceErrorCategoryRow = {
+  category: string;
+  count: number;
 };
 
 export type AdminSourceHealthInput = {
@@ -109,6 +115,7 @@ export type AdminDashboardData = {
     pendingErrors: number;
   };
   sources: AdminSourceRow[];
+  sourceErrorCategories: AdminSourceErrorCategoryRow[];
   sourceHealth: AdminSourceHealthRow[];
   jobs: AdminJobRow[];
   users: AdminUserRow[];
@@ -556,6 +563,40 @@ function jobRunTime(job: AdminSourceHealthInput["jobs"][number]) {
   return job.finishedAt ?? job.startedAt;
 }
 
+function classifySourceError(errorMessage: string) {
+  const normalized = errorMessage.toLowerCase();
+
+  if (!normalized) {
+    return "暂无错误";
+  }
+
+  if (/(timed out|timeout|etimedout)/.test(normalized)) {
+    return "网络超时";
+  }
+
+  if (/(429|too many requests|rate limit)/.test(normalized)) {
+    return "上游限流";
+  }
+
+  if (/(tls|ssl|certificate|cert)/.test(normalized)) {
+    return "TLS/证书错误";
+  }
+
+  if (/(http\s*5\d\d|\b5\d\d\b|bad gateway|service unavailable)/.test(normalized)) {
+    return "上游服务错误";
+  }
+
+  if (/(http\s*4\d\d|\b4\d\d\b|forbidden|unauthorized)/.test(normalized)) {
+    return "上游拒绝访问";
+  }
+
+  if (/(fetch failed|network|econnreset|econnrefused|enotfound|socket)/.test(normalized)) {
+    return "网络连接失败";
+  }
+
+  return "其他错误";
+}
+
 export function mapSourceHealth(input: AdminSourceHealthInput): AdminSourceHealthRow {
   const jobs = [...input.jobs].sort(
     (left, right) => dateTimeMillis(right.startedAt) - dateTimeMillis(left.startedAt),
@@ -564,6 +605,7 @@ export function mapSourceHealth(input: AdminSourceHealthInput): AdminSourceHealt
   const latestSuccess = jobs.find((job) => job.status === "SUCCESS") ?? null;
   const latestFailure = jobs.find((job) => job.status === "FAILED") ?? null;
   const sourceError = input.lastError?.trim() ?? "";
+  const lastError = latestFailure?.errorMessage?.trim() || sourceError;
   let consecutiveFailures = 0;
 
   for (const job of jobs) {
@@ -589,13 +631,32 @@ export function mapSourceHealth(input: AdminSourceHealthInput): AdminSourceHealt
 
   return {
     consecutiveFailures,
+    errorCategory: classifySourceError(lastError),
     id: input.sourceId,
-    lastError: latestFailure?.errorMessage?.trim() || sourceError || "暂无错误",
+    lastError: lastError || "暂无错误",
     latestFailure: latestFailure ? formatDateTime(jobRunTime(latestFailure)) : sourceError ? "未记录" : "暂无失败",
     latestSuccess: latestSuccess ? formatDateTime(jobRunTime(latestSuccess)) : "暂无成功",
     name: input.sourceName,
     status,
   };
+}
+
+export function summarizeSourceErrorCategories(
+  rows: AdminSourceHealthRow[],
+): AdminSourceErrorCategoryRow[] {
+  const counts = new Map<string, number>();
+
+  for (const row of rows) {
+    if (row.errorCategory === "暂无错误") {
+      continue;
+    }
+
+    counts.set(row.errorCategory, (counts.get(row.errorCategory) ?? 0) + 1);
+  }
+
+  return Array.from(counts.entries())
+    .map(([category, count]) => ({ category, count }))
+    .sort((left, right) => right.count - left.count || left.category.localeCompare(right.category));
 }
 
 function mapJob(job: RawJobRunRow): AdminJobRow {
@@ -771,6 +832,16 @@ export async function getAdminDashboardData(
       healthJobsBySource.set(job.sourceId, healthJobs);
     }
 
+    const sourceHealth = sources.map((source) =>
+      mapSourceHealth({
+        enabled: rawBoolean(source.enabled),
+        jobs: healthJobsBySource.get(source.id) ?? [],
+        lastError: source.lastError,
+        sourceId: source.id,
+        sourceName: source.name,
+      }),
+    );
+
     return {
       jobFilterOptions: {
         jobTypes: jobTypes
@@ -798,15 +869,8 @@ export async function getAdminDashboardData(
         dailySchedule: "08:00",
         pendingErrors: rawNumber(pendingErrorRows[0]?.count ?? 0),
       },
-      sourceHealth: sources.map((source) =>
-        mapSourceHealth({
-          enabled: rawBoolean(source.enabled),
-          jobs: healthJobsBySource.get(source.id) ?? [],
-          lastError: source.lastError,
-          sourceId: source.id,
-          sourceName: source.name,
-        }),
-      ),
+      sourceErrorCategories: summarizeSourceErrorCategories(sourceHealth),
+      sourceHealth,
       sources: sources.map((source) => mapSource(source, latestJobsBySource.get(source.id) ?? null)),
       jobs: jobs.map(mapJob),
       users: users.map(mapUser),

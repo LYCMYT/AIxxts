@@ -364,6 +364,7 @@ export function AdminDashboard({
   jobFilters = emptyJobFilters,
   jobPagination = emptyJobPagination,
   jobs = [],
+  sourceErrorCategories = [],
   sourceHealth = [],
   sources = [],
   summary = emptySummary,
@@ -438,8 +439,25 @@ export function AdminDashboard({
         id="source-health"
         title="数据源健康"
       >
+        <div className="mb-4 flex flex-wrap gap-2">
+          {sourceErrorCategories.length > 0 ? (
+            sourceErrorCategories.map((item) => (
+              <span
+                className="inline-flex items-center gap-2 rounded-[14px] border border-[var(--line-soft)] bg-[var(--surface-soft)] px-3 py-1.5 text-xs font-semibold text-[var(--muted-strong)]"
+                key={item.category}
+              >
+                <span>{item.category}</span>
+                <span className="text-[var(--danger)]">{item.count} 个来源</span>
+              </span>
+            ))
+          ) : (
+            <span className="inline-flex rounded-[14px] border border-[var(--line-soft)] bg-[var(--surface-soft)] px-3 py-1.5 text-xs font-semibold text-[var(--muted-strong)]">
+              暂无待处理错误类别
+            </span>
+          )}
+        </div>
         <TableFrame>
-          <table className="min-w-[940px] w-full border-collapse text-left">
+          <table className="min-w-[1060px] w-full border-collapse text-left">
             <thead>
               <tr>
                 <TableHead>来源</TableHead>
@@ -447,6 +465,7 @@ export function AdminDashboard({
                 <TableHead>连续失败</TableHead>
                 <TableHead>最近成功</TableHead>
                 <TableHead>最近失败</TableHead>
+                <TableHead>错误归类</TableHead>
                 <TableHead>最近错误</TableHead>
               </tr>
             </thead>
@@ -469,11 +488,16 @@ export function AdminDashboard({
                     </TableCell>
                     <TableCell>{source.latestSuccess}</TableCell>
                     <TableCell>{source.latestFailure}</TableCell>
+                    <TableCell>
+                      <span className="inline-flex rounded-[14px] border border-[var(--line-soft)] bg-[var(--surface-soft)] px-2.5 py-1 text-xs font-semibold text-[var(--muted-strong)]">
+                        {source.errorCategory}
+                      </span>
+                    </TableCell>
                     <TableCell className="max-w-[320px] break-words">{source.lastError}</TableCell>
                   </tr>
                 ))
               ) : (
-                <EmptyTableRow colSpan={6}>暂无数据源健康记录。</EmptyTableRow>
+                <EmptyTableRow colSpan={7}>暂无数据源健康记录。</EmptyTableRow>
               )}
             </tbody>
           </table>
