@@ -12,6 +12,7 @@ const MAX_TRANSLATION_LIMIT = 50;
 
 export type RunCandidateTranslationJobOptions = {
   digestDate?: string;
+  force?: boolean;
   limit?: number;
   selectedOnly?: boolean;
 };
@@ -63,6 +64,7 @@ async function runCandidateTranslationJobCore(
   const limit = normalizeLimit(options.limit);
   const selectedOnly = options.selectedOnly ?? true;
   const digestDate = options.digestDate?.trim();
+  const force = options.force ?? false;
 
   if (!env.LLM_API_KEY?.trim()) {
     return {
@@ -76,37 +78,11 @@ async function runCandidateTranslationJobCore(
   }
 
   const candidates = await prisma.candidateItem.findMany({
-    where: {
-      OR: [
-        {
-          translatedTitle: null,
-        },
-        {
-          translatedSummary: null,
-        },
-        {
-          translatedAt: null,
-        },
-      ],
-      ...(selectedOnly
-        ? {
-            digestItems: {
-              some: {
-                digest: {
-                  ...(digestDate
-                    ? {
-                        digestDate,
-                      }
-                    : {}),
-                  status: {
-                    in: [DigestStatus.DRAFT, DigestStatus.PUBLISHED],
-                  },
-                },
-              },
-            },
-          }
-        : {}),
-    },
+    where: buildCandidateTranslationCandidateWhere({
+      digestDate,
+      force,
+      selectedOnly,
+    }),
     orderBy: [{ publishedAt: "desc" }, { title: "asc" }],
     take: limit,
   });
@@ -173,6 +149,7 @@ async function runCandidateTranslationJobCore(
       outputTokens: outputTokens > 0 ? outputTokens : undefined,
       responseJson: {
         selectedOnly,
+        force,
         digestDate: digestDate || null,
         limit,
         translatedIds,
@@ -216,6 +193,53 @@ function normalizeJobMetadata(options: RunCandidateTranslationJobOptions) {
     digestDate: options.digestDate?.trim() || null,
     limit: normalizeLimit(options.limit),
     selectedOnly: options.selectedOnly ?? true,
+    force: options.force ?? false,
+  };
+}
+
+export function buildCandidateTranslationCandidateWhere({
+  digestDate,
+  force,
+  selectedOnly,
+}: {
+  digestDate?: string;
+  force: boolean;
+  selectedOnly: boolean;
+}): Prisma.CandidateItemWhereInput {
+  return {
+    ...(force
+      ? {}
+      : {
+          OR: [
+            {
+              translatedTitle: null,
+            },
+            {
+              translatedSummary: null,
+            },
+            {
+              translatedAt: null,
+            },
+          ],
+        }),
+    ...(selectedOnly
+      ? {
+          digestItems: {
+            some: {
+              digest: {
+                ...(digestDate
+                  ? {
+                      digestDate,
+                    }
+                  : {}),
+                status: {
+                  in: [DigestStatus.DRAFT, DigestStatus.PUBLISHED],
+                },
+              },
+            },
+          },
+        }
+      : {}),
   };
 }
 

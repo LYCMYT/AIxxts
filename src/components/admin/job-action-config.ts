@@ -37,8 +37,8 @@ export const adminJobActions = [
   },
   {
     kind: "translate",
-    label: "翻译补齐",
-    runningLabel: "正在补齐中文详情",
+    label: "逐句重译",
+    runningLabel: "正在逐句翻译",
     url: "/api/admin/jobs/translate",
     icon: Translate,
     tone: "secondary",

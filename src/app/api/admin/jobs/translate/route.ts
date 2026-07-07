@@ -8,6 +8,7 @@ export async function POST(request: Request) {
     const options = await readAdminJobOptions(request);
     const summary = await runCandidateTranslationJob({
       digestDate: options.digestDate,
+      force: options.force,
       limit: options.limit,
       selectedOnly: options.selectedOnly,
     });

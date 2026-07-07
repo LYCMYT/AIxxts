@@ -12,12 +12,13 @@ function jsonRequest(body: unknown) {
   });
 }
 
-test("readAdminJobOptions accepts digest date, limit, and selectedOnly", async () => {
+test("readAdminJobOptions accepts digest date, limit, selectedOnly, and force", async () => {
   const options = await readAdminJobOptions(
     jsonRequest({
       digestDate: "2026-07-06",
       limit: 20,
       selectedOnly: false,
+      force: true,
     }),
   );
 
@@ -25,6 +26,7 @@ test("readAdminJobOptions accepts digest date, limit, and selectedOnly", async (
     digestDate: "2026-07-06",
     limit: 20,
     selectedOnly: false,
+    force: true,
   });
 });
 
@@ -62,6 +64,12 @@ test("readAdminJobOptions rejects invalid job option fields", async () => {
         selectedOnly: "true",
       },
       error: "selectedOnly must be a boolean.",
+    },
+    {
+      body: {
+        force: "true",
+      },
+      error: "force must be a boolean.",
     },
   ];
 

@@ -93,3 +93,20 @@ test("buildCandidateTranslationPrompt drops metadata-only source text", () => {
   assert.equal(payload.item.summary, null);
   assert.equal(payload.item.contentText, null);
 });
+
+test("buildCandidateTranslationPrompt requires literal sentence-by-sentence translation", () => {
+  const prompt = buildCandidateTranslationPrompt({
+    title: "OpenAI releases a new model",
+    summary: "The model improves coding. It is available today.",
+    contentText: "First paragraph. Keep this sentence.\n\nSecond paragraph with a product name: DeepSeek.",
+  });
+
+  const payload = JSON.parse(prompt.user);
+  const rulesText = payload.rules.join("\n");
+
+  assert.match(prompt.system, /逐字逐句/);
+  assert.match(rulesText, /逐段逐句翻译/);
+  assert.match(rulesText, /保留原文段落顺序和换行/);
+  assert.match(rulesText, /不得总结、压缩、改写/);
+  assert.match(rulesText, /专有名词、产品名、公司名、数字、日期、代码标识保持原样/);
+});

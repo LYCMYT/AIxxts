@@ -2,6 +2,7 @@ export type AdminJobOptions = {
   digestDate?: string;
   limit?: number;
   selectedOnly?: boolean;
+  force?: boolean;
 };
 
 export class AdminJobRequestError extends Error {
@@ -49,6 +50,14 @@ export function parseAdminJobOptions(body: Record<string, unknown>): AdminJobOpt
     }
 
     options.selectedOnly = body.selectedOnly;
+  }
+
+  if (body.force !== undefined) {
+    if (typeof body.force !== "boolean") {
+      throw new AdminJobRequestError("force must be a boolean.");
+    }
+
+    options.force = body.force;
   }
 
   return options;

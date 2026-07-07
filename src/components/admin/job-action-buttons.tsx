@@ -67,7 +67,7 @@ function summarizeJobResult(result: unknown) {
   return "任务已完成";
 }
 
-function buildJobBody(kind: AdminJobActionKind, digestDate: string) {
+export function buildJobBody(kind: AdminJobActionKind, digestDate: string) {
   if (kind === "collect") {
     return undefined;
   }
@@ -82,6 +82,10 @@ function buildJobBody(kind: AdminJobActionKind, digestDate: string) {
 
   if (kind === "enrichArticles" || kind === "translate") {
     body.limit = 20;
+  }
+
+  if (kind === "translate") {
+    body.force = true;
   }
 
   return body;
