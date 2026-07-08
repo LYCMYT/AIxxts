@@ -42,6 +42,7 @@ export default async function AdminPage({
           pendingErrors: 0,
         }
       }
+      topics={data?.topics ?? []}
       users={data?.users ?? []}
     />
   );

@@ -1,4 +1,4 @@
-import { Database, ListChecks, MagnifyingGlass, Plus, ShieldCheck, UserGear, WarningCircle, YoutubeLogo } from "@phosphor-icons/react/dist/ssr";
+import { Database, ListChecks, MagnifyingGlass, Plus, ShieldCheck, TagSimple, UserGear, WarningCircle, YoutubeLogo } from "@phosphor-icons/react/dist/ssr";
 import type { AdminDashboardData } from "@/server/admin/queries";
 import { AdminSectionLayout, AdminSectionPanel } from "./admin-section-layout";
 import { DigestPublishButton } from "./digest-publish-button";
@@ -6,6 +6,7 @@ import { JobActionButtons } from "./job-action-buttons";
 import { ManualCandidateForm } from "./manual-candidate-form";
 import { SourceActionButtons } from "./source-action-buttons";
 import { SourceEditor } from "./source-editor";
+import { TopicManager } from "./topic-manager";
 
 type BadgeTone = "success" | "danger" | "warning" | "muted" | "accent";
 
@@ -49,6 +50,7 @@ const emptyJobPagination: AdminDashboardData["jobPagination"] = {
   totalCount: 0,
   totalPages: 1,
 };
+const emptyTopics: AdminDashboardData["topics"] = [];
 
 const inputClass = "w-full rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)] px-3.5 py-2.5 text-sm text-[var(--foreground)] transition placeholder:text-[var(--muted)] focus:border-[var(--accent)] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--accent-soft)]";
 
@@ -398,7 +400,7 @@ function AdminOverview({
   );
 }
 
-export function AdminDashboard({ digestDate = currentDigestDate(), jobFilterOptions = emptyJobFilterOptions, jobFilters = emptyJobFilters, jobPagination = emptyJobPagination, jobs = [], sourceErrorCategories = [], sourceHealth = [], sources = [], summary = emptySummary, users = [] }: AdminDashboardProps = {}) {
+export function AdminDashboard({ digestDate = currentDigestDate(), jobFilterOptions = emptyJobFilterOptions, jobFilters = emptyJobFilters, jobPagination = emptyJobPagination, jobs = [], sourceErrorCategories = [], sourceHealth = [], sources = [], summary = emptySummary, topics = emptyTopics, users = [] }: AdminDashboardProps = {}) {
   return (
     <main className="min-h-[100dvh] bg-[var(--background)] px-4 py-6 sm:px-6 lg:px-8">
       <div className="mx-auto flex w-full max-w-[1280px] flex-col gap-5">
@@ -569,6 +571,12 @@ export function AdminDashboard({ digestDate = currentDigestDate(), jobFilterOpti
           <AdminSectionPanel sectionId="manual">
             <SectionHeading description="用于补充抖音、小红书或临时来源中的重要候选内容，提交后进入统一候选池。" icon={Plus} id="manual" title="手动候选录入">
               <ManualCandidateForm />
+            </SectionHeading>
+          </AdminSectionPanel>
+
+          <AdminSectionPanel sectionId="topics">
+            <SectionHeading description="查看当前主题标签规模，合并重复主题，保持每日精选筛选口径稳定。" icon={TagSimple} id="topics" title="主题管理">
+              <TopicManager topics={topics} />
             </SectionHeading>
           </AdminSectionPanel>
 

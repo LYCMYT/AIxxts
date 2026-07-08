@@ -1,5 +1,6 @@
 import { COLLECTABLE_SOURCE_TYPES } from "@/server/collectors/types";
 import { classifyRequestError } from "@/server/collectors/request-diagnostics";
+import { getAdminTopicRows, type AdminTopicRow } from "@/server/admin/topics";
 
 type PrismaClientLike = Awaited<typeof import("@/server/db/prisma")>["prisma"];
 
@@ -119,6 +120,7 @@ export type AdminDashboardData = {
   sourceErrorCategories: AdminSourceErrorCategoryRow[];
   sourceHealth: AdminSourceHealthRow[];
   jobs: AdminJobRow[];
+  topics: AdminTopicRow[];
   users: AdminUserRow[];
 };
 
@@ -693,6 +695,7 @@ export async function getAdminDashboardData(
       todayCandidates,
       pendingErrorRows,
       filteredJobCountRows,
+      topics,
     ] = await Promise.all([
       prisma.$queryRaw<RawSourceRow[]>`
         SELECT
@@ -784,6 +787,7 @@ export async function getAdminDashboardData(
         `,
         ...jobWhere.args,
       ),
+      getAdminTopicRows(),
     ]);
     const latestJobsBySource = new Map<string, RawJobRunRow>();
     const healthJobsBySource = new Map<string, RawJobRunRow[]>();
@@ -845,6 +849,7 @@ export async function getAdminDashboardData(
       sourceHealth,
       sources: sources.map((source) => mapSource(source, latestJobsBySource.get(source.id) ?? null)),
       jobs: jobs.map(mapJob),
+      topics,
       users: users.map(mapUser),
     };
   } catch {

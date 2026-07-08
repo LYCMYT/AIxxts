@@ -7,6 +7,7 @@ export const adminSectionLinks = [
   { id: "sources", href: "#sources", label: "数据源", group: "内容" },
   { id: "youtube", href: "#youtube", label: "监听规则", group: "内容" },
   { id: "manual", href: "#manual", label: "手动候选", group: "内容" },
+  { id: "topics", href: "#topics", label: "主题管理", group: "内容" },
   { id: "users", href: "#users", label: "用户角色", group: "系统" },
 ] as const;
 

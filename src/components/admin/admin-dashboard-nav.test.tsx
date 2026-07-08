@@ -15,6 +15,8 @@ test("AdminDashboard renders a dedicated admin navigation with desktop links and
   assert.match(html, /data-testid="admin-section-nav-select"/);
   assert.match(html, /href="#overview"/);
   assert.match(html, /href="#source-health"/);
+  assert.match(html, /href="#topics"/);
+  assert.match(html, /主题管理/);
 });
 
 test("AdminSectionLayout only renders the active admin section", () => {
