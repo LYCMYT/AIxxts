@@ -76,9 +76,7 @@ pnpm snapshot:pages
 pnpm build:pages
 ```
 
-推送到 `main` 后，`.github/workflows/github-pages.yml` 会自动发布 `out/` 静态产物到 GitHub Pages。
-
-首次使用时，如果 Actions 中 `Configure GitHub Pages` 提示 `Get Pages site failed`，需要仓库管理员在 GitHub 仓库页面进入 `Settings -> Pages`，把 `Build and deployment -> Source` 设置为 `GitHub Actions`。这是 GitHub 对首次启用 Pages 的权限限制；启用后后续推送会自动部署。
+当前 Pages 内容已发布到 `gh-pages` 静态分支。更新公开链接内容时，先重新导出并构建 `out/`，再把 `out/` 的静态文件发布到 `gh-pages` 分支。GitHub Pages 不会读取 `.env.local`，也不会访问本地 SQLite 数据库。
 
 ## 文档入口
 
