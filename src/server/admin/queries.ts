@@ -1,3 +1,4 @@
+import { DigestStatus, Prisma } from "@/generated/prisma/client";
 import { COLLECTABLE_SOURCE_TYPES } from "@/server/collectors/types";
 import { classifyRequestError } from "@/server/collectors/request-diagnostics";
 import { getAdminTopicRows, type AdminTopicRow } from "@/server/admin/topics";
@@ -72,6 +73,24 @@ export type AdminJobRow = {
   summary: string;
 };
 
+export type AdminCandidateSelectedFilter = "selected" | "unselected" | "";
+
+export type AdminCandidateRow = {
+  candidateStatus: string;
+  collectedAt: string;
+  detailHref: string;
+  id: string;
+  publishedAt: string;
+  selectedStatus: {
+    label: string;
+    tone: BadgeTone;
+  };
+  source: string;
+  sourceType: string;
+  title: string;
+  topicTags: string[];
+};
+
 export type AdminJobDetailRow = {
   label: string;
   value: string;
@@ -89,6 +108,23 @@ export type AdminUserRow = {
 };
 
 export type AdminDashboardData = {
+  candidateFilterOptions: {
+    sources: Array<{
+      id: string;
+      name: string;
+    }>;
+    topics: string[];
+  };
+  candidateFilters: AdminCandidateFilters;
+  candidatePagination: {
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+    page: number;
+    pageSize: number;
+    totalCount: number;
+    totalPages: number;
+  };
+  candidates: AdminCandidateRow[];
   jobFilterOptions: {
     jobTypes: string[];
     sources: Array<{
@@ -129,6 +165,23 @@ export type AdminJobFilterInput = {
   page?: unknown;
   sourceId?: unknown;
   status?: unknown;
+};
+
+export type AdminCandidateFilterInput = {
+  candidatePage?: unknown;
+  candidateQ?: unknown;
+  candidateSelected?: unknown;
+  candidateSourceId?: unknown;
+  candidateTopic?: unknown;
+};
+
+export type AdminCandidateFilters = {
+  page: number;
+  pageSize: number;
+  q: string;
+  selected: AdminCandidateSelectedFilter;
+  sourceId: string;
+  topic: string;
 };
 
 export type AdminJobFilters = {
@@ -174,10 +227,29 @@ type RawOptionRow = {
   value: string | null;
 };
 
+type AdminCandidateRecord = Prisma.CandidateItemGetPayload<{
+  include: {
+    digestItems: {
+      include: {
+        digest: true;
+      };
+    };
+    source: true;
+    topicTags: {
+      include: {
+        topic: true;
+      };
+    };
+  };
+}>;
+
 const APP_TIME_ZONE = "America/New_York";
+const CANDIDATE_PAGE_SIZE = 10;
 const JOB_PAGE_SIZE = 10;
 const MAX_FILTER_LENGTH = 100;
 const VALID_JOB_STATUSES = ["RUNNING", "SUCCESS", "FAILED", "SKIPPED"] as const;
+const VALID_CANDIDATE_SELECTED_FILTERS = ["selected", "unselected"] as const;
+const ACTIVE_DIGEST_STATUSES = [DigestStatus.DRAFT, DigestStatus.PUBLISHED] as const;
 
 const sourceTypeLabels: Record<string, string> = {
   RSS: "RSS",
@@ -340,6 +412,25 @@ export function normalizeAdminJobFilters(input: AdminJobFilterInput = {}): Admin
   };
 }
 
+export function normalizeAdminCandidateFilters(
+  input: AdminCandidateFilterInput = {},
+): AdminCandidateFilters {
+  const selected = shortFilterValue(input.candidateSelected).toLowerCase();
+
+  return {
+    page: parseJobPage(input.candidatePage),
+    pageSize: CANDIDATE_PAGE_SIZE,
+    q: shortFilterValue(input.candidateQ),
+    selected: VALID_CANDIDATE_SELECTED_FILTERS.includes(
+      selected as (typeof VALID_CANDIDATE_SELECTED_FILTERS)[number],
+    )
+      ? (selected as AdminCandidateSelectedFilter)
+      : "",
+    sourceId: shortFilterValue(input.candidateSourceId),
+    topic: shortFilterValue(input.candidateTopic),
+  };
+}
+
 function jobStatusOptions() {
   return VALID_JOB_STATUSES.map((status) => ({
     label: jobLabel(status),
@@ -369,6 +460,79 @@ function buildJobWhere(filters: AdminJobFilters) {
   return {
     args,
     sql: `WHERE ${clauses.join(" AND ")}`,
+  };
+}
+
+export function buildAdminCandidateWhere(
+  filters: AdminCandidateFilters,
+): Prisma.CandidateItemWhereInput {
+  const clauses: Prisma.CandidateItemWhereInput[] = [];
+
+  if (filters.q) {
+    clauses.push({
+      OR: [
+        { title: { contains: filters.q } },
+        { summary: { contains: filters.q } },
+        { translatedTitle: { contains: filters.q } },
+        { translatedSummary: { contains: filters.q } },
+      ],
+    });
+  }
+
+  if (filters.sourceId) {
+    clauses.push({ sourceId: filters.sourceId });
+  }
+
+  if (filters.topic) {
+    clauses.push({
+      topicTags: {
+        some: {
+          topic: {
+            label: filters.topic,
+          },
+        },
+      },
+    });
+  }
+
+  if (filters.selected === "selected") {
+    clauses.push({
+      digestItems: {
+        some: {
+          digest: {
+            status: {
+              in: [...ACTIVE_DIGEST_STATUSES],
+            },
+          },
+        },
+      },
+    });
+  }
+
+  if (filters.selected === "unselected") {
+    clauses.push({
+      digestItems: {
+        none: {
+          digest: {
+            status: {
+              in: [...ACTIVE_DIGEST_STATUSES],
+            },
+          },
+        },
+      },
+    });
+  }
+
+  if (clauses.length === 0) {
+    return {};
+  }
+
+  if (clauses.length === 1) {
+    return clauses[0];
+  }
+
+  return {
+    AND: clauses,
   };
 }
 
@@ -672,8 +836,64 @@ function mapUser(user: {
   };
 }
 
+function candidateStatusLabel(status: string) {
+  const labels: Record<string, string> = {
+    ARCHIVED: "已归档",
+    DUPLICATE: "重复内容",
+    NEW: "待处理",
+    REJECTED: "已拒绝",
+    SELECTED: "已标记入选",
+  };
+
+  return labels[status] ?? status;
+}
+
+function candidateTopicLabels(candidate: AdminCandidateRecord) {
+  return Array.from(
+    new Set(
+      candidate.topicTags
+        .map((item) => item.topic.label)
+        .filter((label) => Boolean(label.trim())),
+    ),
+  );
+}
+
+function candidateHasActiveDigest(candidate: AdminCandidateRecord) {
+  return candidate.digestItems.some((item) =>
+    ACTIVE_DIGEST_STATUSES.includes(item.digest.status as (typeof ACTIVE_DIGEST_STATUSES)[number]),
+  );
+}
+
+function mapCandidate(candidate: AdminCandidateRecord): AdminCandidateRow {
+  const selected = candidateHasActiveDigest(candidate);
+
+  return {
+    candidateStatus: candidateStatusLabel(candidate.status),
+    collectedAt: formatDateTime(candidate.collectedAt),
+    detailHref: `/items/${encodeURIComponent(candidate.id)}`,
+    id: candidate.id,
+    publishedAt: formatDateTime(candidate.publishedAt),
+    selectedStatus: selected
+      ? {
+          label: "已入选",
+          tone: "success",
+        }
+      : {
+          label: "未入选",
+          tone: "muted",
+        },
+    source: candidate.source.name,
+    sourceType: sourceTypeLabel(candidate.source.type),
+    title: candidate.translatedTitle?.trim() || candidate.title,
+    topicTags: candidateTopicLabels(candidate),
+  };
+}
+
 export async function getAdminDashboardData(
-  options: { jobs?: AdminJobFilterInput } = {},
+  options: {
+    candidates?: AdminCandidateFilterInput;
+    jobs?: AdminJobFilterInput;
+  } = {},
 ): Promise<AdminDashboardData | null> {
   const prisma = await getPrisma();
 
@@ -683,6 +903,9 @@ export async function getAdminDashboardData(
 
   try {
     const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const candidateFilters = normalizeAdminCandidateFilters(options.candidates);
+    const candidateWhere = buildAdminCandidateWhere(candidateFilters);
+    const candidateOffset = (candidateFilters.page - 1) * candidateFilters.pageSize;
     const jobFilters = normalizeAdminJobFilters(options.jobs);
     const jobWhere = buildJobWhere(jobFilters);
     const jobOffset = (jobFilters.page - 1) * jobFilters.pageSize;
@@ -695,6 +918,8 @@ export async function getAdminDashboardData(
       todayCandidates,
       pendingErrorRows,
       filteredJobCountRows,
+      filteredCandidateCount,
+      candidateRows,
       topics,
     ] = await Promise.all([
       prisma.$queryRaw<RawSourceRow[]>`
@@ -787,12 +1012,45 @@ export async function getAdminDashboardData(
         `,
         ...jobWhere.args,
       ),
+      prisma.candidateItem.count({
+        where: candidateWhere,
+      }),
+      prisma.candidateItem.findMany({
+        include: {
+          digestItems: {
+            include: {
+              digest: true,
+            },
+          },
+          source: true,
+          topicTags: {
+            include: {
+              topic: true,
+            },
+          },
+        },
+        orderBy: [
+          {
+            publishedAt: "desc",
+          },
+          {
+            collectedAt: "desc",
+          },
+        ],
+        skip: candidateOffset,
+        take: candidateFilters.pageSize,
+        where: candidateWhere,
+      }),
       getAdminTopicRows(),
     ]);
     const latestJobsBySource = new Map<string, RawJobRunRow>();
     const healthJobsBySource = new Map<string, RawJobRunRow[]>();
     const totalJobCount = rawNumber(filteredJobCountRows[0]?.count ?? 0);
     const totalJobPages = Math.max(1, Math.ceil(totalJobCount / jobFilters.pageSize));
+    const totalCandidatePages = Math.max(
+      1,
+      Math.ceil(filteredCandidateCount / candidateFilters.pageSize),
+    );
 
     for (const job of latestJobs) {
       if (!job.sourceId) {
@@ -819,6 +1077,23 @@ export async function getAdminDashboardData(
     );
 
     return {
+      candidateFilterOptions: {
+        sources: sources.map((source) => ({
+          id: source.id,
+          name: source.name,
+        })),
+        topics: topics.map((topic) => topic.label),
+      },
+      candidateFilters,
+      candidatePagination: {
+        hasNextPage: candidateFilters.page < totalCandidatePages,
+        hasPreviousPage: candidateFilters.page > 1,
+        page: candidateFilters.page,
+        pageSize: candidateFilters.pageSize,
+        totalCount: filteredCandidateCount,
+        totalPages: totalCandidatePages,
+      },
+      candidates: candidateRows.map(mapCandidate),
       jobFilterOptions: {
         jobTypes: jobTypes
           .map((item) => item.value)

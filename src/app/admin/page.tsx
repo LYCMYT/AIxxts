@@ -13,6 +13,11 @@ export default async function AdminPage({
   searchParams,
 }: {
   searchParams: Promise<{
+    candidatePage?: string;
+    candidateQ?: string;
+    candidateSelected?: string;
+    candidateSourceId?: string;
+    candidateTopic?: string;
     jobType?: string;
     page?: string;
     sourceId?: string;
@@ -21,11 +26,16 @@ export default async function AdminPage({
 }) {
   const params = await searchParams;
   const data = await getAdminDashboardData({
+    candidates: params,
     jobs: params,
   });
 
   return (
     <AdminDashboard
+      candidateFilterOptions={data?.candidateFilterOptions}
+      candidateFilters={data?.candidateFilters}
+      candidatePagination={data?.candidatePagination}
+      candidates={data?.candidates ?? []}
       jobFilterOptions={data?.jobFilterOptions}
       jobFilters={data?.jobFilters}
       jobPagination={data?.jobPagination}

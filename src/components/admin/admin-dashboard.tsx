@@ -1,6 +1,7 @@
 import { Database, ListChecks, MagnifyingGlass, Plus, ShieldCheck, TagSimple, UserGear, WarningCircle, YoutubeLogo } from "@phosphor-icons/react/dist/ssr";
 import type { AdminDashboardData } from "@/server/admin/queries";
 import { AdminSectionLayout, AdminSectionPanel } from "./admin-section-layout";
+import { CandidateSearchPanel } from "./candidate-search-panel";
 import { DigestPublishButton } from "./digest-publish-button";
 import { JobActionButtons } from "./job-action-buttons";
 import { ManualCandidateForm } from "./manual-candidate-form";
@@ -50,6 +51,27 @@ const emptyJobPagination: AdminDashboardData["jobPagination"] = {
   totalCount: 0,
   totalPages: 1,
 };
+const emptyCandidateFilters: AdminDashboardData["candidateFilters"] = {
+  page: 1,
+  pageSize: 10,
+  q: "",
+  selected: "",
+  sourceId: "",
+  topic: "",
+};
+const emptyCandidateFilterOptions: AdminDashboardData["candidateFilterOptions"] = {
+  sources: [],
+  topics: [],
+};
+const emptyCandidatePagination: AdminDashboardData["candidatePagination"] = {
+  hasNextPage: false,
+  hasPreviousPage: false,
+  page: 1,
+  pageSize: 10,
+  totalCount: 0,
+  totalPages: 1,
+};
+const emptyCandidates: AdminDashboardData["candidates"] = [];
 const emptyTopics: AdminDashboardData["topics"] = [];
 
 const inputClass = "w-full rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)] px-3.5 py-2.5 text-sm text-[var(--foreground)] transition placeholder:text-[var(--muted)] focus:border-[var(--accent)] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--accent-soft)]";
@@ -400,7 +422,7 @@ function AdminOverview({
   );
 }
 
-export function AdminDashboard({ digestDate = currentDigestDate(), jobFilterOptions = emptyJobFilterOptions, jobFilters = emptyJobFilters, jobPagination = emptyJobPagination, jobs = [], sourceErrorCategories = [], sourceHealth = [], sources = [], summary = emptySummary, topics = emptyTopics, users = [] }: AdminDashboardProps = {}) {
+export function AdminDashboard({ candidateFilterOptions = emptyCandidateFilterOptions, candidateFilters = emptyCandidateFilters, candidatePagination = emptyCandidatePagination, candidates = emptyCandidates, digestDate = currentDigestDate(), jobFilterOptions = emptyJobFilterOptions, jobFilters = emptyJobFilters, jobPagination = emptyJobPagination, jobs = [], sourceErrorCategories = [], sourceHealth = [], sources = [], summary = emptySummary, topics = emptyTopics, users = [] }: AdminDashboardProps = {}) {
   return (
     <main className="min-h-[100dvh] bg-[var(--background)] px-4 py-6 sm:px-6 lg:px-8">
       <div className="mx-auto flex w-full max-w-[1280px] flex-col gap-5">
@@ -571,6 +593,17 @@ export function AdminDashboard({ digestDate = currentDigestDate(), jobFilterOpti
           <AdminSectionPanel sectionId="manual">
             <SectionHeading description="用于补充抖音、小红书或临时来源中的重要候选内容，提交后进入统一候选池。" icon={Plus} id="manual" title="手动候选录入">
               <ManualCandidateForm />
+            </SectionHeading>
+          </AdminSectionPanel>
+
+          <AdminSectionPanel sectionId="candidates">
+            <SectionHeading description="按标题、来源、主题和是否入选日报筛选候选池内容，并进入站内详情页查看中文详情与修正主题。" icon={MagnifyingGlass} id="candidates" title="候选检索">
+              <CandidateSearchPanel
+                candidates={candidates}
+                filters={candidateFilters}
+                options={candidateFilterOptions}
+                pagination={candidatePagination}
+              />
             </SectionHeading>
           </AdminSectionPanel>
 
