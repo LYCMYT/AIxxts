@@ -81,7 +81,7 @@ export function DigestHome({
   const topics = topicBreakdown(items).slice(0, 8);
 
   return (
-    <main className="mx-auto w-full max-w-[1160px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+    <main className="mx-auto w-full max-w-[1280px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
       <section className="rounded-[var(--radius-lg)] border border-[var(--line-soft)] bg-[var(--surface)] p-5 shadow-[var(--shadow-subtle)] sm:p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div className="grid gap-3">
@@ -112,43 +112,30 @@ export function DigestHome({
         </div>
       </section>
 
-      <section className="my-5 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(260px,320px)]">
-        <div className="grid gap-3">
-          <div className="flex flex-col gap-2 rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)] px-4 py-3 shadow-[var(--shadow-subtle)] sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <h2 className="text-base font-semibold text-[var(--foreground)]">排序列表</h2>
-              <p className="text-sm leading-6 text-[var(--muted)]">
-                {selectedCount} 条精选，来自近 24 小时 {candidateCount} 条候选。
-              </p>
-            </div>
-            <Link
-              className="focus-ring inline-flex w-fit items-center gap-2 rounded-full border border-[var(--line-soft)] bg-[var(--surface)] px-3 py-2 text-sm font-medium text-[var(--accent-strong)] transition hover:border-[var(--accent)] hover:bg-[var(--accent-soft)]"
-              href="/digests"
-            >
-              历史回看
-              <ArrowRight size={15} weight="bold" />
-            </Link>
+      <section className="my-5 grid gap-3">
+        <div className="flex flex-col gap-2 rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)] px-4 py-3 shadow-[var(--shadow-subtle)] sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h2 className="text-base font-semibold text-[var(--foreground)]">排序列表</h2>
+            <p className="text-sm leading-6 text-[var(--muted)]">
+              {selectedCount} 条精选，来自近 24 小时 {candidateCount} 条候选。
+            </p>
           </div>
-
-          {items.length > 0 ? (
-            <div className="grid gap-3">
-              {items.map((item) => (
-                <DigestListItem item={item} key={item.id} />
-              ))}
-            </div>
-          ) : (
-            <div className="rounded-[var(--radius)] border border-dashed border-[var(--line)] bg-[var(--surface)] p-5 text-sm leading-6 text-[var(--muted)] shadow-[var(--shadow-subtle)]">
-              暂无可展示的精选条目，请查看任务日志或等待下一次生成。
-            </div>
-          )}
+          <Link
+            className="focus-ring inline-flex w-fit items-center gap-2 rounded-full border border-[var(--line-soft)] bg-[var(--surface)] px-3 py-2 text-sm font-medium text-[var(--accent-strong)] transition hover:border-[var(--accent)] hover:bg-[var(--accent-soft)]"
+            href="/digests"
+          >
+            历史回看
+            <ArrowRight size={15} weight="bold" />
+          </Link>
         </div>
 
-        <div className="grid gap-3 rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)] p-4 shadow-[var(--shadow-subtle)]">
-          <div>
-            <h2 className="text-base font-semibold text-[var(--foreground)]">主题雷达</h2>
-          </div>
-          {topics.length > 0 ? (
-            <div className="grid gap-2">
+        {topics.length > 0 ? (
+          <div className="rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)] p-4 shadow-[var(--shadow-subtle)]">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="text-base font-semibold text-[var(--foreground)]">主题雷达</h2>
+              <span className="text-xs font-medium text-[var(--muted)]">按今日精选主题聚合</span>
+            </div>
+            <div className="mt-3 grid gap-2 md:grid-cols-2 xl:grid-cols-4">
               {topics.map((topic) => (
                 <Link
                   className="focus-ring grid gap-1 rounded-[var(--radius-sm)] border border-[var(--line-soft)] bg-[var(--surface-soft)] px-3 py-2 transition hover:border-[var(--accent)] hover:bg-[var(--accent-soft)]"
@@ -168,12 +155,20 @@ export function DigestHome({
                 </Link>
               ))}
             </div>
-          ) : (
-            <p className="rounded-[var(--radius-sm)] border border-dashed border-[var(--line)] bg-[var(--surface-soft)] px-3 py-2 text-sm leading-6 text-[var(--muted)]">
-              暂无主题标签，生成带主题的每日精选后自动统计。
-            </p>
-          )}
-        </div>
+          </div>
+        ) : null}
+
+        {items.length > 0 ? (
+          <div className="grid gap-3">
+            {items.map((item) => (
+              <DigestListItem item={item} key={item.id} />
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-[var(--radius)] border border-dashed border-[var(--line)] bg-[var(--surface)] p-5 text-sm leading-6 text-[var(--muted)] shadow-[var(--shadow-subtle)]">
+            暂无可展示的精选条目，请查看任务日志或等待下一次生成。
+          </div>
+        )}
       </section>
     </main>
   );
@@ -196,7 +191,7 @@ function DigestListItem({ item }: { item: DigestItem }) {
     .slice(0, 4);
 
   return (
-    <article className="grid gap-4 rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)] p-4 shadow-[var(--shadow-subtle)] transition hover:border-[var(--line)] hover:shadow-[var(--shadow-soft)] md:grid-cols-[42px_minmax(0,1fr)_minmax(180px,220px)]">
+    <article className="grid gap-4 rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)] p-4 shadow-[var(--shadow-subtle)] transition hover:border-[var(--line)] hover:shadow-[var(--shadow-soft)] md:grid-cols-[42px_minmax(0,1fr)_minmax(240px,300px)]">
       <div className="flex md:block">
         <span className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--line-soft)] bg-[var(--surface-soft)] text-sm font-semibold text-[var(--foreground)]">
           {item.rank}

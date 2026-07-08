@@ -337,7 +337,7 @@ export function CandidateSearchPanel({
 
       <div className="-mx-4 max-w-[calc(100%+2rem)] overflow-x-auto px-4 sm:mx-0 sm:max-w-full sm:px-0">
         <div className="min-w-full overflow-hidden rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)]">
-          <table className="min-w-[1060px] w-full border-collapse text-left">
+          <table className="min-w-[940px] w-full border-collapse text-left">
             <thead>
               <tr>
                 <th className="whitespace-nowrap border-b border-[var(--line-soft)] bg-[var(--surface-soft)] px-3.5 py-3 text-left text-xs font-semibold text-[var(--muted-strong)]">
@@ -365,9 +365,6 @@ export function CandidateSearchPanel({
                 <th className="whitespace-nowrap border-b border-[var(--line-soft)] bg-[var(--surface-soft)] px-3.5 py-3 text-left text-xs font-semibold text-[var(--muted-strong)]">
                   发布时间
                 </th>
-                <th className="whitespace-nowrap border-b border-[var(--line-soft)] bg-[var(--surface-soft)] px-3.5 py-3 text-left text-xs font-semibold text-[var(--muted-strong)]">
-                  操作
-                </th>
               </tr>
             </thead>
             <tbody>
@@ -387,12 +384,20 @@ export function CandidateSearchPanel({
                     </td>
                     <td className="border-b border-[var(--line-soft)] px-3.5 py-3.5 align-middle text-sm">
                       <div className="grid gap-1">
-                        <a
-                          className="focus-ring rounded-[var(--radius-sm)] font-semibold text-[var(--foreground)] transition hover:text-[var(--accent-strong)]"
-                          href={candidate.detailHref}
-                        >
-                          {candidate.title}
-                        </a>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <a
+                            className="focus-ring rounded-[var(--radius-sm)] font-semibold text-[var(--foreground)] transition hover:text-[var(--accent-strong)]"
+                            href={candidate.detailHref}
+                          >
+                            {candidate.title}
+                          </a>
+                          <a
+                            className="focus-ring inline-flex min-h-7 items-center justify-center whitespace-nowrap rounded-full border border-[var(--line-soft)] bg-[var(--surface)] px-2.5 text-xs font-semibold text-[var(--accent-strong)] transition hover:border-[var(--accent)] hover:bg-[var(--accent-soft)]"
+                            href={candidate.detailHref}
+                          >
+                            查看详情
+                          </a>
+                        </div>
                         <span className="text-xs text-[var(--muted)]">{candidate.candidateStatus}</span>
                       </div>
                     </td>
@@ -431,21 +436,13 @@ export function CandidateSearchPanel({
                         <span className="text-xs text-[var(--muted)]">采集 {candidate.collectedAt}</span>
                       </div>
                     </td>
-                    <td className="border-b border-[var(--line-soft)] px-3.5 py-3.5 align-middle text-sm">
-                      <a
-                        className="focus-ring inline-flex min-h-9 items-center justify-center rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)] px-3 text-sm font-semibold text-[var(--muted-strong)] transition hover:border-[var(--accent)] hover:bg-[var(--accent-soft)] hover:text-[var(--accent-strong)]"
-                        href={candidate.detailHref}
-                      >
-                        查看详情
-                      </a>
-                    </td>
                   </tr>
                 ))
               ) : (
                 <tr>
                   <td
                     className="border-b border-[var(--line-soft)] px-3.5 py-6 text-center text-sm text-[var(--muted)]"
-                    colSpan={7}
+                    colSpan={6}
                   >
                     暂无符合条件的候选内容。
                   </td>

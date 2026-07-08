@@ -443,7 +443,7 @@ export function AdminDashboard({ candidateFilterOptions = emptyCandidateFilterOp
   return (
     <main className="min-h-[100dvh] bg-[var(--background)] px-4 py-6 sm:px-6 lg:px-8">
       <div className="mx-auto flex w-full max-w-[1280px] flex-col gap-5">
-        <header className="grid gap-4 rounded-[var(--radius-lg)] border border-[var(--line-soft)] bg-[var(--surface)] p-4 shadow-[var(--shadow-subtle)] sm:p-6">
+        <header className="rounded-[var(--radius-lg)] border border-[var(--line-soft)] bg-[var(--surface)] p-4 shadow-[var(--shadow-subtle)] sm:p-6">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div className="grid min-w-0 gap-2">
               <p className="text-sm font-medium text-[var(--accent-strong)]">管理后台</p>
@@ -457,27 +457,6 @@ export function AdminDashboard({ candidateFilterOptions = emptyCandidateFilterOp
                   退出登录
                 </button>
               </form>
-            </div>
-          </div>
-
-          <div className="grid gap-2 border-t border-[var(--line-soft)] pt-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface-soft)] px-3.5 py-3">
-              <p className="text-xs text-[var(--muted)]">启用数据源</p>
-              <p className="mt-1 text-lg font-semibold">
-                {summary.enabledSources} / {summary.totalSources}
-              </p>
-            </div>
-            <div className="rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface-soft)] px-3.5 py-3">
-              <p className="text-xs text-[var(--muted)]">今日候选池</p>
-              <p className="mt-1 text-lg font-semibold">{summary.todayCandidates} 条</p>
-            </div>
-            <div className="rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface-soft)] px-3.5 py-3">
-              <p className="text-xs text-[var(--muted)]">每日生成</p>
-              <p className="mt-1 text-lg font-semibold">{summary.dailySchedule}</p>
-            </div>
-            <div className="rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface-soft)] px-3.5 py-3">
-              <p className="text-xs text-[var(--muted)]">待处理错误</p>
-              <p className="mt-1 text-lg font-semibold text-[var(--danger)]">{summary.pendingErrors} 条</p>
             </div>
           </div>
         </header>
