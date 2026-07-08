@@ -9,8 +9,13 @@ import {
   WarningCircle,
 } from "@phosphor-icons/react/dist/ssr";
 import type { ItemDetailData } from "@/server/digests/queries";
+import { CandidateTopicEditor } from "./candidate-topic-editor";
 
 type RelatedSource = ItemDetailData["duplicateSources"][number];
+type TopicOption = {
+  id: string;
+  label: string;
+};
 
 function DetailMetric({ label, value, note }: { label: string; value: string; note: string }) {
   return (
@@ -120,7 +125,15 @@ function MetadataPanel({ item }: { item: ItemDetailData }) {
   );
 }
 
-function EvidencePanel({ item }: { item: ItemDetailData }) {
+function EvidencePanel({
+  canManageTopics,
+  item,
+  topicOptions,
+}: {
+  canManageTopics: boolean;
+  item: ItemDetailData;
+  topicOptions: TopicOption[];
+}) {
   return (
     <aside className="grid gap-4 self-start lg:sticky lg:top-6">
       <section className="rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)] p-4 shadow-[var(--shadow-subtle)]">
@@ -164,6 +177,14 @@ function EvidencePanel({ item }: { item: ItemDetailData }) {
               ))}
             </div>
           </div>
+        ) : null}
+
+        {canManageTopics ? (
+          <CandidateTopicEditor
+            candidateId={item.id}
+            currentTopicTags={item.topicTags}
+            topicOptions={topicOptions}
+          />
         ) : null}
 
         <div className="mt-4 flex flex-wrap gap-2">
@@ -242,11 +263,15 @@ function EvidencePanel({ item }: { item: ItemDetailData }) {
 }
 
 export function ItemDetailPage({
+  canManageTopics = false,
   itemId,
   item,
+  topicOptions = [],
 }: {
+  canManageTopics?: boolean;
   itemId: string;
   item?: ItemDetailData | null;
+  topicOptions?: TopicOption[];
 }) {
   if (!item) {
     return <EmptyItemState itemId={itemId} />;
@@ -404,7 +429,7 @@ export function ItemDetailPage({
           </section>
         </div>
 
-        <EvidencePanel item={item} />
+        <EvidencePanel canManageTopics={canManageTopics} item={item} topicOptions={topicOptions} />
       </section>
 
     </main>

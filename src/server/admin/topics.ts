@@ -1,4 +1,5 @@
 import { prisma } from "@/server/db/prisma";
+import { normalizeTopicTags, topicSlug } from "@/server/ranking/topics";
 
 const APP_TIME_ZONE = "America/New_York";
 
@@ -34,6 +35,14 @@ export type AdminTopicActionDeps = {
   ) => Promise<AdminCandidateTopicRecord | null>;
   findTopicById: (topicId: string) => Promise<AdminTopicRecord | null>;
   listCandidateTopics: (topicId: string) => Promise<AdminCandidateTopicRecord[]>;
+};
+
+export type AdminCandidateTopicEditDeps = {
+  deleteCandidateTopic: (candidateId: string, topicId: string) => Promise<void>;
+  findCandidateById: (candidateId: string) => Promise<{ id: string } | null>;
+  listCandidateTopicsByCandidate: (candidateId: string) => Promise<AdminCandidateTopicRecord[]>;
+  upsertCandidateTopic: (link: AdminCandidateTopicRecord) => Promise<void>;
+  upsertTopicByLabel: (label: string) => Promise<AdminTopicRecord>;
 };
 
 export type MergeTopicsResult = {
@@ -102,6 +111,67 @@ const defaultDeps: AdminTopicActionDeps = {
     }),
 };
 
+const defaultCandidateTopicEditDeps: AdminCandidateTopicEditDeps = {
+  deleteCandidateTopic: async (candidateId, topicId) => {
+    await prisma.candidateTopic.delete({
+      where: {
+        candidateId_topicId: {
+          candidateId,
+          topicId,
+        },
+      },
+    });
+  },
+  findCandidateById: async (candidateId) =>
+    await prisma.candidateItem.findUnique({
+      select: {
+        id: true,
+      },
+      where: {
+        id: candidateId,
+      },
+    }),
+  listCandidateTopicsByCandidate: async (candidateId) =>
+    await prisma.candidateTopic.findMany({
+      where: {
+        candidateId,
+      },
+    }),
+  upsertCandidateTopic: async (link) => {
+    await prisma.candidateTopic.upsert({
+      where: {
+        candidateId_topicId: {
+          candidateId: link.candidateId,
+          topicId: link.topicId,
+        },
+      },
+      create: {
+        candidateId: link.candidateId,
+        confidence: link.confidence,
+        source: link.source,
+        topicId: link.topicId,
+      },
+      update: {
+        confidence: link.confidence,
+        source: link.source,
+      },
+    });
+  },
+  upsertTopicByLabel: async (label) =>
+    await prisma.topicTag.upsert({
+      where: {
+        slug: topicSlug(label),
+      },
+      create: {
+        label,
+        slug: topicSlug(label),
+      },
+      update: {
+        label,
+      },
+    }),
+};
+
 export class AdminTopicActionError extends Error {
   constructor(
     message: string,
@@ -153,6 +223,71 @@ export function normalizeMergeTopicsInput(value: unknown) {
   return {
     sourceTopicId,
     targetTopicId,
+  };
+}
+
+export function normalizeCandidateTopicLabelsInput(value: unknown) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new AdminTopicActionError("request body must be a JSON object.", 400);
+  }
+
+  const topicLabels = (value as Record<string, unknown>).topicLabels;
+
+  if (!Array.isArray(topicLabels)) {
+    throw new AdminTopicActionError("topicLabels must be an array.", 400);
+  }
+
+  if (topicLabels.some((label) => typeof label !== "string")) {
+    throw new AdminTopicActionError("topicLabels must contain only strings.", 400);
+  }
+
+  return normalizeTopicTags(topicLabels);
+}
+
+export async function updateAdminCandidateTopics(
+  candidateIdValue: string | null | undefined,
+  value: unknown,
+  deps: AdminCandidateTopicEditDeps = defaultCandidateTopicEditDeps,
+) {
+  const candidateId = candidateIdValue?.trim();
+
+  if (!candidateId) {
+    throw new AdminTopicActionError("candidate id is required.", 400);
+  }
+
+  const topicLabels = normalizeCandidateTopicLabelsInput(value);
+  const candidate = await deps.findCandidateById(candidateId);
+
+  if (!candidate) {
+    throw new AdminTopicActionError("candidate not found.", 404);
+  }
+
+  const [existingLinks, desiredTopics] = await Promise.all([
+    deps.listCandidateTopicsByCandidate(candidate.id),
+    Promise.all(topicLabels.map((label) => deps.upsertTopicByLabel(label))),
+  ]);
+  const desiredTopicIds = new Set(desiredTopics.map((topic) => topic.id));
+
+  for (const topic of desiredTopics) {
+    await deps.upsertCandidateTopic({
+      candidateId: candidate.id,
+      confidence: null,
+      createdAt: new Date(),
+      source: "manual",
+      topicId: topic.id,
+    });
+  }
+
+  for (const link of existingLinks) {
+    if (!desiredTopicIds.has(link.topicId)) {
+      await deps.deleteCandidateTopic(candidate.id, link.topicId);
+    }
+  }
+
+  return {
+    candidateId: candidate.id,
+    topicLabels,
+    updatedCount: desiredTopics.length,
   };
 }
 
