@@ -78,6 +78,8 @@ pnpm build:pages
 
 推送到 `main` 后，`.github/workflows/github-pages.yml` 会自动发布 `out/` 静态产物到 GitHub Pages。
 
+首次使用时，如果 Actions 中 `Configure GitHub Pages` 提示 `Get Pages site failed`，需要仓库管理员在 GitHub 仓库页面进入 `Settings -> Pages`，把 `Build and deployment -> Source` 设置为 `GitHub Actions`。这是 GitHub 对首次启用 Pages 的权限限制；启用后后续推送会自动部署。
+
 ## 文档入口
 
 - [PRD 分析](docs/01-prd-analysis.md)
