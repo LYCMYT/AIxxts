@@ -1,4 +1,4 @@
-import { Database, ListChecks, MagnifyingGlass, Plus, ShieldCheck, TagSimple, UserGear, WarningCircle, YoutubeLogo } from "@phosphor-icons/react/dist/ssr";
+import { Database, ListChecks, MagnifyingGlass, Plus, ShieldCheck, TagSimple, UserGear, WarningCircle } from "@phosphor-icons/react/dist/ssr";
 import type { AdminDashboardData } from "@/server/admin/queries";
 import { AdminSectionLayout, AdminSectionPanel } from "./admin-section-layout";
 import { CandidateSearchPanel } from "./candidate-search-panel";
@@ -300,10 +300,12 @@ function OverviewMetricCard({
 }
 
 function AdminOverview({
+  digestDate,
   jobs,
   sourceHealth,
   summary,
 }: {
+  digestDate?: string | null;
   jobs: AdminDashboardData["jobs"];
   sourceHealth: AdminDashboardData["sourceHealth"];
   summary: AdminDashboardData["summary"];
@@ -352,7 +354,20 @@ function AdminOverview({
           />
         </div>
 
-        <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(280px,360px)]">
+          <div className="rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)] p-4">
+            <div className="grid gap-1">
+              <h3 className="text-sm font-semibold">日常操作</h3>
+              <p className="text-xs leading-5 text-[var(--muted)]">
+                用于手动补跑采集、生成每日精选、翻译详情和发布当天内容。
+              </p>
+            </div>
+            <div className="mt-3 grid gap-2">
+              <JobActionButtons digestDate={digestDate} />
+              <DigestPublishButton digestDate={digestDate} />
+            </div>
+          </div>
+
           <div className="rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)] p-4">
             <div className="flex items-center justify-between gap-3">
               <h3 className="text-sm font-semibold">优先处理来源</h3>
@@ -432,13 +447,11 @@ export function AdminDashboard({ candidateFilterOptions = emptyCandidateFilterOp
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div className="grid min-w-0 gap-2">
               <p className="text-sm font-medium text-[var(--accent-strong)]">管理后台</p>
-              <h1 className="text-2xl font-semibold tracking-normal sm:text-3xl">MVP 维护控制台</h1>
-              <p className="max-w-3xl text-sm leading-6 text-[var(--muted)]">维护采集来源、关键词、手动候选、任务结果和成员权限。页面只展示数据库记录，暂无数据时显示空状态。</p>
+              <h1 className="text-2xl font-semibold tracking-normal sm:text-3xl">每日情报运营台</h1>
+              <p className="max-w-3xl text-sm leading-6 text-[var(--muted)]">先确认采集和生成状态，再处理来源、候选内容、主题和成员权限。</p>
             </div>
 
-            <div className="grid min-w-0 gap-2 lg:min-w-[260px]">
-              <JobActionButtons digestDate={digestDate} />
-              <DigestPublishButton digestDate={digestDate} />
+            <div className="grid min-w-0 gap-2 lg:min-w-[160px]">
               <form action="/api/auth/logout" method="post">
                 <button className="focus-ring inline-flex min-h-10 w-full items-center justify-center rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface)] px-3.5 py-2 text-sm font-semibold text-[var(--muted-strong)] shadow-[var(--shadow-subtle)] transition hover:border-[var(--accent)] hover:bg-[var(--accent-soft)] hover:text-[var(--accent-strong)] active:translate-y-px" type="submit">
                   退出登录
@@ -471,7 +484,7 @@ export function AdminDashboard({ candidateFilterOptions = emptyCandidateFilterOp
 
         <AdminSectionLayout>
           <AdminSectionPanel sectionId="overview">
-            <AdminOverview jobs={jobs} sourceHealth={sourceHealth} summary={summary} />
+            <AdminOverview digestDate={digestDate} jobs={jobs} sourceHealth={sourceHealth} summary={summary} />
           </AdminSectionPanel>
 
           <AdminSectionPanel sectionId="source-health">
@@ -565,27 +578,6 @@ export function AdminDashboard({ candidateFilterOptions = emptyCandidateFilterOp
                     ) : (
                       <EmptyTableRow colSpan={8}>暂无数据源记录。请先执行 pnpm seed:sources 或在后续管理功能中新增来源。</EmptyTableRow>
                     )}
-                  </tbody>
-                </table>
-              </TableFrame>
-            </SectionHeading>
-          </AdminSectionPanel>
-
-          <AdminSectionPanel sectionId="youtube">
-            <SectionHeading description="管理 YouTube 搜索词、语言地区和单次最大结果数，供视频候选采集使用。" icon={YoutubeLogo} id="youtube" title="YouTube 关键词">
-              <TableFrame>
-                <table className="min-w-[720px] w-full border-collapse text-left">
-                  <thead>
-                    <tr>
-                      <TableHead>关键词</TableHead>
-                      <TableHead>语言 / 地区</TableHead>
-                      <TableHead>最大结果数</TableHead>
-                      <TableHead>启用状态</TableHead>
-                      <TableHead>最近匹配</TableHead>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <EmptyTableRow colSpan={5}>暂无独立关键词表。当前 YouTube 采集词以数据源配置为准，后续再接入可编辑关键词管理。</EmptyTableRow>
                   </tbody>
                 </table>
               </TableFrame>

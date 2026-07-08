@@ -19,6 +19,8 @@ test("AdminDashboard renders a dedicated admin navigation with desktop links and
   assert.match(html, /候选检索/);
   assert.match(html, /href="#topics"/);
   assert.match(html, /主题管理/);
+  assert.doesNotMatch(html, /href="#youtube"/);
+  assert.doesNotMatch(html, /监听规则/);
 });
 
 test("AdminSectionLayout only renders the active admin section", () => {

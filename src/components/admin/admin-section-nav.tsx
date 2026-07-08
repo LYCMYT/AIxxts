@@ -5,7 +5,6 @@ export const adminSectionLinks = [
   { id: "source-health", href: "#source-health", label: "健康概览", group: "运行" },
   { id: "jobs", href: "#jobs", label: "任务状态", group: "运行" },
   { id: "sources", href: "#sources", label: "数据源", group: "内容" },
-  { id: "youtube", href: "#youtube", label: "监听规则", group: "内容" },
   { id: "manual", href: "#manual", label: "手动候选", group: "内容" },
   { id: "candidates", href: "#candidates", label: "候选检索", group: "内容" },
   { id: "topics", href: "#topics", label: "主题管理", group: "内容" },

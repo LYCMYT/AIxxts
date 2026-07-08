@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ChartBar, GithubLogo, GlobeHemisphereWest } from "@phosphor-icons/react/dist/ssr";
+import { ChartBar } from "@phosphor-icons/react/dist/ssr";
 import { DesktopNav, MobileNav } from "./nav-links";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -26,23 +26,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </Link>
 
           <DesktopNav />
-
-          <div className="flex items-center gap-2">
-            <span className="hidden items-center gap-2 rounded-full border border-[var(--line)] bg-[var(--surface)] px-3 py-1.5 text-xs font-medium text-[var(--muted-strong)] sm:flex">
-              <GlobeHemisphereWest size={15} className="text-[var(--accent)]" />
-              开放预览
-            </span>
-            <a
-              aria-label="打开 GitHub 仓库"
-              className="focus-ring flex h-9 w-9 items-center justify-center rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--muted-strong)] transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
-              href="https://github.com/LYCMYT/AIxxts"
-              rel="noreferrer"
-              target="_blank"
-              title="GitHub"
-            >
-              <GithubLogo size={18} />
-            </a>
-          </div>
         </div>
 
         <MobileNav />
