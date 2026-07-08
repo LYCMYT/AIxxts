@@ -50,9 +50,14 @@ test("CandidateSearchPanel renders candidate filters, rows, topics, and detail l
   assert.match(html, /name="candidateQ"/);
   assert.match(html, /value="agent"/);
   assert.match(html, /name="candidateSelected"/);
+  assert.match(html, /data-candidate-status-endpoint="\/api\/admin\/candidates\/status"/);
+  assert.match(html, /type="checkbox"/);
   assert.match(html, /Claude Code 发布/);
   assert.match(html, /AI Agent/);
   assert.match(html, /已入选/);
+  assert.match(html, /归档/);
+  assert.match(html, /拒绝/);
+  assert.match(html, /恢复待处理/);
   assert.match(html, /href="\/items\/candidate-1"/);
   assert.match(html, /共 13 条/);
   assert.match(html, /candidatePage=3#candidates/);

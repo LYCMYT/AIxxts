@@ -166,17 +166,28 @@ export async function attachCandidateTranslationsToDailyResult(
   }
 }
 
+export function buildDailyCandidateWhere(
+  windowStart: Date,
+  windowEnd: Date,
+): Prisma.CandidateItemWhereInput {
+  return {
+    publishedAt: {
+      gte: windowStart,
+      lt: windowEnd,
+    },
+    status: {
+      notIn: [
+        CandidateStatus.DUPLICATE,
+        CandidateStatus.REJECTED,
+        CandidateStatus.ARCHIVED,
+      ],
+    },
+  };
+}
+
 async function loadCandidates(windowStart: Date, windowEnd: Date): Promise<RankingCandidate[]> {
   return await prisma.candidateItem.findMany({
-    where: {
-      publishedAt: {
-        gte: windowStart,
-        lt: windowEnd,
-      },
-      status: {
-        notIn: [CandidateStatus.DUPLICATE, CandidateStatus.REJECTED],
-      },
-    },
+    where: buildDailyCandidateWhere(windowStart, windowEnd),
     include: {
       source: {
         select: {

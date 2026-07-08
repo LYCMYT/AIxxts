@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { attachCandidateTranslationsToDailyResult } from "./daily";
+import { CandidateStatus } from "@/generated/prisma/client";
+import { attachCandidateTranslationsToDailyResult, buildDailyCandidateWhere } from "./daily";
 import type { CandidateTranslationJobResult } from "./translate-candidates";
 import type { ArticleEnrichmentJobResult } from "./enrich-articles";
 
@@ -35,6 +36,25 @@ function dailyResult(status: "written" | "published_preserved" | "failed") {
     message: "daily job result",
   };
 }
+
+test("buildDailyCandidateWhere excludes rejected, duplicate, and archived candidates", () => {
+  const windowStart = new Date("2026-07-06T00:00:00.000Z");
+  const windowEnd = new Date("2026-07-07T00:00:00.000Z");
+
+  assert.deepEqual(buildDailyCandidateWhere(windowStart, windowEnd), {
+    publishedAt: {
+      gte: windowStart,
+      lt: windowEnd,
+    },
+    status: {
+      notIn: [
+        CandidateStatus.DUPLICATE,
+        CandidateStatus.REJECTED,
+        CandidateStatus.ARCHIVED,
+      ],
+    },
+  });
+});
 
 test("attachCandidateTranslationsToDailyResult translates after a written digest", async () => {
   const calls: string[] = [];
