@@ -59,6 +59,25 @@ http://127.0.0.1:3000/admin
 
 管理后台、开发进度页和 `/api/admin/*` 需要管理员登录。本地默认管理员账号为 `admin`，密码为 `admin123`；生产环境请通过 `ADMIN_EMAIL` 和 `ADMIN_PASSWORD` 替换后重新执行 `pnpm seed:admin`。
 
+## GitHub Pages 免费访问版
+
+仓库已配置 GitHub Pages 静态阅读版，用于通过公开链接直接查看已发布的每日精选：
+
+```text
+https://lycmyt.github.io/AIxxts/
+```
+
+GitHub Pages 只托管静态文件，不运行 Next.js API、登录、SQLite、后台管理、采集任务或 LLM 翻译任务。因此 Pages 版本只展示 `public/github-pages-snapshot.json` 中导出的公开精选内容；完整后台仍需使用本地/服务器部署。
+
+更新 Pages 内容时，在有本地数据库的环境执行：
+
+```powershell
+pnpm snapshot:pages
+pnpm build:pages
+```
+
+推送到 `main` 后，`.github/workflows/github-pages.yml` 会自动发布 `out/` 静态产物到 GitHub Pages。
+
 ## 文档入口
 
 - [PRD 分析](docs/01-prd-analysis.md)

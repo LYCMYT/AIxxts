@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "next dev -H 127.0.0.1",
     "build": "next build",
+    "build:pages": "tsx scripts/build-github-pages.ts",
     "start": "next start -H 127.0.0.1",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
@@ -17,6 +18,7 @@
     "db:studio": "prisma studio",
     "seed:admin": "tsx scripts/seed-admin.ts",
     "seed:sources": "tsx scripts/seed-sources.ts",
+    "snapshot:pages": "tsx scripts/export-github-pages-snapshot.ts",
     "job:collect": "tsx scripts/run-collect.ts",
     "job:daily": "tsx scripts/run-daily.ts",
     "job:enrich-articles": "tsx scripts/run-enrich-articles.ts",

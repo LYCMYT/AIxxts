@@ -1,0 +1,546 @@
+{
+  "digest": {
+    "candidateCount": 2770,
+    "date": "2026-07-07",
+    "generatedAt": "2026-07-07T06:11:45.741+00:00",
+    "selectedCount": 20,
+    "status": "PUBLISHED",
+    "summary": "今日精选涵盖前沿AI框架和工具，包括开源的Agentic browser BrowserOS、本地AI应用构建器dyad、LLM推理引擎llama.cpp更新、Claude Code替代clawcodex、自主agent框架aeon等20个项目。",
+    "title": "2026年7月7日AI行业每日精选"
+  },
+  "exportedAt": "2026-07-08T04:05:21.016Z",
+  "items": [
+    {
+      "author": "browseros-ai",
+      "id": "54ff2540-03e2-4406-b73b-f4e5b33c3bc1",
+      "interpretation": "BrowserOS是一个开源的agentic浏览器，旨在替代ChatGPT Atlas、Perplexity Comet和Dia，基于TypeScript构建，拥有11665颗星和1187个fork，展示了强大的社区关注度。",
+      "originalSummary": "🌐 The open-source Agentic browser; alternative to ChatGPT Atlas, Perplexity Comet, Dia. | 11665 stars, 1187 forks | language: TypeScript",
+      "originalUrl": "https://github.com/browseros-ai/BrowserOS",
+      "publishedAt": "2026-07-07T06:03:44.000Z",
+      "rank": 1,
+      "signals": [
+        "method: LLM 评分",
+        "sourceType: GITHUB",
+        "publishedAt: 2026-07-07T06:03:44.000Z",
+        "hotScore: 70.289",
+        "influenceScore: 70.289",
+        "impactReason: 作为开源的agentic浏览器，可能改变用户与AI交互的方式，提供更开放的替代方案。"
+      ],
+      "source": "GitHub AI Repository Search",
+      "sourceType": "GITHUB",
+      "title": "GitHub repo: browseros-ai/BrowserOS",
+      "topicTags": [
+        "AI Agent",
+        "AI 编程",
+        "开源项目"
+      ],
+      "translatedContent": "🌐 开源代理浏览器；ChatGPT Atlas、Perplexity Comet、Dia 的替代品。| 11665 星，1187 分支 | 语言：TypeScript",
+      "translatedSummary": "🌐 开源代理浏览器；ChatGPT Atlas、Perplexity Comet、Dia 的替代品。| 11665 星，1187 分支 | 语言：TypeScript"
+    },
+    {
+      "author": "dyad-sh",
+      "id": "2f1a3a5a-673c-45b8-b263-8c9d960c7c70",
+      "interpretation": "dyad是一个本地、开源的AI应用构建器，面向高级用户，作为v0/Lovable/Replit/Bolt的替代方案，拥有20840颗星和2496个fork。",
+      "originalSummary": "Local, open-source AI app builder for power users ✨ v0 / Lovable / Replit / Bolt alternative 🌟 Star if you like it! | 20840 stars, 2496 forks | language: TypeScript",
+      "originalUrl": "https://github.com/dyad-sh/dyad",
+      "publishedAt": "2026-07-07T06:02:24.000Z",
+      "rank": 2,
+      "signals": [
+        "method: LLM 评分",
+        "sourceType: GITHUB",
+        "publishedAt: 2026-07-07T06:02:24.000Z",
+        "hotScore: 77.071",
+        "influenceScore: 77.071",
+        "impactReason: 提供本地化的AI应用开发环境，减少对云服务的依赖，可能推动AI应用的民主化。"
+      ],
+      "source": "GitHub AI Repository Search",
+      "sourceType": "GITHUB",
+      "title": "GitHub repo: dyad-sh/dyad",
+      "topicTags": [
+        "AI 编程",
+        "开源项目"
+      ],
+      "translatedContent": "面向高级用户的本地开源AI应用构建器 ✨ v0 / Lovable / Replit / Bolt 的替代品 🌟 如果喜欢请点星！| 20840 星，2496 分支 | 语言: TypeScript",
+      "translatedSummary": "面向高级用户的本地开源AI应用构建器 ✨ v0 / Lovable / Replit / Bolt 的替代品 🌟 如果喜欢请点星！| 20840 星，2496 分支 | 语言: TypeScript"
+    },
+    {
+      "author": "github-actions[bot]",
+      "id": "7b0716ce-ad46-4d24-98ff-0030c1c9c2a2",
+      "interpretation": "llama.cpp发布b9894版本，主要更新了Vulkan后端对GGML_OP_SET_ROWS中f16支持修复，项目拥有119501颗星和20264个fork，是核心LLM推理框架。",
+      "originalSummary": "<details open> vulkan : check src0 type in GGML_OP_SET_ROWS to avoid failures due to unimplemented f16 support (#25351) * vulkan : check src0 type in GGML_OP_SET_ROWS to avoid failures due to unimplemented f16 support *... | 119501 stars, 20264 forks",
+      "originalUrl": "https://github.com/ggml-org/llama.cpp/releases/tag/b9894",
+      "publishedAt": "2026-07-07T05:30:42.000Z",
+      "rank": 3,
+      "signals": [
+        "method: LLM 评分",
+        "sourceType: GITHUB",
+        "publishedAt: 2026-07-07T05:30:42.000Z",
+        "hotScore: 93.292",
+        "influenceScore: 93.292",
+        "impactReason: 作为广泛使用的LLM推理引擎，此次更新提升了Vulkan兼容性，影响众多依赖llama.cpp的项目。"
+      ],
+      "source": "GitHub Core LLM Releases REST",
+      "sourceType": "GITHUB",
+      "title": "ggml-org/llama.cpp release: b9894",
+      "topicTags": [
+        "AI 编程",
+        "开源项目",
+        "模型发布"
+      ],
+      "translatedContent": "<details open> Vulkan：在 GGML_OP_SET_ROWS 中检查 src0 类型，以避免因未实现 f16 支持而导致的失败（#25351）* Vulkan：在 GGML_OP_SET_ROWS 中检查 src0 类型，以避免因未实现 f16 支持而导致的失败 * chore：去除 else --------- Co-authored-by: Stanisław Szymczyk <sszymczy@gmail.com> </details> **macOS/iOS：** - [macOS Apple Silicon (arm64)](https://github.com/ggml-org/llama.cpp/releases/download/b9894/llama-b9894-bin-macos-arm64.tar.gz) - macOS Apple Silicon (arm64, 启用 KleidiAI) [已禁用](https://github.com/ggml-org/llama.cpp/pull/23780) - [macOS Intel (x64)](https://github.com/ggml-org/llama.cpp/releases/download/b9894/llama-b9894-bin-macos-x64.tar.gz) - [iOS XCFramework](https://github.com/ggml-org/llama.cpp/releases/download/b9894/llama-b9894-xcframework.zip) **Linux：** - [Ubuntu x64 (CPU)](https://github.com/ggml-org/llama.cpp/releases/download/b9894/llama-b9894-bin-ubuntu-x64.tar.gz) - [Ubuntu arm64 (CPU)](https://github.com/ggml-org/llama.cpp/releases/download/b9894/llama-b9894-bin-ubuntu-arm64.tar.gz) - [Ubuntu s390x (CPU)](https://github.com/ggml-org/llama.cpp/releases/download/b9894/llama-b9894-bin-ubuntu-s390x.tar.gz) - [Ubuntu x64 (Vulkan)](https://github.com/ggml-org/llama.cpp/releases/download/b9894/llama-b9894-bin-ubuntu-vulkan-x64.tar.gz) - [Ubuntu arm64 (Vulkan)](https://github.com/ggml-org/llama.cpp/releases/download/b9894/llama-b9894-bin-ubuntu-vulkan-arm64.tar.gz) - [Ubuntu x64 (ROCm 7.2)](https://github.com/ggml-org/llama.cpp/releases/download/b9894/llama-b9894-bin-ubuntu-rocm-7.2-x64.tar.gz) - [Ubuntu x64 (OpenVINO)](https://github.com/ggml-org/llama.cpp/releases/download/b9894/llama-b9894-bin-ubuntu-openvino-2026.2.1-x64.tar.gz) - [Ubuntu x64 (SYCL FP32)](https://github.com/ggml-org/llama.cpp/releases/download/b9894/llama-b9894-bin-ubuntu-sycl-fp32-x64.tar.gz) - [Ubuntu x64 (SYCL FP16)](https://github.com/ggml-org/llama.cpp/releases/download/b9894/llama-b9894-bin-ubuntu-sycl-fp16-x64.tar.gz) **Android：** - [Andro...",
+      "translatedSummary": "<details open> Vulkan：在 GGML_OP_SET_ROWS 中检查 src0 类型，以避免因未实现 f16 支持而导致的失败（#25351）* Vulkan：在 GGML_OP_SET_ROWS 中检查 src0 类型，以避免因未实现 f16 支持而导致的失败 *... | 119501 星标，20264 派生"
+    },
+    {
+      "author": "agentforce314",
+      "id": "3f7dee28-be89-4d9d-a7e7-3a00d32530f8",
+      "interpretation": "clawcodex是Claude Code的纯Python重建版，号称达到200倍成本节省，拥有678颗星和120个fork。",
+      "originalSummary": "Token efficient Claude Code full Python rebuild. AI Coding Agent in 230K LoC pure Python. Up to 200X Cost Saving! | 678 stars, 120 forks | language: Python",
+      "originalUrl": "https://github.com/agentforce314/clawcodex",
+      "publishedAt": "2026-07-07T05:32:55.000Z",
+      "rank": 4,
+      "signals": [
+        "method: LLM 评分",
+        "sourceType: GITHUB",
+        "publishedAt: 2026-07-07T05:32:55.000Z",
+        "hotScore: 49.567",
+        "influenceScore: 49.567",
+        "impactReason: 通过大幅降低AI编码agent的成本，可能促进更多开发者采用类似的自主编码解决方案。"
+      ],
+      "source": "GitHub AI Repository Search",
+      "sourceType": "GITHUB",
+      "title": "GitHub repo: agentforce314/clawcodex",
+      "topicTags": [
+        "AI Agent",
+        "AI 编程",
+        "开源项目"
+      ],
+      "translatedContent": "令牌高效的Claude Code纯Python重构。用230K行纯Python编写的AI编码代理。节省高达200倍成本！ | 678星，120分叉 | 语言：Python",
+      "translatedSummary": "令牌高效的Claude Code纯Python重构。用230K行纯Python编写的AI编码代理。节省高达200倍成本！ | 678星，120分叉 | 语言：Python"
+    },
+    {
+      "author": "aaronjmars",
+      "id": "bdd8dbbc-e6f1-42f8-bbf3-40843c515135",
+      "interpretation": "aeon是最自主的agent框架，强调无需审批循环和无需监护，配置一次即可永久运行，拥有570颗星和203个fork。",
+      "originalSummary": "The most autonomous agent framework. No approval loops. No babysitting. Configure once, forget forever. | 570 stars, 203 forks | language: TypeScript",
+      "originalUrl": "https://github.com/aaronjmars/aeon",
+      "publishedAt": "2026-07-07T05:34:07.000Z",
+      "rank": 5,
+      "signals": [
+        "method: LLM 评分",
+        "sourceType: GITHUB",
+        "publishedAt: 2026-07-07T05:34:07.000Z",
+        "hotScore: 47.539",
+        "influenceScore: 47.539",
+        "impactReason: 通过极致的自主性设计，可能重新定义agent部署和运维方式，减少人工干预需求。"
+      ],
+      "source": "GitHub AI Repository Search",
+      "sourceType": "GITHUB",
+      "title": "GitHub repo: aaronjmars/aeon",
+      "topicTags": [
+        "AI Agent",
+        "AI 编程",
+        "开源项目"
+      ],
+      "translatedContent": "最自主的智能体框架。无需审批循环。无需监督。配置一次，永远无需操心。| 570 星标，203 分支 | 语言：TypeScript",
+      "translatedSummary": "最自主的智能体框架。无需审批循环。无需监督。配置一次，永远无需操心。| 570 星标，203 分支 | 语言：TypeScript"
+    },
+    {
+      "author": "sonichi",
+      "id": "f0020f72-8554-474d-af9a-43836cea2e8d",
+      "interpretation": "sutando是“我的AI Stand”，白天实时运行，夜晚自我重写，以召唤AI超能力，拥有352颗星和71个fork，基于Python。",
+      "originalSummary": "My AI Stand. Realtime by day, rewriting itself by night. Summon my AI superpower. | 352 stars, 71 forks | language: Python",
+      "originalUrl": "https://github.com/sonichi/sutando",
+      "publishedAt": "2026-07-07T06:02:57.000Z",
+      "rank": 6,
+      "signals": [
+        "method: LLM 评分",
+        "sourceType: GITHUB",
+        "publishedAt: 2026-07-07T06:02:57.000Z",
+        "hotScore: 46.147",
+        "influenceScore: 46.147",
+        "impactReason: 通过自我重写能力，sutando可能实现AI系统的持续自我进化，提升长期自主性。"
+      ],
+      "source": "GitHub AI Repository Search",
+      "sourceType": "GITHUB",
+      "title": "GitHub repo: sonichi/sutando",
+      "topicTags": [
+        "AI 编程",
+        "开源项目"
+      ],
+      "translatedContent": "我的 AI 替身。白天实时运行，夜晚自我重写。召唤我的 AI 超能力。| 352 星标，71 分支 | 语言：Python",
+      "translatedSummary": "我的 AI 替身。白天实时运行，夜晚自我重写。召唤我的 AI 超能力。| 352 星标，71 分支 | 语言：Python"
+    },
+    {
+      "author": "bitrouter",
+      "id": "b3d06826-ae2c-45b6-952d-a24e82bd86cb",
+      "interpretation": "bitrouter是一个开源的agentic LLM网关和路由器，可优化agent循环，兼容任何框架、模型和工作流，拥有199颗星和12个fork。",
+      "originalSummary": "An open-source agentic LLM gateway & router that optimize your agentic loops in your way, works with any harnesses, any models, any workflows. | 199 stars, 12 forks | language: Rust",
+      "originalUrl": "https://github.com/bitrouter/bitrouter",
+      "publishedAt": "2026-07-07T06:02:51.000Z",
+      "rank": 7,
+      "signals": [
+        "method: LLM 评分",
+        "sourceType: GITHUB",
+        "publishedAt: 2026-07-07T06:02:51.000Z",
+        "hotScore: 36.757",
+        "influenceScore: 36.757",
+        "impactReason: 作为开放的LLM路由层，bitrouter可能成为agent系统基础设施的关键组件，提升灵活性和效率。"
+      ],
+      "source": "GitHub AI Repository Search",
+      "sourceType": "GITHUB",
+      "title": "GitHub repo: bitrouter/bitrouter",
+      "topicTags": [
+        "AI Agent",
+        "AI 编程",
+        "开源项目"
+      ],
+      "translatedContent": "一个开源代理LLM网关和路由器，可按您的方式优化代理循环，兼容任何框架、任何模型、任何工作流。 | 199星，12分支 | 语言：Rust",
+      "translatedSummary": "一个开源代理LLM网关和路由器，可按您的方式优化代理循环，兼容任何框架、任何模型、任何工作流。 | 199星，12分支 | 语言：Rust"
+    },
+    {
+      "author": "bonigarcia",
+      "id": "99e0e931-a200-4d3c-a0f4-e852e31e50cc",
+      "interpretation": "context-engineering旨在构建一致、准确、可预测的AI系统，拥有94颗星和16个fork，基于Python。",
+      "originalSummary": "Context Engineering: Build Consistent, Accurate, Predictable AI Systems | 94 stars, 16 forks | language: Python",
+      "originalUrl": "https://github.com/bonigarcia/context-engineering",
+      "publishedAt": "2026-07-07T06:08:08.000Z",
+      "rank": 8,
+      "signals": [
+        "method: LLM 评分",
+        "sourceType: GITHUB",
+        "publishedAt: 2026-07-07T06:08:08.000Z",
+        "hotScore: 31.717",
+        "influenceScore: 31.717",
+        "impactReason: 通过系统化的上下文工程方法，可能提升AI输出的可靠性和可控性，特别适用于关键任务场景。"
+      ],
+      "source": "GitHub AI Repository Search",
+      "sourceType": "GITHUB",
+      "title": "GitHub repo: bonigarcia/context-engineering",
+      "topicTags": [
+        "AI 编程",
+        "开源项目"
+      ],
+      "translatedContent": "上下文工程：构建一致、准确、可预测的 AI 系统 | 94 星标，16 分支 | 语言：Python",
+      "translatedSummary": "上下文工程：构建一致、准确、可预测的 AI 系统 | 94 星标，16 分支 | 语言：Python"
+    },
+    {
+      "author": "tomcounsell",
+      "id": "371c5b70-7bcc-4b7e-b8f9-18876c6d76b9",
+      "interpretation": "该项目是一个高效的AI协作者，能够学习、自我改进并交付工作，拥有17颗星和9个fork，基于Python。",
+      "originalSummary": "A productive AI coworker that learns, self-improves, and ships work. | 17 stars, 9 forks | language: Python",
+      "originalUrl": "https://github.com/tomcounsell/ai",
+      "publishedAt": "2026-07-07T06:07:47.000Z",
+      "rank": 9,
+      "signals": [
+        "method: LLM 评分",
+        "sourceType: GITHUB",
+        "publishedAt: 2026-07-07T06:07:47.000Z",
+        "hotScore: 24.33",
+        "influenceScore: 24.33",
+        "impactReason: 通过不断学习和自我优化，该AI协作者可能提升长期工作效率，适合持续的开发辅助。"
+      ],
+      "source": "GitHub AI Repository Search",
+      "sourceType": "GITHUB",
+      "title": "GitHub repo: tomcounsell/ai",
+      "topicTags": [
+        "AI 编程",
+        "开源项目"
+      ],
+      "translatedContent": "一个高效的AI同事，能够学习、自我改进并交付工作。 | 17星，9分叉 | 语言：Python",
+      "translatedSummary": "一个高效的AI同事，能够学习、自我改进并交付工作。 | 17星，9分叉 | 语言：Python"
+    },
+    {
+      "author": "Oolab-labs",
+      "id": "3c2572ea-b2c0-4eda-99e7-6c49d3edb2be",
+      "interpretation": "patchwork-os是个人AI的决策层，本地优先的运行时，agent可自动化GitHub、Slack、Gmail等45+服务，但每个高风险的行动需用户确认，拥有26颗星和4个fork。",
+      "originalSummary": "The decision layer for personal AI. Local-first runtime where agents automate across GitHub, Slack, Gmail & 45+ services — but every risky action stops for your yes, workers earn ... | 26 stars, 4 forks | language: TypeScript",
+      "originalUrl": "https://github.com/Oolab-labs/patchwork-os",
+      "publishedAt": "2026-07-07T06:03:24.000Z",
+      "rank": 10,
+      "signals": [
+        "method: LLM 评分",
+        "sourceType: GITHUB",
+        "publishedAt: 2026-07-07T06:03:24.000Z",
+        "hotScore: 21.37",
+        "influenceScore: 21.37",
+        "impactReason: 通过本地优先设计和人工确认机制，patchwork-os在自主性与安全性之间取得平衡，适用于个人AI代理。"
+      ],
+      "source": "GitHub AI Repository Search",
+      "sourceType": "GITHUB",
+      "title": "GitHub repo: Oolab-labs/patchwork-os",
+      "topicTags": [
+        "AI Agent",
+        "AI 编程",
+        "开源项目"
+      ],
+      "translatedContent": "个人AI的决策层。本地优先运行时，代理可在GitHub、Slack、Gmail及45多个服务中自动化操作——但每个风险操作都需要你的确认，工人赚取... | 26星，4个分支 | 语言: TypeScript",
+      "translatedSummary": "个人AI的决策层。本地优先运行时，代理可在GitHub、Slack、Gmail及45多个服务中自动化操作——但每个风险操作都需要你的确认，工人赚取... | 26星，4个分支 | 语言: TypeScript"
+    },
+    {
+      "author": "SnowWarri0r",
+      "id": "4c14f283-1e38-4b35-a635-455463af35d6",
+      "interpretation": "licai是一个本地化个人理财助手，支持A股、基金、理财、数字资产等全资产看板，并提供市场AI问答和资讯解读，拥有23颗星和7个fork。",
+      "originalSummary": "本地化个人理财助手 — A股/基金/理财/现金/数字资产/机器人全资产看板 + 市场AI问答 + 个股K线盘口详情 + 板块对比 + 早盘信息简报 + 资讯AI解读。只给客观信息，不荐买卖。 | 23 stars, 7 forks | language: Python",
+      "originalUrl": "https://github.com/SnowWarri0r/licai",
+      "publishedAt": "2026-07-07T06:02:42.000Z",
+      "rank": 11,
+      "signals": [
+        "method: LLM 评分",
+        "sourceType: GITHUB",
+        "publishedAt: 2026-07-07T06:02:42.000Z",
+        "hotScore: 21.981",
+        "influenceScore: 21.981",
+        "impactReason: 将AI应用于个人理财管理，可能帮助用户更好地理解和优化资产配置。"
+      ],
+      "source": "GitHub AI Repository Search",
+      "sourceType": "GITHUB",
+      "title": "GitHub repo: SnowWarri0r/licai",
+      "topicTags": [
+        "AI 编程",
+        "开源项目"
+      ],
+      "translatedContent": "本地化个人理财助手 — A股/基金/理财/现金/数字资产/机器人全资产看板 + 市场AI问答 + 个股K线盘口详情 + 板块对比 + 早盘信息简报 + 资讯AI解读。只给客观信息，不荐买卖。 | 23 stars, 7 forks | language: Python",
+      "translatedSummary": "本地化个人理财助手 — A股/基金/理财/现金/数字资产/机器人全资产看板 + 市场AI问答 + 个股K线盘口详情 + 板块对比 + 早盘信息简报 + 资讯AI解读。只给客观信息，不荐买卖。 | 23 stars, 7 forks | language: Python"
+    },
+    {
+      "author": "lowwkezer",
+      "id": "e83b13e2-e05b-4c6d-8c6b-f06d2dddd218",
+      "interpretation": "shannon是一个使用AI自动化Web应用渗透测试的工具，旨在在攻击者之前发现真实漏洞，拥有20颗星和4个fork，基于TypeScript。",
+      "originalSummary": "🛡️ Automate web app pentesting with AI to find real exploits before attackers do, enhancing your app’s security proactively. | 20 stars, 4 forks | language: TypeScript",
+      "originalUrl": "https://github.com/lowwkezer/shannon",
+      "publishedAt": "2026-07-07T06:08:02.000Z",
+      "rank": 12,
+      "signals": [
+        "method: LLM 评分",
+        "sourceType: GITHUB",
+        "publishedAt: 2026-07-07T06:08:02.000Z",
+        "hotScore: 20.06",
+        "influenceScore: 20.06",
+        "impactReason: 通过AI驱动的自动化渗透测试，能够提前发现安全漏洞，提升应用安全性。"
+      ],
+      "source": "GitHub AI Repository Search",
+      "sourceType": "GITHUB",
+      "title": "GitHub repo: lowwkezer/shannon",
+      "topicTags": [
+        "AI 编程",
+        "开源项目"
+      ],
+      "translatedContent": "🛡️ 利用AI自动化Web应用渗透测试，在攻击者之前发现真实漏洞，主动增强应用安全性。 | 20 stars, 4 forks | 语言: TypeScript",
+      "translatedSummary": "🛡️ 利用AI自动化Web应用渗透测试，在攻击者之前发现真实漏洞，主动增强应用安全性。 | 20 stars, 4 forks | 语言: TypeScript"
+    },
+    {
+      "author": "comedy1024",
+      "id": "a336d6b5-965d-4e76-a8a5-0d9cae2b8210",
+      "interpretation": "hermes-agent-desktop在Linux GUI桌面中运行Hermes Agent和WebUI，拥有12颗星和2个fork，基于HTML。",
+      "originalSummary": "Hermes Agent + webui in Linux GUI Desktop | 12 stars, 2 forks | language: HTML",
+      "originalUrl": "https://github.com/comedy1024/hermes-agent-desktop",
+      "publishedAt": "2026-07-07T06:07:56.000Z",
+      "rank": 13,
+      "signals": [
+        "method: LLM 评分",
+        "sourceType: GITHUB",
+        "publishedAt: 2026-07-07T06:07:56.000Z",
+        "hotScore: 16.23",
+        "influenceScore: 16.23",
+        "impactReason: 为桌面用户提供更便捷的Hermes Agent访问方式，可能促进agent在桌面端的应用。"
+      ],
+      "source": "GitHub AI Repository Search",
+      "sourceType": "GITHUB",
+      "title": "GitHub repo: comedy1024/hermes-agent-desktop",
+      "topicTags": [
+        "AI Agent",
+        "AI 编程",
+        "开源项目"
+      ],
+      "translatedContent": "Hermes Agent + webui 在 Linux 图形界面桌面中 | 12 星标, 2 分支 | 语言: HTML",
+      "translatedSummary": "Hermes Agent + webui 在 Linux 图形界面桌面中 | 12 星标, 2 分支 | 语言: HTML"
+    },
+    {
+      "author": "jedarden",
+      "id": "bf38aa75-7bac-4828-9c99-7492b5a39226",
+      "interpretation": "NEEDLE是无头agent编排器，使用确定性状态机处理bead队列，分发到任何LLM CLI并处理所有结果，基于Rust，拥有12颗星和1个fork。",
+      "originalSummary": "Headless agent orchestrator with deterministic state machine — processes a bead queue, dispatches to any LLM CLI, handles every outcome. Rust. | 12 stars, 1 forks | language: Rust",
+      "originalUrl": "https://github.com/jedarden/NEEDLE",
+      "publishedAt": "2026-07-07T05:33:12.000Z",
+      "rank": 14,
+      "signals": [
+        "method: LLM 评分",
+        "sourceType: GITHUB",
+        "publishedAt: 2026-07-07T05:33:12.000Z",
+        "hotScore: 15.174",
+        "influenceScore: 15.174",
+        "impactReason: 通过确定性状态机实现可靠的多agent编排，可能提升生产环境的agent工作流稳定性。"
+      ],
+      "source": "GitHub AI Repository Search",
+      "sourceType": "GITHUB",
+      "title": "GitHub repo: jedarden/NEEDLE",
+      "topicTags": [
+        "AI Agent",
+        "AI 编程",
+        "开源项目"
+      ],
+      "translatedContent": "无头智能体编排器，带有确定性状态机——处理珠子队列，分发到任何LLM CLI，处理所有结果。Rust语言。 | 12个星标，1个分支 | 语言：Rust",
+      "translatedSummary": "无头智能体编排器，带有确定性状态机——处理珠子队列，分发到任何LLM CLI，处理所有结果。Rust语言。 | 12个星标，1个分支 | 语言：Rust"
+    },
+    {
+      "author": "kagura-agent",
+      "id": "6d923ed3-2e73-43b4-8c41-18058d2ed5da",
+      "interpretation": "kagura-story是Kagura AI agent的学习、成长和开源冒险日志，拥有11颗星和0个fork，基于Shell。",
+      "originalSummary": "Kagura's Story — an AI agent's journal of learning, growth, and open source adventures | 11 stars, 0 forks | language: Shell",
+      "originalUrl": "https://github.com/kagura-agent/kagura-story",
+      "publishedAt": "2026-07-07T06:02:32.000Z",
+      "rank": 15,
+      "signals": [
+        "method: LLM 评分",
+        "sourceType: GITHUB",
+        "publishedAt: 2026-07-07T06:02:32.000Z",
+        "hotScore: 12.95",
+        "influenceScore: 12.95",
+        "impactReason: 以叙事方式记录AI agent的成长过程，可能为agent行为分析提供新的视角。"
+      ],
+      "source": "GitHub AI Repository Search",
+      "sourceType": "GITHUB",
+      "title": "GitHub repo: kagura-agent/kagura-story",
+      "topicTags": [
+        "AI Agent",
+        "AI 编程",
+        "开源项目"
+      ],
+      "translatedContent": "Kagura 的故事 — 一个 AI 智能体的学习、成长和开源冒险日志 | 11 颗星，0 个复刻 | 语言：Shell",
+      "translatedSummary": "Kagura 的故事 — 一个 AI 智能体的学习、成长和开源冒险日志 | 11 颗星，0 个复刻 | 语言：Shell"
+    },
+    {
+      "author": "ContextLab",
+      "id": "0d1a5ef7-aa6f-4384-8eb5-bbdffd17a67a",
+      "interpretation": "llmXive是一个LLM驱动的科学发现自动化系统，拥有2颗星和2个fork，基于TeX。",
+      "originalSummary": "llmXive is an LLM-driven system for automating scientific discovery | 2 stars, 2 forks | language: TeX",
+      "originalUrl": "https://github.com/ContextLab/llmXive",
+      "publishedAt": "2026-07-07T05:33:13.000Z",
+      "rank": 16,
+      "signals": [
+        "method: LLM 评分",
+        "sourceType: GITHUB",
+        "publishedAt: 2026-07-07T05:33:13.000Z",
+        "hotScore: 10.94",
+        "influenceScore: 10.94",
+        "impactReason: 致力于自动化科学发现过程，可能加速研究领域的知识发现。"
+      ],
+      "source": "GitHub AI Repository Search",
+      "sourceType": "GITHUB",
+      "title": "GitHub repo: ContextLab/llmXive",
+      "topicTags": [
+        "AI 编程",
+        "开源项目"
+      ],
+      "translatedContent": "llmXive是一个基于LLM的自动化科学发现系统 | 2星，2个分支 | 语言：TeX",
+      "translatedSummary": "llmXive是一个基于LLM的自动化科学发现系统 | 2星，2个分支 | 语言：TeX"
+    },
+    {
+      "author": "Onurizm",
+      "id": "e69515f0-7ccb-4bad-bf5d-21f4a3a02ed0",
+      "interpretation": "shadow-genesis管理agentic记忆和上下文持久性，是一个自复制系统，专为可扩展、智能数据处理而设计，拥有3颗星和1个fork。",
+      "originalSummary": "🌑 Manage agentic memory and context persistence with Shadow Genesis, a self-replicating system built for scalable, intelligent data handling. | 3 stars, 1 forks",
+      "originalUrl": "https://github.com/Onurizm/shadow-genesis",
+      "publishedAt": "2026-07-07T06:07:56.000Z",
+      "rank": 17,
+      "signals": [
+        "method: LLM 评分",
+        "sourceType: GITHUB",
+        "publishedAt: 2026-07-07T06:07:56.000Z",
+        "hotScore: 9.031",
+        "influenceScore: 9.031",
+        "impactReason: 通过自复制和可扩展的记忆管理，可能增强agent的长期记忆能力。"
+      ],
+      "source": "GitHub AI Repository Search",
+      "sourceType": "GITHUB",
+      "title": "GitHub repo: Onurizm/shadow-genesis",
+      "topicTags": [
+        "AI Agent",
+        "AI 编程",
+        "开源项目"
+      ],
+      "translatedContent": "🌑 使用Shadow Genesis管理智能体记忆和上下文持久化，这是一个为可扩展、智能数据处理而构建的自我复制系统。 | 3颗星，1个fork",
+      "translatedSummary": "🌑 使用Shadow Genesis管理智能体记忆和上下文持久化，这是一个为可扩展、智能数据处理而构建的自我复制系统。 | 3颗星，1个fork"
+    },
+    {
+      "author": "mohahasan",
+      "id": "6beedcd8-7742-4db9-89b2-07084a493793",
+      "interpretation": "ios-agentic-skills用于发现和使用iOS/watchOS上的agentic审计技能和剧本，以确保质量保证的一致性，拥有4颗星和0个fork，基于JavaScript。",
+      "originalSummary": "🔍 Discover and utilize agentic iOS/watchOS audit skills and playbooks for consistent quality assurance in your applications. | 4 stars, 0 forks | language: JavaScript",
+      "originalUrl": "https://github.com/mohahasan/ios-agentic-skills",
+      "publishedAt": "2026-07-07T06:02:39.000Z",
+      "rank": 18,
+      "signals": [
+        "method: LLM 评分",
+        "sourceType: GITHUB",
+        "publishedAt: 2026-07-07T06:02:39.000Z",
+        "hotScore: 8.388",
+        "influenceScore: 8.388",
+        "impactReason: 通过可复用的审计技能，可能提升iOS应用的质量保证流程。"
+      ],
+      "source": "GitHub AI Repository Search",
+      "sourceType": "GITHUB",
+      "title": "GitHub repo: mohahasan/ios-agentic-skills",
+      "topicTags": [
+        "AI Agent",
+        "AI 编程",
+        "开源项目"
+      ],
+      "translatedContent": "🔍 发现并利用 agentic iOS/watchOS 审计技能和行动手册，为您的应用提供一致的质量保证。 | 4 星，0 分支 | 语言: JavaScript",
+      "translatedSummary": "🔍 发现并利用 agentic iOS/watchOS 审计技能和行动手册，为您的应用提供一致的质量保证。 | 4 星，0 分支 | 语言: JavaScript"
+    },
+    {
+      "author": "manwithacat",
+      "id": "1cb4c2fa-de50-4ae6-b637-7ce2dcca0359",
+      "interpretation": "dazzle是AI协作软件的语义基础，拥有2颗星和0个fork，基于Python。",
+      "originalSummary": "A semantic substrate for AI-collaborative software. | 2 stars, 0 forks | language: Python",
+      "originalUrl": "https://github.com/manwithacat/dazzle",
+      "publishedAt": "2026-07-07T06:02:38.000Z",
+      "rank": 19,
+      "signals": [
+        "method: LLM 评分",
+        "sourceType: GITHUB",
+        "publishedAt: 2026-07-07T06:02:38.000Z",
+        "hotScore: 8.41",
+        "influenceScore: 8.41",
+        "impactReason: 通过建立语义基础，可能改善AI与人类协作的效率和理解力。"
+      ],
+      "source": "GitHub AI Repository Search",
+      "sourceType": "GITHUB",
+      "title": "GitHub repo: manwithacat/dazzle",
+      "topicTags": [
+        "AI 编程",
+        "开源项目"
+      ],
+      "translatedContent": "AI协作软件的语义基础。 | 2 星，0 分支 | 语言：Python",
+      "translatedSummary": "AI协作软件的语义基础。 | 2 星，0 分支 | 语言：Python"
+    },
+    {
+      "author": "wesleysimplicio",
+      "id": "96d7d7c3-8e6f-408d-a98d-d9d80be5d780",
+      "interpretation": "simplicio-dev-cli是一个使用任何LLM以99%准确率完成任务的工具，支持Claude、DeepSeek、Codex、Gemini等，拥有2颗星和1个fork，基于Python。",
+      "originalSummary": "Your tasks with 99% accuracy using any LLM (Claude, DeepSeek, Codex, Gemini, Hermes, OpenClaw, Cursor). | 2 stars, 1 forks | language: Python",
+      "originalUrl": "https://github.com/wesleysimplicio/simplicio-dev-cli",
+      "publishedAt": "2026-07-07T06:02:28.000Z",
+      "rank": 20,
+      "signals": [
+        "method: LLM 评分",
+        "sourceType: GITHUB",
+        "publishedAt: 2026-07-07T06:02:28.000Z",
+        "hotScore: 8.134",
+        "influenceScore: 8.134",
+        "impactReason: 通过CLI提供高精度任务执行，可能简化开发者的日常工作流程。"
+      ],
+      "source": "GitHub AI Repository Search",
+      "sourceType": "GITHUB",
+      "title": "GitHub repo: wesleysimplicio/simplicio-dev-cli",
+      "topicTags": [
+        "AI 编程",
+        "开源项目",
+        "模型发布"
+      ],
+      "translatedContent": "使用任意 LLM（Claude、DeepSeek、Codex、Gemini、Hermes、OpenClaw、Cursor）以 99% 的准确率完成你的任务。 | 2 星标，1 个复刻 | 语言：Python",
+      "translatedSummary": "使用任意 LLM（Claude、DeepSeek、Codex、Gemini、Hermes、OpenClaw、Cursor）以 99% 的准确率完成你的任务。 | 2 星标，1 个复刻 | 语言：Python"
+    }
+  ]
+}
