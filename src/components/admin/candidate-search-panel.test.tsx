@@ -29,10 +29,15 @@ test("CandidateSearchPanel renders candidate filters, rows, topics, and detail l
         q: "agent",
         selected: "selected",
         sourceId: "source-1",
+        status: "ARCHIVED",
         topic: "AI Agent",
       }}
       options={{
         sources: [{ id: "source-1", name: "Anthropic Blog" }],
+        statuses: [
+          { label: "待处理", value: "NEW" },
+          { label: "已归档", value: "ARCHIVED" },
+        ],
         topics: ["AI Agent", "模型发布"],
       }}
       pagination={{
@@ -50,6 +55,8 @@ test("CandidateSearchPanel renders candidate filters, rows, topics, and detail l
   assert.match(html, /name="candidateQ"/);
   assert.match(html, /value="agent"/);
   assert.match(html, /name="candidateSelected"/);
+  assert.match(html, /name="candidateStatus"/);
+  assert.match(html, /已归档/);
   assert.match(html, /data-candidate-status-endpoint="\/api\/admin\/candidates\/status"/);
   assert.match(html, /type="checkbox"/);
   assert.match(html, /Claude Code 发布/);
@@ -60,5 +67,6 @@ test("CandidateSearchPanel renders candidate filters, rows, topics, and detail l
   assert.match(html, /恢复待处理/);
   assert.match(html, /href="\/items\/candidate-1"/);
   assert.match(html, /共 13 条/);
+  assert.match(html, /candidateStatus=ARCHIVED/);
   assert.match(html, /candidatePage=3#candidates/);
 });

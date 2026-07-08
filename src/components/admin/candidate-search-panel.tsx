@@ -72,6 +72,10 @@ function candidateListHref(filters: CandidateSearchPanelProps["filters"], page: 
     params.set("candidateSelected", filters.selected);
   }
 
+  if (filters.status) {
+    params.set("candidateStatus", filters.status);
+  }
+
   if (page > 1) {
     params.set("candidatePage", String(page));
   }
@@ -215,7 +219,7 @@ export function CandidateSearchPanel({
 
       <form
         action="/admin#candidates"
-        className="grid gap-3 rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface-soft)] p-3 lg:grid-cols-[1.2fr_1fr_1fr_1fr_auto_auto]"
+        className="grid gap-3 rounded-[var(--radius)] border border-[var(--line-soft)] bg-[var(--surface-soft)] p-3 lg:grid-cols-[1.2fr_1fr_1fr_1fr_1fr_auto_auto]"
         method="get"
       >
         <CandidateField label="关键词">
@@ -252,6 +256,16 @@ export function CandidateSearchPanel({
             <option value="">全部候选</option>
             <option value="selected">已入选日报</option>
             <option value="unselected">未入选日报</option>
+          </select>
+        </CandidateField>
+        <CandidateField label="处理状态">
+          <select className={inputClass} defaultValue={filters.status} name="candidateStatus">
+            <option value="">全部状态</option>
+            {options.statuses.map((status) => (
+              <option key={status.value} value={status.value}>
+                {status.label}
+              </option>
+            ))}
           </select>
         </CandidateField>
         <div className="flex items-end">

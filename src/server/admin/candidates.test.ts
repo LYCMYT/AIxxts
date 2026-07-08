@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { DigestStatus } from "@/generated/prisma/client";
+import { CandidateStatus, DigestStatus } from "@/generated/prisma/client";
 import {
   buildAdminCandidateWhere,
   normalizeAdminCandidateFilters,
@@ -13,6 +13,7 @@ test("normalizeAdminCandidateFilters reads candidate-prefixed filters", () => {
       candidateQ: " agent ",
       candidateSelected: "selected",
       candidateSourceId: "source-1",
+      candidateStatus: "archived",
       candidateTopic: " AI Agent ",
     }),
     {
@@ -21,6 +22,7 @@ test("normalizeAdminCandidateFilters reads candidate-prefixed filters", () => {
       q: "agent",
       selected: "selected",
       sourceId: "source-1",
+      status: CandidateStatus.ARCHIVED,
       topic: "AI Agent",
     },
   );
@@ -39,6 +41,7 @@ test("normalizeAdminCandidateFilters drops invalid candidate filters", () => {
       q: "",
       selected: "",
       sourceId: "",
+      status: "",
       topic: "",
     },
   );
@@ -52,6 +55,7 @@ test("buildAdminCandidateWhere filters by text, source, topic, and selected dige
       q: "agent",
       selected: "selected",
       sourceId: "source-1",
+      status: CandidateStatus.ARCHIVED,
       topic: "AI Agent",
     }),
     {
@@ -73,6 +77,9 @@ test("buildAdminCandidateWhere filters by text, source, topic, and selected dige
               },
             },
           },
+        },
+        {
+          status: CandidateStatus.ARCHIVED,
         },
         {
           digestItems: {
@@ -98,6 +105,7 @@ test("buildAdminCandidateWhere can isolate candidates not selected into active d
       q: "",
       selected: "unselected",
       sourceId: "",
+      status: "",
       topic: "",
     }),
     {

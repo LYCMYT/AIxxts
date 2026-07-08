@@ -17,6 +17,7 @@ export default async function AdminPage({
     candidateQ?: string;
     candidateSelected?: string;
     candidateSourceId?: string;
+    candidateStatus?: string;
     candidateTopic?: string;
     jobType?: string;
     page?: string;

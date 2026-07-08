@@ -1,4 +1,4 @@
-import { DigestStatus, Prisma } from "@/generated/prisma/client";
+import { CandidateStatus, DigestStatus, Prisma } from "@/generated/prisma/client";
 import { COLLECTABLE_SOURCE_TYPES } from "@/server/collectors/types";
 import { classifyRequestError } from "@/server/collectors/request-diagnostics";
 import { getAdminTopicRows, type AdminTopicRow } from "@/server/admin/topics";
@@ -74,6 +74,7 @@ export type AdminJobRow = {
 };
 
 export type AdminCandidateSelectedFilter = "selected" | "unselected" | "";
+export type AdminCandidateStatusFilter = CandidateStatus | "";
 
 export type AdminCandidateRow = {
   candidateStatus: string;
@@ -112,6 +113,10 @@ export type AdminDashboardData = {
     sources: Array<{
       id: string;
       name: string;
+    }>;
+    statuses: Array<{
+      label: string;
+      value: CandidateStatus;
     }>;
     topics: string[];
   };
@@ -172,6 +177,7 @@ export type AdminCandidateFilterInput = {
   candidateQ?: unknown;
   candidateSelected?: unknown;
   candidateSourceId?: unknown;
+  candidateStatus?: unknown;
   candidateTopic?: unknown;
 };
 
@@ -181,6 +187,7 @@ export type AdminCandidateFilters = {
   q: string;
   selected: AdminCandidateSelectedFilter;
   sourceId: string;
+  status: AdminCandidateStatusFilter;
   topic: string;
 };
 
@@ -249,6 +256,13 @@ const JOB_PAGE_SIZE = 10;
 const MAX_FILTER_LENGTH = 100;
 const VALID_JOB_STATUSES = ["RUNNING", "SUCCESS", "FAILED", "SKIPPED"] as const;
 const VALID_CANDIDATE_SELECTED_FILTERS = ["selected", "unselected"] as const;
+const VALID_CANDIDATE_STATUSES = [
+  CandidateStatus.NEW,
+  CandidateStatus.DUPLICATE,
+  CandidateStatus.SELECTED,
+  CandidateStatus.ARCHIVED,
+  CandidateStatus.REJECTED,
+] as const;
 const ACTIVE_DIGEST_STATUSES = [DigestStatus.DRAFT, DigestStatus.PUBLISHED] as const;
 
 const sourceTypeLabels: Record<string, string> = {
@@ -416,6 +430,7 @@ export function normalizeAdminCandidateFilters(
   input: AdminCandidateFilterInput = {},
 ): AdminCandidateFilters {
   const selected = shortFilterValue(input.candidateSelected).toLowerCase();
+  const status = shortFilterValue(input.candidateStatus).toUpperCase();
 
   return {
     page: parseJobPage(input.candidatePage),
@@ -427,6 +442,9 @@ export function normalizeAdminCandidateFilters(
       ? (selected as AdminCandidateSelectedFilter)
       : "",
     sourceId: shortFilterValue(input.candidateSourceId),
+    status: VALID_CANDIDATE_STATUSES.includes(status as CandidateStatus)
+      ? (status as CandidateStatus)
+      : "",
     topic: shortFilterValue(input.candidateTopic),
   };
 }
@@ -492,6 +510,12 @@ export function buildAdminCandidateWhere(
           },
         },
       },
+    });
+  }
+
+  if (filters.status) {
+    clauses.push({
+      status: filters.status,
     });
   }
 
@@ -848,6 +872,13 @@ function candidateStatusLabel(status: string) {
   return labels[status] ?? status;
 }
 
+function candidateStatusOptions() {
+  return VALID_CANDIDATE_STATUSES.map((status) => ({
+    label: candidateStatusLabel(status),
+    value: status,
+  }));
+}
+
 function candidateTopicLabels(candidate: AdminCandidateRecord) {
   return Array.from(
     new Set(
@@ -1082,6 +1113,7 @@ export async function getAdminDashboardData(
           id: source.id,
           name: source.name,
         })),
+        statuses: candidateStatusOptions(),
         topics: topics.map((topic) => topic.label),
       },
       candidateFilters,

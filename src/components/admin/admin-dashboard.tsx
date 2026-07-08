@@ -57,10 +57,12 @@ const emptyCandidateFilters: AdminDashboardData["candidateFilters"] = {
   q: "",
   selected: "",
   sourceId: "",
+  status: "",
   topic: "",
 };
 const emptyCandidateFilterOptions: AdminDashboardData["candidateFilterOptions"] = {
   sources: [],
+  statuses: [],
   topics: [],
 };
 const emptyCandidatePagination: AdminDashboardData["candidatePagination"] = {
