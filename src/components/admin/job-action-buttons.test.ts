@@ -10,3 +10,11 @@ test("buildJobBody requests forced sentence-by-sentence translation for translat
     selectedOnly: true,
   });
 });
+
+test("buildJobBody requests selected topic backfill without forcing existing manual tags", () => {
+  assert.deepEqual(buildJobBody("topicBackfill", "2026-07-07"), {
+    digestDate: "2026-07-07",
+    limit: 100,
+    selectedOnly: true,
+  });
+});

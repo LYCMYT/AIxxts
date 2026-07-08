@@ -2,10 +2,16 @@ import {
   ArrowClockwise,
   FileText,
   Play,
+  TagSimple,
   Translate,
 } from "@phosphor-icons/react";
 
-export type AdminJobActionKind = "daily" | "collect" | "enrichArticles" | "translate";
+export type AdminJobActionKind =
+  | "daily"
+  | "collect"
+  | "enrichArticles"
+  | "translate"
+  | "topicBackfill";
 
 export const adminJobActions = [
   {
@@ -41,6 +47,15 @@ export const adminJobActions = [
     runningLabel: "正在逐句翻译",
     url: "/api/admin/jobs/translate",
     icon: Translate,
+    tone: "secondary",
+    usesDigestDate: true,
+  },
+  {
+    kind: "topicBackfill",
+    label: "主题回填",
+    runningLabel: "正在回填主题",
+    url: "/api/admin/jobs/backfill-topics",
+    icon: TagSimple,
     tone: "secondary",
     usesDigestDate: true,
   },

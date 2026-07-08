@@ -84,6 +84,10 @@ export function buildJobBody(kind: AdminJobActionKind, digestDate: string) {
     body.limit = 20;
   }
 
+  if (kind === "topicBackfill") {
+    body.limit = 100;
+  }
+
   if (kind === "translate") {
     body.force = true;
   }

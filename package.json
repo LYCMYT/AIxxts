@@ -20,6 +20,7 @@
     "job:collect": "tsx scripts/run-collect.ts",
     "job:daily": "tsx scripts/run-daily.ts",
     "job:enrich-articles": "tsx scripts/run-enrich-articles.ts",
+    "job:backfill-topics": "tsx scripts/run-backfill-topics.ts",
     "job:translate": "tsx scripts/run-translate.ts"
   },
   "dependencies": {

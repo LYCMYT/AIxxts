@@ -4,12 +4,14 @@ import * as collectRoute from "./collect/route";
 import * as dailyRoute from "./daily/route";
 import * as enrichArticlesRoute from "./enrich-articles/route";
 import * as translateRoute from "./translate/route";
+import * as topicBackfillRoute from "./backfill-topics/route";
 
 test("admin job trigger routes expose POST handlers", () => {
   assert.equal(typeof collectRoute.POST, "function");
   assert.equal(typeof dailyRoute.POST, "function");
   assert.equal(typeof enrichArticlesRoute.POST, "function");
   assert.equal(typeof translateRoute.POST, "function");
+  assert.equal(typeof topicBackfillRoute.POST, "function");
 });
 
 test("admin article enrichment route rejects invalid options with 400", async () => {
